@@ -1,0 +1,6 @@
+{
+  "name": "plan-de-ahorro",
+  "private": true,
+  "type": "module",
+  "scripts": { "build": "node scripts/build-config.mjs" }
+}
