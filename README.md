@@ -21,6 +21,7 @@ Es una sola página HTML. Entras con tu cuenta de Google y tus datos se guardan 
 - **Retiro e inversiones** a largo plazo, en pesos o en UDIs.
 - **Consejos con tus números**, por ejemplo "págate primero", qué hacer con el aguinaldo o cuánto ganas si recortas un gasto.
 - **Movimientos.** Registro rápido de gastos, ahorros, pagos de deuda e ingresos. Tiene atajos para tus gastos fijos, filtros y opciones para editar y borrar.
+- **Otra moneda.** Muestra tus montos también en otra moneda con el tipo de cambio que tú pongas.
 - **Privacidad.** Botón para ocultar montos y bloqueo opcional con PIN.
 - **Respaldo.** Descarga e importa tus datos en JSON.
 - Tema claro y oscuro, funciona en el celular y sin conexión (se sincroniza al volver).

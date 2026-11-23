@@ -539,8 +539,9 @@ let COL = null;
 const money = v => { if (S && S.hideAmt) return '$ •••'; return money0(v); };
 const money0 = v => { try { return new Intl.NumberFormat('es-MX', { style: 'currency', currency: CFG.currency, maximumFractionDigits: 0 }).format(v); } catch { return '$' + Math.round(v).toLocaleString('es-MX'); } };
 const moneyAxis = v => { if (S.hideAmt) return '•'; const a = Math.abs(v); if (a >= 1e6) return `${(v/1e6).toFixed(1)}M`; if (a >= 1e3) return `${(v/1e3).toFixed(a >= 1e4 ? 0 : 1)}k`; return String(Math.round(v)); };
-const yen = () => '';
-const yenSep = () => '';
+const ALT_CURS = { JPY: 'Yen (JPY)', USD: 'Dólar (USD)', EUR: 'Euro (EUR)', GBP: 'Libra (GBP)', CAD: 'Dólar canadiense (CAD)', AUD: 'Dólar australiano (AUD)', KRW: 'Won (KRW)', CNY: 'Yuan (CNY)', BRL: 'Real (BRL)', COP: 'Peso colombiano (COP)', ARS: 'Peso argentino (ARS)', CLP: 'Peso chileno (CLP)', MXN: 'Peso mexicano (MXN)' };
+const altAmt = v => { if (!CFG.showAlt || S.hideAmt || !CFG.altCur || !(+CFG.rate > 0)) return ''; try { return new Intl.NumberFormat('es-MX', { style: 'currency', currency: CFG.altCur, maximumFractionDigits: 0 }).format(v * +CFG.rate); } catch { return ''; } };
+const altSep = v => { const a = altAmt(v); return a ? ' · ' + a : ''; };
 const pctTxt = v => `${(v * 100).toFixed(v < 0.1 && v > 0 ? 1 : 0)} %`;
 
 /* ---------- ejemplo (en pesos) ---------- */
@@ -646,7 +647,7 @@ function projection(sim) {
 
 /* lotes de la maqueta */
 function goalLots() {
-  return CFG.funds.map(f => { const s = fundSaved(f.id), fr = f.t ? s / f.t : 0; return { id: f.id, kind: 'tower', n: f.n, c: f.c, f: fr, val: `${Math.round(Math.min(fr, 1) * 100)} %`, tip: `${f.n}\n${money(s)} de ${money(f.t)}${f.h ? `\n${f.h}` : ''}` }; });
+  return CFG.funds.map(f => { const s = fundSaved(f.id), fr = f.t ? s / f.t : 0; return { id: f.id, kind: 'tower', n: f.n, c: f.c, f: fr, val: `${Math.round(Math.min(fr, 1) * 100)} %`, tip: `${f.n}\n${money(s)} de ${money(f.t)}${altSep(f.t)}${f.h ? `\n${f.h}` : ''}` }; });
 }
 function moneyLots() {
   const L = [];
@@ -1285,7 +1286,7 @@ function leftHtml(M, noHead) {
   const st = { good: ['A tiempo', 'pos'], warn: ['Justo', 'flat'], bad: ['Atrasado', 'neg'], done: ['Meta cumplida', 'pos'], none: ['Sin ritmo aún', 'flat'] }[M.status];
   const etaTxt = M.eta ? ymLabel(M.eta.slice(0, 7), true) : '—';
   return `${noHead ? '' : `<div class="card-h"><h2>Resumen de tu meta</h2><span class="chip">${esc(periodLabel())}</span></div>`}
-  ${kpi('$', 'var(--ai-soft)', 'var(--ai)', `Ahorrado para ${esc(GN())}`, `Meta ${money(M.g)}`, money(M.saved), `<span class="dl pos">${pctTxt(M.g ? M.saved / M.g : 0)} de la meta</span>`)}
+  ${kpi('$', 'var(--ai-soft)', 'var(--ai)', `Ahorrado para ${esc(GN())}`, `Meta ${money(M.g)}${altSep(M.g)}`, money(M.saved), `<span class="dl pos">${pctTxt(M.g ? M.saved / M.g : 0)} de la meta</span>`)}
   ${kpi('+', 'var(--good-soft)', 'var(--good)', 'Ahorro del período', 'Contra el período anterior', money(M.savP), delta(M.savP, M.savPrev, 'up'))}
   ${kpi('−', 'var(--shu-soft)', 'var(--shu)', 'Gastos del período', 'Todo lo que salió', money(M.gasP), delta(M.gasP, M.gasPrev, 'down'))}
   ${kpi('→', 'var(--warn-soft)', 'var(--warn)', 'Ahorro necesario', `Por mes · tu promedio ${money(M.avg)}`, money(M.need), `<span class="dl ${M.avg >= M.need ? 'pos' : 'neg'}">${M.avg >= M.need ? 'vas bien' : 'te falta ritmo'}</span>`)}
@@ -1302,7 +1303,7 @@ function heroHtml(M) {
     chips = moneyLots().map(L => `<button class="fund${S.fund === L.id ? ' is-on' : ''}" data-fund="${esc(L.id)}"><span class="fund-n"><span class="dot" style="background:${L.c}"></span><span>${esc(L.n)}</span></span><span class="fund-v"><b style="color:${L.vc || 'var(--fg)'}">${esc(L.val)}</b></span>${L.kind === 'debt' ? `<span class="bar"><i style="width:${((1 - L.f) * 100).toFixed(1)}%;background:var(--good)"></i></span>` : ''}</button>`).join('');
   } else {
     top = `<div><div class="eyebrow">${esc(GN())}</div><div class="big num">${M.daysLeft} días</div><div class="hero-sub">Fecha meta: ${dateLong(CFG.tripDate)}</div></div>
-      <div style="text-align:right"><div class="eyebrow">Construido</div><div class="big num">${pctTxt(Math.min(p, 1))}</div><div class="hero-sub">Faltan ${money(M.remaining)}</div></div>`;
+      <div style="text-align:right"><div class="eyebrow">Construido</div><div class="big num">${pctTxt(Math.min(p, 1))}</div><div class="hero-sub">Faltan ${money(M.remaining)}${altSep(M.remaining)}</div></div>`;
     chips = CFG.funds.map(f => { const s = fundSaved(f.id); const fr = f.t ? Math.min(1, s / f.t) : 0; return `<button class="fund${S.fund === f.id ? ' is-on' : ''}" data-fund="${esc(f.id)}"><span class="fund-n"><span class="dot" style="background:${f.c}"></span><span>${esc(f.n)}</span></span><span class="fund-v"><b>${money(s)}</b><span>${Math.round(fr * 100)} %</span></span><span class="bar"><i style="width:${(fr * 100).toFixed(1)}%;background:${f.c}"></i></span></button>`; }).join('');
   }
   return `<div class="hero-top">${top}</div>${Dio.ok ? '<div id="dioSlot"></div>' : routeSvg(p)}<div class="funds">${chips}</div>`;
@@ -1427,7 +1428,7 @@ function kpiStrip(M, P) {
   const t = (l, v, s, c) => `<div class="kt"><small>${l}</small><b class="num" style="${c ? `color:${c}` : ''}">${v}</b><span>${s}</span></div>`;
   return `<div class="kstrip">
     ${t('Patrimonio neto', money(net), 'ahorro + retiro + por recibir − deudas', net < 0 ? 'var(--bad)' : '')}
-    ${t('Ahorrado hoy', money(M.saved), '')}
+    ${t('Ahorrado hoy', money(M.saved), altAmt(M.saved))}
     ${t('Deudas', money(debt), debt ? `≈ ${money(CFG.debts.reduce((s, d) => s + debtLeft(d) * (+d.r || 60) / 1200, 0))}/mes de intereses` : 'sin deudas', debt ? 'var(--bad)' : 'var(--good)')}
     ${ltList().length ? t('Para tu retiro', money(ltTotal()), 'largo plazo, no se usa', 'var(--good)') : t('Por recibir', money(inc), 'sin contar lo que te deben', 'var(--good)')}
     ${t('Te sobra al mes', money(libre), 'sueldo − fijos − variable')}
@@ -1761,6 +1762,8 @@ function planSection() {
       ${f('cDays', 'Días trabajados de cada 30', inp('cDays', 'workDays', 'number', +d.workDays || 20, ' min="0" max="30" step="1"'), 'Para calcular gastos «por día».')}
       ${f('cUdi', 'Valor de la UDI', inp('cUdi', 'udi', 'number', +d.udi || 8.93, ' min="0" step="any"'), 'Lo publica Banxico. Se usa si tu ahorro de retiro está en UDIs.')}
       ${f('cCur', 'Moneda', `<select id="cCur" data-pf="currency">${Object.entries(CURRENCIES).map(([k, n]) => `<option value="${k}"${k === d.currency ? ' selected' : ''}>${n}</option>`).join('')}</select>`)}
+      <label class="ff tgl" for="cAlt"><input id="cAlt" data-pf="showAlt" type="checkbox"${d.showAlt ? ' checked' : ''}><span>Mostrar también en otra moneda</span></label>
+      ${d.showAlt ? f('cAltCur', 'Otra moneda', `<select id="cAltCur" data-pf="altCur">${Object.entries(ALT_CURS).map(([k, n]) => `<option value="${k}"${k === (d.altCur || 'USD') ? ' selected' : ''}>${n}</option>`).join('')}</select>`) + f('cRate', `Cuánto vale 1 ${esc(d.currency)} en esa moneda`, inp('cRate', 'rate', 'number', +d.rate || 0, ' min="0" step="any"'), 'Actualízalo cuando cambie el tipo de cambio.') : ''}
     </div>
     <div class="tpl"><span>Plantillas de fondos:</span><button type="button" data-act="tpl" data-id="general">Ahorro general</button></div></section>`;
 }
@@ -1986,7 +1989,7 @@ document.addEventListener('click', e => {
 document.addEventListener('input', e => { const el = e.target;
   if (el.id === 'simVar') { S.sim.varEst = +el.value; const y = window.scrollY; renderPanel(); window.scrollTo(0, y); const r = $('#simVar'); if (r) r.focus(); return; }
   if (el.dataset && el.dataset.li && cfgDraft) { const r = cfgDraft[el.dataset.li][+el.dataset.i]; r[el.dataset.k] = el.type === 'number' ? (el.value === '' ? '' : +el.value) : el.value; if (el.type === 'color' && el.nextElementSibling) el.nextElementSibling.textContent = el.value; markDirty(); return; }
-  if (el.dataset && el.dataset.pf && cfgDraft) { const k = el.dataset.pf; cfgDraft[k] = el.type === 'checkbox' ? el.checked : el.type === 'number' ? +el.value : el.value; markDirty(); if (k === 'showAlt') drawCfg(); return; }
+  if (el.dataset && el.dataset.pf && cfgDraft) { const k = el.dataset.pf; cfgDraft[k] = el.type === 'checkbox' ? el.checked : el.type === 'number' ? +el.value : el.value; markDirty(); if (k === 'showAlt') { if (cfgDraft.showAlt && !cfgDraft.altCur) cfgDraft.altCur = 'USD'; drawCfg(); } return; }
   if (el.dataset && el.dataset.fi != null && cfgDraft) { cfgDraft.funds[+el.dataset.fi][el.dataset.k] = el.dataset.k === 't' ? +el.value : el.value; } });
 document.addEventListener('change', e => { const el = e.target; if (el.id === 'lockMin') { CFG.lockMin = +el.value; if (cfgDraft) cfgDraft.lockMin = CFG.lockMin; writeDoc('config', CFG).then(() => toast('Bloqueo automático guardado')).catch(() => {}); armIdle(); return; } if (el.dataset && el.dataset.simf) { S.sim.friend = el.checked; const y = window.scrollY; renderPanel(); window.scrollTo(0, y); return; } if (el.dataset && el.dataset.sim) { S.sim.skip[el.dataset.sim] = !el.checked; const y = window.scrollY; renderPanel(); window.scrollTo(0, y); const d = $('.sim'); if (d) d.open = true; } });
 document.addEventListener('submit', e => {
