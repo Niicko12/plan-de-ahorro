@@ -3,3 +3,5 @@ node_modules
 *.log
 .firebaserc
 .DS_Store
+.vercel
+.env*
