@@ -491,7 +491,7 @@ html{scroll-padding-top:70px}
 <button type="button" id="botBtn" aria-label="Abrir a Nova, tu asistente" title="Pregúntale a Nova"><span aria-hidden="true">💬</span><em style="font-style:normal">Pregúntale a Nova</em></button>
 <section id="bot" hidden role="dialog" aria-label="Nova, tu asistente"><div class="bot-h"><span style="font-size:22px" aria-hidden="true">✨</span><b>Nova · tu asistente</b><button type="button" id="botX" aria-label="Cerrar asistente">×</button></div><div id="botLog" aria-live="polite"></div><div id="botChips"></div><form id="botForm" autocomplete="off"><input id="botIn" type="text" maxlength="200" placeholder="Escribe tu pregunta…" aria-label="Escribe tu pregunta" enterkeyhint="send"><button type="submit">Enviar</button></form></section>
 <button type="button" id="gmBtn" hidden title="Traer los gastos que te llegaron por correo">✉ Gmail</button>
-<div id="cday" hidden><div class="qa-back" data-act="cday-close"></div><div class="qa-sheet" role="dialog" aria-modal="true" aria-labelledby="cdayT"><div class="card-h"><h2 id="cdayT">Día</h2><button type="button" class="back" data-act="cday-close" aria-label="Cerrar">×</button></div><div id="cdayL" class="cday-list"></div><h3 class="sub" style="margin-top:14px">Agregar en este día</h3><div class="cday-add"><button type="button" class="btn small" data-act="cday-add" data-key="upcoming">Un pago de una sola vez</button><button type="button" class="btn small" data-act="cday-add" data-key="fixed">Un gasto fijo cada mes</button><button type="button" class="btn small" data-act="cday-add" data-key="incoming">Dinero por recibir</button><button type="button" class="btn small" data-act="cday-add" data-key="debts">Una tarjeta o deuda</button><button type="button" class="back" data-act="cday-edit" data-key="plan">Cambiar mis días de pago</button></div></div></div>
+<div id="cday" hidden><div class="qa-back" data-act="cday-close"></div><div class="qa-sheet" role="dialog" aria-modal="true" aria-labelledby="cdayT"><div class="card-h"><h2 id="cdayT">Día</h2><button type="button" class="back" data-act="cday-close" aria-label="Cerrar">×</button></div><div id="cdayL" class="cday-list"></div><h3 class="sub" style="margin-top:14px">Agregar en este día</h3><div class="cday-add"><button type="button" class="btn small" data-act="cday-add" data-key="upcoming">Se paga una sola vez <small>(ej. un vuelo)</small></button><button type="button" class="btn small" data-act="cday-add" data-key="fixed">Se repite cada mes <small>(ej. renta, entrenador)</small></button><button type="button" class="btn small" data-act="cday-add" data-key="fixed" data-months="3">Por unos meses <small>(ej. a meses sin intereses)</small></button><button type="button" class="btn small" data-act="cday-add" data-key="incoming">Dinero por recibir</button><button type="button" class="btn small" data-act="cday-add" data-key="debts">Una tarjeta o deuda</button><button type="button" class="back" data-act="cday-edit" data-key="plan">Cambiar mis días de pago</button></div></div></div>
 <div id="qa" hidden><div class="qa-back" data-act="qa-close"></div><div class="qa-sheet" role="dialog" aria-modal="true" aria-labelledby="qaT"><div class="card-h"><h2 id="qaT">Registrar</h2><button type="button" class="back" data-act="qa-close">Cerrar</button></div><div id="qaBody"></div></div></div>
 
 <script>try { if (localStorage.getItem('pa-pin-on') === '1' && sessionStorage.getItem('pa-unlocked') !== '1') document.getElementById('lock').hidden = false; } catch {}</script>
@@ -646,7 +646,11 @@ const debtLeft = d => Math.max(0, (+d.t || 0) - debtPaid(d.id));
 const upLeft = u => Math.max(0, (+u.a || 0) - sum(movs().filter(m => m.type === 'gasto' && m.ref === u.id)));
 const inLeft = i => Math.max(0, (+i.a || 0) - sum(movs().filter(m => m.type === 'ingreso' && m.ref === i.id)));
 const totalDebt = () => CFG.debts.reduce((t, d) => t + debtLeft(d), 0);
-const fixedMonthlyTotal = (skip = {}) => CFG.fixed.filter(f => !skip[f.id]).reduce((t, f) => t + fixMonthly(f), 0);
+// Un gasto fijo puede tener «fin» (YYYY-MM): pagos por unos meses, por ejemplo a meses sin intereses. Después de ese mes deja de contar.
+const fixActive = (f, ym = CUR_YM) => !f.fin || ym <= f.fin;
+const fixedNow = () => CFG.fixed.filter(f => fixActive(f));
+const fixMonthsLeft = (f, months) => f.fin ? Math.max(0, Math.min(months, ymDiff(CUR_YM, f.fin) + 1)) : months;
+const fixedMonthlyTotal = (skip = {}, ym = CUR_YM) => CFG.fixed.filter(f => !skip[f.id] && fixActive(f, ym)).reduce((t, f) => t + fixMonthly(f), 0);
 const lastDay = (y, m) => new Date(y, m + 1, 0).getDate();
 const payDays = () => { const a = (Array.isArray(CFG.paydays) && CFG.paydays.length ? CFG.paydays : [15, 31]).map(Number).filter(x => x >= 1 && x <= 31); return a.length ? [...new Set(a)].sort((x, y) => x - y) : [15, 31]; };
 const perPay = () => (+CFG.income || 0) / payDays().length;
@@ -686,7 +690,7 @@ function projection(sim) {
   const months = Math.max(0, diffDays(TODAY, end) / 30.44);
   const pays = paydaysUntil(end).length, income = pays * perPay();
   const incoming = CFG.incoming.filter(i => !i.d || i.d <= end).reduce((t, i) => t + inLeft(i), 0);
-  const fixed = fixedMonthlyTotal(sim.skip) * months;
+  const fixed = CFG.fixed.filter(f => !sim.skip[f.id]).reduce((t, f) => t + fixMonthly(f) * fixMonthsLeft(f, months), 0);
   const debts = totalDebt(), ups = CFG.upcoming.reduce((t, u) => t + upLeft(u), 0);
   const variable = (+sim.varEst || 0) * months;
   const saved = sum(movs().filter(m => m.type === 'ahorro'));
@@ -700,10 +704,10 @@ function goalLots() {
 }
 function moneyLots() {
   const L = [];
-  const mo = k => CFG.fixed.filter(f => lotOfFixed(f) === k).reduce((t, f) => t + fixMonthly(f), 0);
+  const mo = k => fixedNow().filter(f => lotOfFixed(f) === k).reduce((t, f) => t + fixMonthly(f), 0);
   CFG.debts.forEach(d => { const left = debtLeft(d); L.push({ id: d.id, kind: 'debt', n: d.n, c: d.c || '#d23f4b', f: d.t ? left / d.t : 0, val: left ? `−${money(left)}` : 'Pagada', vc: left ? '#d23f4b' : '#11946f', tip: `${d.n}\nDebes ${money(left)} de ${money(d.t)}\nPagado: ${money(debtPaid(d.id))}` }); });
   const upL = CFG.upcoming.filter(u => u.cat === 'salud').reduce((t, u) => t + upLeft(u), 0);
-  const has = k => CFG.fixed.some(f => lotOfFixed(f) === k);
+  const has = k => fixedNow().some(f => lotOfFixed(f) === k);
   if (upL || has('clinica')) L.push({ id: 'clinica', kind: 'clinic', n: 'Dentista', c: '#1fa596', f: 0, val: upL ? `${money(upL)} pendiente` : `${money(mo('clinica'))}/mes`, vc: upL ? '#b97f07' : '#1fa596', tip: `Dientes y brackets\n${CFG.upcoming.filter(u => u.cat === 'salud').map(u => `${u.n}: ${upLeft(u) ? money(upLeft(u)) + ' pendiente' : 'pagado'}`).join('\n')}\nMensualidad: ${money(mo('clinica'))}` });
   if (+CFG.income) L.push({ id: 'trabajo', kind: 'office', n: 'Trabajo', c: '#3a8dde', f: 0, val: `+${money(CFG.income)}/mes`, vc: '#11946f', tip: `Sueldo ${money(CFG.income)} al mes · ${money(perPay())} por quincena\nPasaje ≈ ${money(mo('trabajo'))} al mes (${workDays()} días de cada 30)` });
   if (has('gym')) L.push({ id: 'gym', kind: 'gym', n: 'Gimnasio', c: '#0e9f6e', f: 0, val: `${money(mo('gym'))}/mes`, tip: `Gimnasio y entrenador\n${money(mo('gym'))} al mes` });
@@ -756,7 +760,7 @@ function calendarHtml() {
   const ev = {}; const add = (d, cls, t, key) => { if (!d || d.slice(0, 7) !== iso(base).slice(0, 7)) return; (ev[d] = ev[d] || []).push([cls, t, key]); };
   payDays().forEach(pd => add(dayIn(y, m, pd), 'b', 'Te pagan', 'plan'));
   CFG.debts.forEach(d => { const nm = d.n; if (+d.corte) add(dayIn(y, m, +d.corte), 'k', `Corte ${nm}`, 'debts'); const cp = +d.compra || (+d.corte ? (+d.corte % 28) + 1 : 0); if (cp) add(dayIn(y, m, cp), 'g', `Compra ${nm}`, 'debts'); if (+d.limite) { const pd = +d.pagar || Math.max(1, +d.limite - 4); add(dayIn(y, m, pd), 'o', `Tu día ${nm}`, 'debts'); add(dayIn(y, m, +d.limite), 'r', `Vence ${nm}`, 'debts'); } });
-  CFG.fixed.forEach(f => { if (+f.dia) add(dayIn(y, m, +f.dia), 'p', f.n, 'fixed'); });
+  CFG.fixed.forEach(f => { if (+f.dia && fixActive(f, iso(base).slice(0, 7))) add(dayIn(y, m, +f.dia), 'p', f.n, 'fixed'); });
   CFG.upcoming.forEach(u => { if (u.d && upLeft(u)) add(u.d, 'p', u.n, 'upcoming'); });
   CFG.incoming.forEach(i => { if (i.d && inLeft(i)) add(i.d, 'b', i.n, 'incoming'); });
   CAL_EV = ev;
@@ -775,7 +779,7 @@ const editBtn = key => `<button type="button" class="back" data-act="edit-sec" d
 const act = (label, a, id, extra = '') => `<button class="btn small" data-act="${a}" data-id="${esc(id)}"${extra}>${label}</button>`;
 function fixedRow(f) {
   const paid = fixPaid(f);
-  return `<div class="list-row"><span class="dot" style="background:${(CAT[f.cat] || CAT.otros).c}"></span><div class="n"><div>${esc(f.n)}</div><small>${money(f.a)} ${esc(fixUnit(f))}${f.u !== 'mes' ? ` · ≈ ${money(fixMonthly(f))}/mes` : ''}</small></div>${paid ? `<button type="button" class="chip good undoable" data-act="unpay" data-ref="${esc(f.id)}" title="¿Te equivocaste? Toca para marcarlo como no pagado" aria-label="Pagado. Toca para marcar ${esc(f.n)} como no pagado">Pagado ✓</button>` : act('Pagar', 'pay-fixed', f.id)}</div>`;
+  return `<div class="list-row"><span class="dot" style="background:${(CAT[f.cat] || CAT.otros).c}"></span><div class="n"><div>${esc(f.n)}</div><small>${money(f.a)} ${esc(fixUnit(f))}${f.u !== 'mes' ? ` · ≈ ${money(fixMonthly(f))}/mes` : ''}${f.fin ? ` · ${(() => { const n = ymDiff(CUR_YM, f.fin) + 1; return n <= 1 ? 'último pago' : `faltan ${n} pagos`; })()}` : ''}</small></div>${paid ? `<button type="button" class="chip good undoable" data-act="unpay" data-ref="${esc(f.id)}" title="¿Te equivocaste? Toca para marcarlo como no pagado" aria-label="Pagado. Toca para marcar ${esc(f.n)} como no pagado">Pagado ✓</button>` : act('Pagar', 'pay-fixed', f.id)}</div>`;
 }
 function upRow(u) {
   const left = upLeft(u);
@@ -795,8 +799,8 @@ function monthHtml() {
   const parts = [['Fijos', s.fixedM, 'var(--ai)'], ['Variables', s.variable, 'var(--shu)'], ['Pagos únicos', s.oneoff, 'var(--warn)'], ['Deudas', s.pagos, '#d23f4b'], ['Ahorro', s.ahorro, 'var(--good)']];
   const tot = Math.max(s.income, parts.reduce((t, p) => t + p[1], 0), 1);
   const bar = parts.filter(p => p[1] > 0).map(([n, v, c]) => `<i style="width:${(v / tot * 100).toFixed(2)}%;background:${c}" data-tip="${esc(`${n}: ${money(v)}`)}"></i>`).join('');
-  const fx = CFG.fixed.map(fixedRow).join('');
-  const pending = CFG.fixed.filter(f => !fixPaid(f)).length;
+  const fx = fixedNow().map(fixedRow).join('');
+  const pending = fixedNow().filter(f => !fixPaid(f)).length;
   return `<div class="card-h"><h2>Tu mes</h2><span style="display:flex;gap:6px;align-items:center"><span class="chip">${esc(ymLabel(CUR_YM, true))}</span>${editBtn('fixed')}</span></div>
     <div class="ks">Te quedan este mes</div>
     <div class="alc-big num" style="color:${s.libre < 0 ? 'var(--bad)' : 'var(--fg)'}">${money(s.libre)}</div>
@@ -826,7 +830,7 @@ function lotHtml(id) {
     const ps = movs().filter(m => m.type === 'pago' && m.cat === id).sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 5);
     return `<div class="card-h"><h2>${esc(d.n)}</h2>${back}</div>${debtRow(d)}<h3 class="sub">Últimos pagos</h3>${ps.map(m => `<div class="list-row"><div class="n"><div>${esc(m.note || 'Pago')}</div><small>${dateShort(m.date)}</small></div><span class="amt-in">−${money(m.amount)}</span></div>`).join('') || '<p class="help">Aún no registras pagos.</p>'}`;
   }
-  const fx = k => CFG.fixed.filter(f => lotOfFixed(f) === k).map(fixedRow).join('');
+  const fx = k => fixedNow().filter(f => lotOfFixed(f) === k).map(fixedRow).join('');
   const T = { clinica: 'Dentista', trabajo: 'Trabajo', gym: 'Gimnasio', casa: 'Casa', banco: 'Banco', amigo: 'Te deben' }[id] || '';
   let body = '';
   if (id === 'clinica') body = CFG.upcoming.filter(u => u.cat === 'salud').map(upRow).join('') + fx('clinica');
@@ -1566,7 +1570,7 @@ function alcoholHtml(M) {
 const simVar = () => S.sim.varEst ?? (EXAMPLE ? 6000 : Math.round((avgVariable() || 6000) / 500) * 500);
 function buildPlan() {
   const end = CFG.quitDate || CFG.tripDate, pays = paydaysUntil(end), ve = simVar();
-  const nP = payDays().length, half = perPay(), fixedQ = fixedMonthlyTotal(S.sim.skip) / nP, varQ = ve / nP;
+  const nP = payDays().length, half = perPay(), varQ = ve / nP;
   const debts = CFG.debts.map(d => ({ id: d.id, n: d.n, left: debtLeft(d), r: (+d.r || 60) / 100 })).filter(d => d.left > 0).sort((a, b) => b.r - a.r || a.left - b.left);
   const ups = CFG.upcoming.map(u => ({ ...u, left: upLeft(u) })).filter(u => u.left > 0).sort((a, b) => (a.d || '9999') < (b.d || '9999') ? -1 : 1);
   const inc = CFG.incoming.map(i => ({ ...i, left: inLeft(i) })).filter(i => i.left > 0 && (S.sim.friend || i.k !== 'amigo'));
@@ -1576,6 +1580,7 @@ function buildPlan() {
     let entra = half; const tags = [];
     inc.forEach(i => { if (i.left && ((i.d && i.d > prev && i.d <= pd) || (!i.d && idx === 0))) { entra += i.left; tags.push(['in', `+ ${i.n}`]); i.left = 0; } });
     debts.forEach(d => { if (d.left > 0) { const it = d.left * d.r / 24; d.left += it; interest += it; } });
+    const fixedQ = fixedMonthlyTotal(S.sim.skip, pd.slice(0, 7)) / nP;
     let free = entra - fixedQ - varQ;
     const o = { date: pd, entra, gastos: fixedQ + varQ, deudas: 0, pagos: 0, meta: 0, tags };
     const next = pays[idx + 1] || end;
@@ -1632,7 +1637,7 @@ function stepsHtml(M, P) {
 
 function expertHtml(M, P) {
   const months = P.months, fixedM = fixedMonthlyTotal(), inc = +CFG.income || 1;
-  const top = [...CFG.fixed].sort((a, b) => fixMonthly(b) - fixMonthly(a))[0];
+  const top = [...fixedNow()].sort((a, b) => fixMonthly(b) - fixMonthly(a))[0];
   const A = alcoholStats(M), gap = M.g - P.final, proof = 2000000 / (+CFG.rate || 9.1);
   const after = P.rows.filter(r => r.debt <= 0 && r.meta > 0 && !r.tags.some(t => t[0] === 'in')); const perQ = after.length ? after.reduce((t, r) => t + r.meta, 0) / after.length : 0;
   const ag = CFG.incoming.filter(i => i.k !== 'amigo' && inLeft(i)).sort((a, b) => inLeft(b) - inLeft(a))[0];
@@ -1643,7 +1648,7 @@ function expertHtml(M, P) {
   const cards = [
     { ic: '⇢', c: 'var(--good)', k: money(Math.max(0, perQ)), u: payDays().length === 2 ? 'cada quincena' : 'cada pago', t: 'Págate primero', d: `Apártalo para ${GN()} el mismo día que cobras.`, v: `<div class="tv-flow"><span>Sueldo</span><i></i><b>${GN()}</b></div>` },
     ag ? { ic: '★', c: 'var(--ai)', k: totalDebt() ? pct(inLeft(ag) / totalDebt()) : money(inLeft(ag)), u: totalDebt() ? 'de tus deudas' : 'extra', t: ag.n, d: totalDebt() ? `Con ${money(inLeft(ag))} cubres esa parte. Que no se vaya en gastos de temporada.` : 'Mándalo directo a tu meta.', v: totalDebt() ? ring(inLeft(ag) / totalDebt(), 'var(--ai)') : '' } : null,
-    CFG.fixed.length ? { ic: '⌂', c: fixedM / inc < .5 ? 'var(--good)' : 'var(--warn)', k: pct(fixedM / inc), u: 'de tu sueldo en fijos', t: fixedM / inc < .5 ? 'Tus fijos están sanos' : 'Tus fijos pesan mucho', d: `El más grande: ${top.n} (${money(fixMonthly(top))}/mes).`, v: `${bar(fixedM / inc, fixedM / inc < .5 ? 'var(--good)' : 'var(--warn)', .5)}<small class="tv-cap">la rayita es el 50 % sano</small>` } : null,
+    fixedNow().length ? { ic: '⌂', c: fixedM / inc < .5 ? 'var(--good)' : 'var(--warn)', k: pct(fixedM / inc), u: 'de tu sueldo en fijos', t: fixedM / inc < .5 ? 'Tus fijos están sanos' : 'Tus fijos pesan mucho', d: `El más grande: ${top.n} (${money(fixMonthly(top))}/mes).`, v: `${bar(fixedM / inc, fixedM / inc < .5 ? 'var(--good)' : 'var(--warn)', .5)}<small class="tv-cap">la rayita es el 50 % sano</small>` } : null,
     { ic: '×', c: 'var(--shu)', k: `+${money(1000 * months)}`, u: `al ${dateShort(P.end)}`, t: 'Recorta $1,000 al mes', d: A.year ? `Bajar a la mitad ${esc(focusName().toLowerCase())} serían ${money(A.year / 24 * months)} más.` : 'Cada recorte pequeño se multiplica.', v: `<div class="tv-x"><span>$1,000</span><i>× ${months.toFixed(1)} meses</i></div>` },
     owed ? { ic: '?', c: 'var(--muted)', k: money(owed), u: 'fuera del plan', t: 'Dinero que te deben', d: 'No cuentes con él hasta que llegue. Si llega, es extra.', v: '' } : null,
     gap > 0 ? { ic: '↗', c: 'var(--bad)', k: money(gap), u: 'te faltan para la meta', t: 'Cierra la brecha', d: `Son ${money(gap / Math.max(1, months))} al mes entre recortes, horas extra o ventas.`, v: bar(M.g ? P.final / M.g : 0, 'var(--ai)') } : { ic: '✓', c: 'var(--good)', k: money(-gap), u: 'de sobra', t: '¡Vas sobrado!', d: 'Súmalo a tu colchón o a tu meta.', v: '' }
@@ -1653,7 +1658,7 @@ function expertHtml(M, P) {
 }
 
 function controlsHtml(P) {
-  const toggles = CFG.fixed.map(f => `<label class="tog"><input type="checkbox" data-sim="${esc(f.id)}"${S.sim.skip[f.id] ? '' : ' checked'}> ${esc(f.n)} <small>${money(fixMonthly(f))}/mes</small></label>`).join('');
+  const toggles = fixedNow().map(f => `<label class="tog"><input type="checkbox" data-sim="${esc(f.id)}"${S.sim.skip[f.id] ? '' : ' checked'}> ${esc(f.n)} <small>${money(fixMonthly(f))}/mes</small></label>`).join('');
   return `<div class="ctl">
     <label class="rng" for="simVar">Gasto variable al mes <span class="h">comida fuera, salidas, compras, antojos</span> <b class="num">${money(P.ve)}</b><input id="simVar" type="range" min="0" max="20000" step="500" value="${P.ve}"></label>
     <label class="tog"><input type="checkbox" data-simf="1"${S.sim.friend ? ' checked' : ''}> Contar con el dinero que me deben</label>
@@ -1852,7 +1857,7 @@ function catOptions(type, sel) {
 function buildMovForm() {
   const t = S.formType;
   const lab = { ahorro: 'Fondo', pago: 'Deuda', ingreso: 'De dónde', gasto: 'Categoría' }[t];
-  const shortcuts = t === 'gasto' ? [...CFG.fixed.map(f => [f.id, f.n]), ...CFG.upcoming.filter(u => upLeft(u)).map(u => [u.id, u.n])] : [];
+  const shortcuts = t === 'gasto' ? [...fixedNow().map(f => [f.id, f.n]), ...CFG.upcoming.filter(u => upLeft(u)).map(u => [u.id, u.n])] : [];
   $('#viewMovs').innerHTML = `<div class="two">
     <div class="card"><div class="card-h"><h2>${S.editId ? 'Editar movimiento' : 'Nuevo movimiento'}</h2>${S.editId ? '<button type="button" class="back" data-act="cancel-edit">Cancelar</button>' : ''}</div>
       <form id="movForm" novalidate>
@@ -1890,7 +1895,7 @@ const catName = id => (CAT[id] || CAT.otros).n;
 const LISTS = {
   funds: { t: 'Fondos de tu meta', h: 'Divide tu meta en partes. Cada fondo es un edificio en la maqueta.', f: [['n', 'text', 'Nombre'], ['t', 'number', 'Meta'], ['c', 'color', 'Color'], ['h', 'text', 'Qué incluye (opcional)']], add: () => ({ n: 'Nuevo fondo', t: 5000, c: FUND_COLORS[Math.floor(Math.random() * FUND_COLORS.length)] }), amt: r => money(r.t), sub: r => r.h || '', tot: r => +r.t || 0 },
   debts: { t: 'Tarjetas y deudas', h: 'Saldo de hoy, tasa anual y los días de tu tarjeta (vienen en tu estado de cuenta).', f: [['n', 'text', 'Nombre o banco'], ['t', 'number', 'Debes hoy'], ['r', 'number', 'Tasa anual %'], ['corte', 'day', 'Día de corte'], ['compra', 'day', 'Mejor día para comprar'], ['pagar', 'day', 'Tu día para pagar (opcional)'], ['limite', 'day', 'Fecha límite de pago']], add: () => ({ n: 'Nueva tarjeta', t: 1000, r: 60, c: '#d23f4b' }), amt: r => money(r.t), sub: r => [`${+r.r || 60} % anual`, +r.corte ? `corte día ${r.corte}` : '', +r.limite ? `vence día ${r.limite}` : 'sin fechas'].filter(Boolean).join(' · '), tot: r => +r.t || 0, dot: r => r.c || '#d23f4b' },
-  fixed: { t: 'Gastos fijos', h: 'Lo que pagas siempre. «Por día» usa tus días trabajados.', f: [['n', 'text', 'Nombre'], ['a', 'number', 'Monto'], ['u', 'select', 'Frecuencia', [['mes', 'al mes'], ['2meses', 'cada 2 meses'], ['dia', 'por día trabajado']]], ['cat', 'select', 'Categoría', () => cats().map(c => [c.id, c.n])], ['dia', 'day', 'Día en que lo pagas (opcional, sale en el calendario)']], add: () => ({ n: 'Nuevo gasto fijo', a: 100, u: 'mes', cat: 'otros' }), amt: r => money(r.a), sub: r => `${UNIT[r.u] || 'al mes'} · ${catName(r.cat)}${+r.dia ? ` · día ${r.dia}` : ''}`, tot: r => fixMonthly(r), totL: 'al mes', dot: r => (CAT[r.cat] || CAT.otros).c },
+  fixed: { t: 'Gastos fijos', h: 'Lo que pagas siempre. «Por día» usa tus días trabajados.', f: [['n', 'text', 'Nombre'], ['a', 'number', 'Monto'], ['u', 'select', 'Frecuencia', [['mes', 'al mes'], ['2meses', 'cada 2 meses'], ['dia', 'por día trabajado']]], ['cat', 'select', 'Categoría', () => cats().map(c => [c.id, c.n])], ['dia', 'day', 'Día en que lo pagas (opcional, sale en el calendario)'], ['fin', 'month', 'Último mes que se paga (solo si es por unos meses, ej. a meses sin intereses)']], add: () => ({ n: 'Nuevo gasto fijo', a: 100, u: 'mes', cat: 'otros' }), amt: r => money(r.a), sub: r => `${UNIT[r.u] || 'al mes'} · ${catName(r.cat)}${+r.dia ? ` · día ${r.dia}` : ''}${r.fin ? (fixActive(r) ? ` · hasta ${ymLabel(r.fin, true)}` : ' · ya terminó') : ''}`, tot: r => fixMonthly(r), totL: 'al mes', dot: r => (CAT[r.cat] || CAT.otros).c },
   upcoming: { t: 'Pagos próximos', h: 'Pagos de una sola vez. La fecha es opcional.', f: [['n', 'text', 'Nombre'], ['a', 'number', 'Monto'], ['d', 'date', 'Fecha'], ['cat', 'select', 'Categoría', () => cats().map(c => [c.id, c.n])]], add: () => ({ n: 'Nuevo pago', a: 1000, cat: 'otros' }), amt: r => money(r.a), sub: r => `${r.d ? dateLong(r.d) : 'Sin fecha'} · ${catName(r.cat)}`, tot: r => +r.a || 0, dot: r => (CAT[r.cat] || CAT.otros).c },
   longterm: { t: 'Retiro e inversiones', h: 'Seguros de retiro, PPR o inversiones a largo plazo. No cuentan para tu meta.', f: [['n', 'text', 'Nombre'], ['bal', 'number', 'Saldo hoy'], ['u', 'select', 'El saldo está en', [['mxn', 'Pesos'], ['udi', 'UDIs']]], ['a', 'number', 'Aportación mensual'], ['hasta', 'number', 'Pagas hasta el año'], ['ref', 'select', 'Gasto fijo que la paga', () => [['', 'Ninguno'], ...(cfgDraft || CFG).fixed.map(f => [f.id, f.n])]], ['c', 'color', 'Color']], add: () => ({ n: 'Nuevo ahorro a largo plazo', bal: 0, u: 'mxn', a: 0, hasta: +CUR_YM.slice(0, 4) + 10, c: '#5b6bd6', bd: TODAY }), amt: r => r.u === 'udi' ? `${(+r.bal || 0).toLocaleString('es-MX')} UDIs` : money(r.bal), sub: r => `${money(r.a)} al mes · hasta ${r.hasta || '—'}`, tot: r => ltBal(r), dot: r => r.c },
   incoming: { t: 'Dinero por recibir', h: 'Aguinaldo, bonos o dinero que te deben.', f: [['n', 'text', 'Nombre'], ['a', 'number', 'Monto'], ['d', 'date', 'Fecha'], ['k', 'select', 'Tipo', [['banco', 'Seguro (aguinaldo, bono)'], ['amigo', 'Me lo deben']]]], add: () => ({ n: 'Nuevo ingreso', a: 1000, k: 'banco' }), amt: r => `+${money(r.a)}`, sub: r => `${r.d ? dateLong(r.d) : 'Sin fecha'} · ${r.k === 'amigo' ? 'me lo deben' : 'seguro'}`, tot: r => +r.a || 0, dot: () => '#11946f' },
@@ -2321,7 +2326,7 @@ const noData = () => !REAL.length ? '<p class="bot-note">Todavía no registras m
 function daysToMonthEnd() { const d = new Date(`${TODAY}T00:00:00`); return lastDay(d.getFullYear(), d.getMonth()) - d.getDate() + 1; }
 function pendingList() {
   const out = [];
-  CFG.fixed.filter(f => !fixPaid(f)).forEach(f => out.push([f.dia ? nextDate(f.dia) : null, `${B(f.n)}: ${money(fixCharge(f))}${f.dia ? ` · día ${f.dia}` : ''}`]));
+  fixedNow().filter(f => !fixPaid(f)).forEach(f => out.push([f.dia ? nextDate(f.dia) : null, `${B(f.n)}: ${money(fixCharge(f))}${f.dia ? ` · día ${f.dia}` : ''}`]));
   CFG.upcoming.filter(u => upLeft(u) > 0).forEach(u => out.push([u.d || null, `${B(u.n)}: ${money(upLeft(u))}${u.d ? ` · ${dateShort(u.d)}` : ''}`]));
   CFG.debts.filter(d => debtLeft(d) > 0).forEach(d => { const c = cardInfo(d); if (c && c.lim) out.push([c.lim, `${B(d.n)}: paga antes del ${dateShort(c.lim)}${c.dLim != null ? ` (en ${c.dLim} días)` : ''}`]); });
   return out.sort((a, b) => (a[0] || '9999') < (b[0] || '9999') ? -1 : 1).map(x => x[1]);
@@ -2393,7 +2398,7 @@ const INTENTS = [
   { id: 'h_gmail', re: [/gmail|correo|e-?mail/, /automatic/, /(importar|traer|jalar|sincronizar) (mis )?(gastos|compras|movimientos)/, /(compras|gastos|movimientos) (del|de mi|de la) (banco|tarjeta)/, /conectar (mi )?(banco|tarjeta)/], a: () => '<p>Puedo traer tus compras desde los avisos que te manda tu banco o PayPal a Gmail:</p><ol><li>Toca <b>✉ Gmail</b> (abajo) o el botón de aquí.</li><li>Elige tu cuenta de Google y acepta el permiso de <b>solo lectura</b>.</li><li>Listo: los gastos aparecen solos en Movimientos con el ícono ✉.</li></ol><p>Tus correos no se guardan; solo el monto, la fecha y el comercio. El permiso dura una hora; después vuelve a tocar el botón.</p>', acts: ['gmail'], next: ['¿Mis datos están seguros?', '¿Cuánto gasté este mes?'] },
   { id: 'h_ajustes', re: [/cambi(o|ar|a) (mi |la |el |los )?(meta|fecha|sueldo|nombre|dias de pago|quincena)/, /(editar|configurar|modificar) (mi )?(meta|plan|sueldo)/, /ajustes|configuracion/], a: () => '<p>Todo lo de tu plan se cambia en <b>Ajustes</b>, arriba. En <b>Tu plan</b> están tu meta, tu fecha, tu sueldo y tus días de pago. Cuando termines, toca <b>Guardar</b>. Si te equivocas, también hay <b>Deshacer</b>.</p>', acts: ['plan'], next: ['¿Qué es un fondo?', '¿Cómo agrego una tarjeta?'] },
   { id: 'h_deuda_add', re: [/(agreg|anad|registr|pon|met)\w* (una |mi |otra )?(tarjeta|deuda|credito|prestamo)/, /nueva (tarjeta|deuda)/], a: () => '<p>Ve a <b>Ajustes → Tarjetas y deudas</b> y toca <b>Agregar</b>. Pon cuánto debes hoy, la tasa anual y los días de corte y de pago (vienen en tu estado de cuenta). La app te avisa antes de cada fecha límite.</p><p>Cuando abones, registra un <b>Pago de deuda</b> con el botón <b>+</b>.</p>', acts: ['debts', 'pago'], next: ['¿Qué es el día de corte?', '¿Cuánto debo?'] },
-  { id: 'h_fijos', re: [/gastos? fijos?/, /renta|suscripcion|recurrente|cada mes/], a: () => '<p>Los <b>gastos fijos</b> son los que pagas siempre (renta, internet, gimnasio). Agrégalos una vez en <b>Ajustes → Gastos fijos</b>. Cada mes aparecen en el panel con un botón <b>Pagar</b>: lo tocas cuando pagues y se registra solo.</p>', acts: ['fixed'], next: ['Me equivoqué, ¿cómo corrijo?', '¿Qué tengo que pagar?'] },
+  { id: 'h_fijos', re: [/gastos? fijos?/, /renta|suscripcion|recurrente|cada mes/, /meses sin intereses|\bmsi\b|a meses|una sola vez|pago unico/], a: () => '<p>Hay tres tipos de pagos y solo los capturas <b>una vez</b>:</p><ul><li><b>Se repite cada mes</b> (renta, entrenador, internet): en <b>Ajustes → Gastos fijos</b>. Sale todos los meses con su botón <b>Pagar</b>.</li><li><b>Por unos meses</b> (a meses sin intereses): también en Gastos fijos, pero pon el <b>último mes que se paga</b>. Después desaparece solo.</li><li><b>Se paga una sola vez</b> (un vuelo, el dentista): en <b>Ajustes → Pagos próximos</b> con su fecha.</li></ul><p>También puedes tocar un día del calendario y elegir el tipo ahí.</p>', acts: ['fixed'], next: ['Me equivoqué, ¿cómo corrijo?', '¿Qué tengo que pagar?'] },
   { id: 'h_calendario', re: [/calendario/, /(cambiar|editar|agregar|poner) (una |la |mis )?(fecha|fechas|dia de pago)/, /dia (en que|que) (pago|me cobran)/], a: () => '<p>El <b>calendario de pagos</b> se arma solo con tus datos: tus días de pago, las fechas de tus tarjetas, tus gastos fijos con día y tus pagos con fecha.</p><ul><li><b>Toca cualquier día</b> para ver qué hay, cambiarlo o agregar algo en esa fecha.</li><li>En el celular las rayitas de colores son los pagos; toca el día para leerlos.</li><li>Para que un gasto fijo salga en el calendario, ponle el <b>día en que lo pagas</b> en Ajustes → Gastos fijos.</li></ul>', acts: ['fixed', 'debts'], next: ['¿Qué tengo que pagar?', '¿Qué es el día de corte?'] },
   { id: 'h_privacidad', re: [/segur|privad|quien (ve|puede ver)|mis datos|hacke|robar|vender/], a: () => '<p>🔒 Tus datos son solo tuyos:</p><ul><li>Se guardan en tu cuenta y las reglas del servidor impiden que otra persona los lea, ni siquiera otros usuarios de la app.</li><li>Este asistente funciona en tu teléfono: tus preguntas no se mandan a ningún lado.</li><li>Gmail es de solo lectura y no se guardan tus correos.</li><li>Puedes ocultar los montos con el ojo 👁 de arriba y poner un PIN en Ajustes → Seguridad.</li></ul>', acts: ['security'], next: ['¿Cómo oculto mis montos?', '¿Cómo hago un respaldo?'] },
   { id: 'h_ocultar', re: [/ocult|escond|que no (se )?vean|\bpin\b|bloque|candado|contrasena de la app/], a: () => '<p>Toca el <b>ojo 👁</b> de arriba para ocultar todos los montos (útil en público). Para que pida un <b>PIN</b> al abrir, ve a <b>Ajustes → Seguridad</b>.</p>', acts: ['security'], next: ['¿Mis datos están seguros?'] },
@@ -2559,7 +2564,7 @@ document.addEventListener('click', e => {
   else if (act === 'cal-day') calDayOpen(a.dataset.day);
   else if (act === 'cday-close') calDayClose();
   else if (act === 'cday-edit') { calDayClose(); S.cfgSec = a.dataset.key; S.edRow = null; S.view = 'cfg'; render(true); window.scrollTo(0, 0); }
-  else if (act === 'cday-add') { const k = a.dataset.key, day = $('#cday').dataset.day, dn = +day.slice(8); cfgAddRow(k, k === 'upcoming' || k === 'incoming' ? { d: day } : k === 'fixed' ? { dia: dn } : { corte: dn }); }
+  else if (act === 'cday-add') { const k = a.dataset.key, day = $('#cday').dataset.day, dn = +day.slice(8); const nm = +a.dataset.months || 0; cfgAddRow(k, k === 'upcoming' || k === 'incoming' ? { d: day } : k === 'fixed' ? { dia: dn, ...(nm ? { fin: ymAdd(day.slice(0, 7), nm - 1) } : {}) } : { corte: dn }); }
   else if (act === 'q-more') { S.qAll = !S.qAll; render(); if (!S.qAll) { const q = document.getElementById('s-quin'); if (q) q.scrollIntoView({ block: 'start' }); } }
   else if (act === 'pay-fixed') { const f = CFG.fixed.find(x => x.id === a.dataset.id); if (f) addMov({ id: uid(), kind: 'mov', type: 'gasto', amount: fixCharge(f), date: TODAY, cat: f.cat, ref: f.id, note: f.n, created: Date.now() }); }
   else if (act === 'pay-up') { const u = CFG.upcoming.find(x => x.id === a.dataset.id); if (u) addMov({ id: uid(), kind: 'mov', type: 'gasto', amount: upLeft(u), date: TODAY, cat: u.cat, ref: u.id, note: u.n, created: Date.now() }); }

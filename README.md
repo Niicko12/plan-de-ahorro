@@ -19,7 +19,7 @@ Es una sola página HTML que funciona igual en el celular y en la computadora. E
 - **Quincena a quincena.** Proyección de cada pago hasta tu fecha límite, con controles para simular cuánto gastas y qué gastos fijos dejas de pagar.
 - **Tarjetas y deudas.** Saldo, tasa anual, día de corte, mejor día para comprar y fecha límite de pago.
 - **Calendario de pagos editable.** Se arma con los datos de cada persona: días de pago, fechas de tarjetas, gastos fijos con día y pagos con fecha. Al tocar un día ves lo que hay, lo cambias o agregas un pago, un gasto fijo, dinero por recibir o una tarjeta en esa fecha.
-- **Gastos fijos, pagos próximos, dinero por recibir y límites del mes** por categoría.
+- **Gastos fijos, pagos próximos, dinero por recibir y límites del mes** por categoría. Cada pago se captura una sola vez y puede repetirse cada mes (renta), repetirse solo unos meses (a meses sin intereses, se quita solo al terminar) o pagarse una sola vez en una fecha (un vuelo).
 - **Retiro e inversiones** a largo plazo, en pesos o en UDIs.
 - **Consejos con tus números**, por ejemplo "págate primero", qué hacer con el aguinaldo o cuánto ganas si recortas un gasto.
 - **Nova, tu asistente.** Le preguntas con tus palabras cosas como "¿cómo voy?", "¿cuánto me queda?", "¿qué tengo que pagar?" o "¿cómo registro un gasto?" y te responde con tus números. También explica términos como día de corte o tasa de ahorro, y trae botones que te llevan directo a cada lugar. Es gratis: funciona en el navegador, sin IA externa, y tus preguntas no se mandan a ningún lado.
