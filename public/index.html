@@ -438,10 +438,10 @@ html{scroll-padding-top:70px}
 .bacts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.bacts .btn{min-height:38px}
 #botChips{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;border-top:1px solid var(--line);scrollbar-width:none}#botChips::-webkit-scrollbar{display:none}
 #botChips button{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ai);border-radius:999px;padding:8px 12px;font-weight:600;font-size:13px;min-height:38px}
-#botForm{display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
-#botIn{flex:1;min-width:0;font-size:16px!important;padding:11px 13px!important;border-radius:14px}
-#botForm button{border:0;background:var(--ai);color:#fff;border-radius:14px;padding:0 16px;font-weight:700;min-height:46px}
-@media (max-width:600px){#bot{left:0;right:0;bottom:0;width:100%;height:85dvh;border-radius:20px 20px 0 0}#botBtn{height:44px;padding:0 12px 0 10px}#botBtn em{display:none}}
+#botForm{display:flex!important;flex-direction:row!important;align-items:center;flex-wrap:nowrap!important;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+#botIn{flex:1 1 auto;width:auto!important;margin:0!important;min-width:0;font-size:16px!important;padding:11px 13px!important;border-radius:14px}
+#botForm button{width:auto!important;flex:none;margin:0!important;border:0;background:var(--ai);color:#fff;border-radius:14px;padding:0 16px;font-weight:700;min-height:46px}
+@media (max-width:600px){#bot{left:0;right:0;bottom:0;width:100%;height:85dvh;border-radius:20px 20px 0 0;box-shadow:0 0 0 100vmax rgba(10,14,28,.45)}#botBtn{height:44px;padding:0 12px 0 10px}#botBtn em{display:none}}
 </style>
 </head><body>
 
@@ -977,15 +977,15 @@ const Dio = (() => {
     if (world) { scene.remove(world); world.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material.dispose) o.material.dispose(); }); }
     world = new T.Group(); scene.add(world); zones = []; movers = []; picks = []; labs.innerHTML = '';
     const dk = isDark() || night;
-    const C = dk ? { slab: '#141a2e', ground: '#222a44', road: '#0c1120', line: '#4b5675', mix: .7, mount: '#3a4772', snow: '#c9d3ee', box: '#9c7445' }
-                 : { slab: '#cfd5e2', ground: '#f1f3f8', road: '#7d8597', line: '#ffffff', mix: .82, mount: '#9fb0d8', snow: '#ffffff', box: '#d9a35f' };
+    const C = dk ? { slab: '#3a2c25', soil: '#4a382e', ground: '#2c5a3f', grass2: '#23503a', lot: '#2a334f', road: '#141a2b', line: '#5b6685', mix: .7, mount: '#3a4772', snow: '#c9d3ee', box: '#9c7445' }
+                 : { slab: '#b4825c', soil: '#9a6a48', ground: '#8fd17e', grass2: '#76c068', lot: '#f4efe4', road: '#6f7789', line: '#ffffff', mix: .82, mount: '#9fb0d8', snow: '#ffffff', box: '#d9a35f' };
     const n = Math.max(1, data.length);
     const cols = n <= 2 ? n : n <= 8 ? Math.ceil(n / 2) : Math.ceil(n / 3);
     const rows = Math.ceil(n / cols);
     const cell = 6, iw = cols * cell, id = rows * cell;
     const GW = iw + 11, GD = id + 10.5;
     const x0 = -2.2, z0 = -GD / 2 + 6.4 + id / 2;
-    box(GW + .8, .8, GD + .8, mat(C.slab), 0, -.4, 0, null, true);
+    box(GW + .8, .8, GD + .8, mat(C.slab), 0, -.4, 0, null, true); box(GW + .82, .22, GD + .82, mat(C.soil), 0, -.62, 0, null, true); box(GW + .8, .12, GD + .8, mat(C.ground), 0, -.02, 0, null, true);
     box(GW, .1, GD, mat(C.ground), 0, .05, 0, null, true);
     const rx0 = x0 - iw / 2 - 1.5, rx1 = x0 + iw / 2 + 1.5, rz0 = z0 - id / 2 - 1.5, rz1 = z0 + id / 2 + 1.5, RW = 1.25;
     const roadM = mat(C.road), lineM = mat(C.line);
@@ -1002,7 +1002,7 @@ const Dio = (() => {
     data.forEach((L, i) => {
       const c = i % cols, r = Math.floor(i / cols);
       const cx = x0 - iw / 2 + cell / 2 + c * cell, cz = z0 - id / 2 + cell / 2 + r * cell;
-      tag(box(5, .05, 5, mat(mix(L.c, C.ground, C.mix)), cx, .13, cz, null, true), L.id);
+      tag(box(5, .05, 5, mat(mix(L.c, C.lot, C.mix)), cx, .13, cz, null, true), L.id);
       const pts = [[-2.5, -2.5], [2.5, -2.5], [2.5, 2.5], [-2.5, 2.5]].map(([a, b]) => new T.Vector3(cx + a, .17, cz + b));
       world.add(new T.LineLoop(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({ color: L.c, transparent: true, opacity: .7 })));
       const z = { ...L, cur: L.kind === 'friend' ? L.f : 0, cx, cz, bx: cx - .5, bz: cz - .4, ph: i * 1.3 };
@@ -1182,6 +1182,19 @@ const Dio = (() => {
         if (lane.h) { g.position.set(p, y, lane.v); g.rotation.y = fwd ? 0 : Math.PI; } else { g.position.set(lane.v, y, p); g.rotation.y = fwd ? -Math.PI / 2 : Math.PI / 2; }
         P.walk(t, reduce);
       });
+    }
+
+    // pasto: matitas y florecitas sueltas en los bordes (fuera de calles y lotes)
+    {
+      const tuftG = new T.ConeGeometry(.07, .22, 4), tuftM = mat(C.grass2), fl = ['#ffffff', '#ffd166', '#ff7aa8', '#b28dff'], flG = new T.SphereGeometry(.05, 5, 4);
+      let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      const inside = (x, z) => x > rx0 - RW && x < rx1 + RW && z > rz0 - RW && z < rz1 + RW;
+      for (let i = 0; i < 140; i += 1) {
+        const x = (rnd() - .5) * (GW - .6), z = (rnd() - .5) * (GD - .6);
+        if (inside(x, z) || Math.hypot(x - fx, z - fz) < 2.3) continue;
+        for (let j = 0; j < 3; j += 1) { const m = new T.Mesh(tuftG, tuftM); m.position.set(x + (j - 1) * .07, .2, z + (j % 2) * .06); m.rotation.z = (j - 1) * .25; world.add(m); }
+        if (rnd() < .25) { const f = new T.Mesh(flG, mat(fl[i % fl.length])); f.position.set(x + .1, .16, z - .08); world.add(f); }
+      }
     }
 
     // ---------- decoración viva: pájaros, nubes, globo, patos, fuente, mariposas, luciérnagas, perro y jardín ----------
@@ -2324,7 +2337,7 @@ const INTENTS = [
   { id: 'sobra', re: [/(me )?(queda|sobra|resta)\b/, /cuanto (puedo|me alcanza) gastar/, /disponible/, /me alcanza/], a: () => {
     const s = monthStats(); if (!s.income) return '<p>Para decirte cuánto te queda necesito tu sueldo. Ponlo en Ajustes → Tu plan.</p>';
     const dl = daysToMonthEnd(), per = s.libre / dl;
-    return `<p>Te quedan ${B(money(s.libre))} este mes.</p>${li([`Sueldo: ${money(s.income)}`, `Gastos fijos: −${money(s.fixedM)}`, `Gastos variables: −${money(s.variable)}`, s.oneoff ? `Pagos únicos: −${money(s.oneoff)}` : '', s.pagos ? `Abonos a deudas: −${money(s.pagos)}` : '', s.ahorro ? `Ahorro: −${money(s.ahorro)}` : ''].filter(Boolean))}${s.libre > 0 ? `<p>Para que te alcance, gasta máximo ${B(money(per))} al día los ${dl} días que faltan.</p>` : '<p>⚠️ Vas en negativo: este mes salió más de lo que entra. Revisa tus gastos variables.</p>'}`;
+    return `<p>Te quedan ${B(money(s.libre))} este mes.</p>${li([`Sueldo: ${money(s.income)}`, s.fixedM ? `Gastos fijos: −${money(s.fixedM)}` : '', s.variable ? `Gastos variables: −${money(s.variable)}` : '', s.oneoff ? `Pagos únicos: −${money(s.oneoff)}` : '', s.pagos ? `Abonos a deudas: −${money(s.pagos)}` : '', s.ahorro ? `Ahorro: −${money(s.ahorro)}` : ''].filter(Boolean))}${s.libre > 0 ? `<p>Para que te alcance, gasta máximo ${B(money(per))} al día los ${dl} días que faltan.</p>` : '<p>⚠️ Vas en negativo: este mes salió más de lo que entra. Revisa tus gastos variables.</p>'}`;
   }, acts: ['plan'], next: ['¿En qué gasto más?', 'Dame un consejo'] },
   { id: 'meta', re: [/meta/, /voy bien/, /cuando (llego|termino|lo logro)/, /cuanto me falta/, /llegare/, /a tiempo/], a: () => {
     const M = metrics(); if (!M.g) return '<p>Aún no defines cuánto necesitas. Ve a Ajustes → Fondos de tu meta.</p>';
@@ -2403,6 +2416,7 @@ function botOpen() {
 function botClose() { BOT.open = false; $('#bot').hidden = true; $('#botBtn').hidden = false; }
 $('#botBtn').addEventListener('click', botOpen);
 $('#botX').addEventListener('click', botClose);
+document.addEventListener('pointerdown', e => { if (BOT.open && !e.target.closest('#bot') && !e.target.closest('#botBtn') && !e.target.closest('#qa')) botClose(); });
 $('#botForm').addEventListener('submit', e => { e.preventDefault(); const i = $('#botIn'); botAsk(i.value); i.value = ''; });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && BOT.open) botClose(); });
 
