@@ -436,8 +436,8 @@ html{scroll-padding-top:70px}
 .bmsg p{margin:0 0 6px}.bmsg p:last-child{margin-bottom:0}.bmsg ul,.bmsg ol{margin:4px 0 6px;padding-left:20px}.bmsg li{margin:3px 0}
 .bot-note{color:var(--muted);font-size:13px}
 .bacts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.bacts .btn{min-height:38px}
-#botChips{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;border-top:1px solid var(--line);scrollbar-width:none}#botChips::-webkit-scrollbar{display:none}
-#botChips button{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ai);border-radius:999px;padding:8px 12px;font-weight:600;font-size:13px;min-height:38px}
+#botChips{display:none}.bchips{display:flex;flex-wrap:wrap;gap:6px;align-self:stretch}
+.bchips button{flex:0 1 auto;max-width:100%;white-space:normal;text-align:left;line-height:1.25;border:1px solid color-mix(in srgb,var(--ai) 35%,var(--line));background:color-mix(in srgb,var(--ai) 9%,var(--surface));color:var(--fg);border-radius:14px;padding:8px 12px;font-weight:600;font-size:13.5px;min-height:38px}.bchips button:hover{border-color:var(--ai)}
 #botForm{display:flex!important;flex-direction:row!important;align-items:center;flex-wrap:nowrap!important;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
 #botIn{flex:1 1 auto;width:auto!important;margin:0!important;min-width:0;font-size:16px!important;padding:11px 13px!important;border-radius:14px}
 #botForm button{width:auto!important;flex:none;margin:0!important;border:0;background:var(--ai);color:#fff;border-radius:14px;padding:0 16px;font-weight:700;min-height:46px}
@@ -2398,9 +2398,10 @@ function botMsg(who, html, acts, next) {
   if (who === 'me') d.textContent = html; else d.innerHTML = html;
   if (acts && acts.length) { const w = document.createElement('div'); w.className = 'bacts'; acts.forEach(k => { const a = A[k]; if (!a) return; const b = document.createElement('button'); b.type = 'button'; b.className = 'btn small'; b.textContent = a[0]; b.addEventListener('click', a[1]); w.append(b); }); d.append(w); }
   log.append(d);
-  const c = $('#botChips'); c.textContent = '';
-  (next || []).forEach(t => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.addEventListener('click', () => botAsk(t)); c.append(b); });
-  log.scrollTop = log.scrollHeight;
+  // Preguntas sugeridas dentro de la conversación, debajo de la respuesta (siempre visibles completas).
+  log.querySelectorAll('.bchips').forEach(x => x.remove());
+  if (who !== 'me' && next && next.length) { const c = document.createElement('div'); c.className = 'bchips'; next.forEach(t => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.addEventListener('click', () => botAsk(t)); c.append(b); }); log.append(c); }
+  if (who === 'me') log.scrollTop = log.scrollHeight; else d.scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 function botAsk(text) {
   const t = String(text || '').trim().slice(0, 200); if (!t) return;
