@@ -17,7 +17,8 @@ Es una sola página HTML que funciona igual en el celular y en la computadora. E
 - **Alertas.** Fechas límite de tus tarjetas, si vas a tiempo para tu fecha meta, categorías que pasaron su límite y fondos completos.
 - **Plan en 4 pasos.** Colchón de emergencia, liquidar deudas, pagos comprometidos y meta, cada paso con su avance.
 - **Quincena a quincena.** Proyección de cada pago hasta tu fecha límite, con controles para simular cuánto gastas y qué gastos fijos dejas de pagar.
-- **Tarjetas y deudas.** Saldo, tasa anual, día de corte, mejor día para comprar y fecha límite de pago, con calendario.
+- **Tarjetas y deudas.** Saldo, tasa anual, día de corte, mejor día para comprar y fecha límite de pago.
+- **Calendario de pagos editable.** Se arma con los datos de cada persona: días de pago, fechas de tarjetas, gastos fijos con día y pagos con fecha. Al tocar un día ves lo que hay, lo cambias o agregas un pago, un gasto fijo, dinero por recibir o una tarjeta en esa fecha.
 - **Gastos fijos, pagos próximos, dinero por recibir y límites del mes** por categoría.
 - **Retiro e inversiones** a largo plazo, en pesos o en UDIs.
 - **Consejos con tus números**, por ejemplo "págate primero", qué hacer con el aguinaldo o cuánto ganas si recortas un gasto.
