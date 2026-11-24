@@ -423,6 +423,25 @@ html{scroll-padding-top:70px}
 .udrop button{border:0;background:none;text-align:left;padding:10px;border-radius:9px;font-weight:600}
 .udrop button:hover{background:var(--surface-2)}
 @media (max-width:600px){.top{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}.nav{display:grid;grid-template-columns:repeat(3,1fr)}.nav button{padding:9px 4px;min-height:42px}.tools{display:flex;flex-wrap:wrap;gap:8px}.tools select{flex:1 1 0;min-width:0;min-height:42px}.tools .icon-btn,.tools .ubtn{flex:none;width:42px;height:42px}.tools #mode{order:9;flex-basis:100%;text-align:center}.udrop{position:fixed;left:12px;right:12px;top:auto;bottom:calc(12px + env(safe-area-inset-bottom,0px));min-width:0;z-index:130;padding:10px;border-radius:18px;box-shadow:0 -8px 40px rgba(0,0,0,.35)}.udrop button{min-height:50px;font-size:16px}.udrop small{font-size:13px}.wrap{padding-bottom:88px}#gmBtn{height:44px;padding:0 12px}}
+#botBtn{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:45;height:52px;padding:0 16px 0 12px;border-radius:18px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow)}
+#botBtn span{font-size:20px}
+#bot{position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:115;width:min(400px,calc(100vw - 32px));height:min(620px,calc(100dvh - 32px));display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 60px rgba(0,0,0,.35);overflow:hidden}
+#bot[hidden]{display:none!important}
+.bot-h{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}.bot-h b{flex:1;font-size:16px}.bot-h small{display:block;color:var(--muted);font-size:12px;font-weight:500}
+#botX{border:0;background:var(--surface-2);border-radius:12px;width:40px;height:40px;font-size:20px;color:var(--fg)}
+#botLog{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
+.bmsg{max-width:88%;padding:10px 13px;border-radius:16px;font-size:14.5px;line-height:1.45;overflow-wrap:anywhere}
+.bmsg.bot{background:var(--surface-2);align-self:flex-start;border-bottom-left-radius:6px}
+.bmsg.me{background:var(--ai);color:#fff;align-self:flex-end;border-bottom-right-radius:6px}
+.bmsg p{margin:0 0 6px}.bmsg p:last-child{margin-bottom:0}.bmsg ul,.bmsg ol{margin:4px 0 6px;padding-left:20px}.bmsg li{margin:3px 0}
+.bot-note{color:var(--muted);font-size:13px}
+.bacts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.bacts .btn{min-height:38px}
+#botChips{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;border-top:1px solid var(--line);scrollbar-width:none}#botChips::-webkit-scrollbar{display:none}
+#botChips button{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ai);border-radius:999px;padding:8px 12px;font-weight:600;font-size:13px;min-height:38px}
+#botForm{display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+#botIn{flex:1;min-width:0;font-size:16px!important;padding:11px 13px!important;border-radius:14px}
+#botForm button{border:0;background:var(--ai);color:#fff;border-radius:14px;padding:0 16px;font-weight:700;min-height:46px}
+@media (max-width:600px){#bot{left:0;right:0;bottom:0;width:100%;height:85dvh;border-radius:20px 20px 0 0}#botBtn{height:44px;padding:0 12px 0 10px}#botBtn em{display:none}}
 </style>
 </head><body>
 
@@ -465,6 +484,8 @@ html{scroll-padding-top:70px}
 <div id="toast" hidden role="status"></div>
 <div id="lock" hidden><div class="lock-card" role="dialog" aria-modal="true" aria-labelledby="lockT"><div class="lock-ic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><h2 id="lockT">Panel bloqueado</h2><p class="help">Escribe tu PIN para entrar.</p><form id="lockForm" novalidate><input id="lockPin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8" placeholder="••••" aria-label="PIN"><button class="btn" type="submit">Entrar</button><p id="lockErr" class="help" style="color:var(--bad)" hidden></p></form></div></div>
 <button type="button" id="fab" aria-label="Registrar movimiento" title="Registrar movimiento">+</button>
+<button type="button" id="botBtn" aria-label="Abrir asistente" title="Pregúntame lo que quieras"><span aria-hidden="true">💬</span><em style="font-style:normal">Pregúntame</em></button>
+<section id="bot" hidden role="dialog" aria-label="Asistente"><div class="bot-h"><span style="font-size:24px" aria-hidden="true">🤖</span><b>Asistente<small>Funciona en tu teléfono · tus datos no salen</small></b><button type="button" id="botX" aria-label="Cerrar asistente">×</button></div><div id="botLog" aria-live="polite"></div><div id="botChips"></div><form id="botForm" autocomplete="off"><input id="botIn" type="text" maxlength="200" placeholder="Escribe tu pregunta…" aria-label="Escribe tu pregunta" enterkeyhint="send"><button type="submit">Enviar</button></form></section>
 <button type="button" id="gmBtn" hidden title="Traer los gastos que te llegaron por correo">✉ Gmail</button>
 <div id="qa" hidden><div class="qa-back" data-act="qa-close"></div><div class="qa-sheet" role="dialog" aria-modal="true" aria-labelledby="qaT"><div class="card-h"><h2 id="qaT">Registrar</h2><button type="button" class="back" data-act="qa-close">Cerrar</button></div><div id="qaBody"></div></div></div>
 
@@ -2141,6 +2162,158 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 $('#gmBtn').addEventListener('click', () => gmSync(true));
 $('#uGm').addEventListener('click', () => { $('#udrop').hidden = true; gmSync(true); });
 
+/* ---------- asistente (gratis, sin IA): responde con tus datos y explica la app; nada sale del teléfono ---------- */
+const BOT = { open: false };
+const nrm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[¿?¡!.,;:()"']/g, ' ').replace(/\s+/g, ' ').trim();
+const B = s => `<b>${esc(s)}</b>`;
+const li = arr => arr.length ? `<ul>${arr.map(x => `<li>${x}</li>`).join('')}</ul>` : '';
+function goView(v, sec) { S.view = v; if (sec) { S.cfgSec = sec; S.edRow = null; } S.confirmDel = null; render(true); window.scrollTo(0, 0); botClose(); }
+const A = {
+  gasto: ['Registrar un gasto', () => { botClose(); qaOpen('gasto'); }],
+  ingreso: ['Registrar un ingreso', () => { botClose(); qaOpen('ingreso'); }],
+  ahorro: ['Registrar un ahorro', () => { botClose(); qaOpen('ahorro'); }],
+  pago: ['Registrar pago de deuda', () => { botClose(); qaOpen('pago'); }],
+  movs: ['Ver mis movimientos', () => goView('movs')],
+  panel: ['Ir al panel', () => goView('panel')],
+  plan: ['Cambiar meta, fechas o sueldo', () => goView('cfg', 'plan')],
+  funds: ['Editar fondos de la meta', () => goView('cfg', 'funds')],
+  debts: ['Agregar o editar deudas', () => goView('cfg', 'debts')],
+  fixed: ['Agregar gastos fijos', () => goView('cfg', 'fixed')],
+  upcoming: ['Agregar pagos próximos', () => goView('cfg', 'upcoming')],
+  incoming: ['Agregar dinero por recibir', () => goView('cfg', 'incoming')],
+  budgets: ['Poner límites del mes', () => goView('cfg', 'budgets')],
+  cats: ['Editar categorías', () => goView('cfg', 'cats')],
+  security: ['Seguridad y PIN', () => goView('cfg', 'security')],
+  gmail: ['Traer gastos de Gmail', () => { botClose(); gmSync(true); }]
+};
+const monthGastos = (ym = CUR_YM) => movs().filter(m => m.type === 'gasto' && m.date.slice(0, 7) === ym);
+function topCats(list, n = 3) { const o = {}; list.forEach(m => { o[m.cat] = (o[m.cat] || 0) + m.amount; }); const tot = sum(list); return Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, n).map(([c, v]) => `${B(catName(c))}: ${money(v)} (${tot ? Math.round(v / tot * 100) : 0}%)`); }
+const noData = () => !REAL.length ? '<p class="bot-note">Todavía no registras movimientos. Cuando empieces, aquí verás tus números reales.</p>' : '';
+function daysToMonthEnd() { const d = new Date(`${TODAY}T00:00:00`); return lastDay(d.getFullYear(), d.getMonth()) - d.getDate() + 1; }
+function pendingList() {
+  const out = [];
+  CFG.fixed.filter(f => !fixPaid(f)).forEach(f => out.push([f.dia ? nextDate(f.dia) : null, `${B(f.n)}: ${money(fixCharge(f))}${f.dia ? ` · día ${f.dia}` : ''}`]));
+  CFG.upcoming.filter(u => upLeft(u) > 0).forEach(u => out.push([u.d || null, `${B(u.n)}: ${money(upLeft(u))}${u.d ? ` · ${dateShort(u.d)}` : ''}`]));
+  CFG.debts.filter(d => debtLeft(d) > 0).forEach(d => { const c = cardInfo(d); if (c && c.lim) out.push([c.lim, `${B(d.n)}: paga antes del ${dateShort(c.lim)}${c.dLim != null ? ` (en ${c.dLim} días)` : ''}`]); });
+  return out.sort((a, b) => (a[0] || '9999') < (b[0] || '9999') ? -1 : 1).map(x => x[1]);
+}
+const GLOS = [
+  [/tasa de ahorro/, 'La <b>tasa de ahorro</b> es qué parte de tu dinero se fue a ahorro en lugar de gasto. Si de cada $100 guardas $20, tu tasa es 20%. Arriba de 20% es muy bueno.'],
+  [/patrimonio/, 'El <b>patrimonio neto</b> es lo que tienes menos lo que debes: tus ahorros, tu retiro y el dinero por recibir, menos tus deudas. Si sube con el tiempo, vas bien.'],
+  [/(te )?sobra|libre/, '<b>Te sobra al mes</b> es tu sueldo menos tus gastos fijos y tu gasto variable promedio. Es lo que podrías mandar a tu meta o a tus deudas.'],
+  [/corte/, 'El <b>día de corte</b> es cuando tu tarjeta cierra el mes y calcula lo que debes. Lo que compres después del corte se cobra hasta el siguiente estado de cuenta.'],
+  [/fecha limite|limite de pago|vence/, 'La <b>fecha límite de pago</b> es el último día para pagar tu tarjeta sin intereses ni recargos. La app te avisa unos días antes.'],
+  [/mejor dia/, 'El <b>mejor día para comprar</b> es justo después del corte: te da el mayor tiempo posible para pagar sin intereses.'],
+  [/50 ?30 ?20/, 'La regla <b>50/30/20</b>: 50% de tu sueldo para necesidades (renta, comida, transporte), 30% para gustos y 20% para ahorro o deudas. Es una guía, no una ley.'],
+  [/colchon|emergencia/, 'El <b>colchón</b> o fondo de emergencia es dinero que no se toca, para imprevistos como una enfermedad o perder el trabajo. Lo ideal es de 1 a 3 meses de gastos.'],
+  [/\budi/, 'Las <b>UDIs</b> son una unidad que sube con la inflación. Muchos seguros de retiro en México se miden en UDIs; la app las convierte a pesos.'],
+  [/variable/, 'El <b>gasto variable</b> es el que cambia cada mes: comida fuera, salidas, compras. El <b>fijo</b> es el que pagas siempre igual, como renta o internet.'],
+  [/fijo/, 'Un <b>gasto fijo</b> es el que pagas siempre, por ejemplo renta, internet o gimnasio. Agrégalos en Ajustes y cada mes solo tocas <b>Pagar</b>.'],
+  [/fondo/, 'Un <b>fondo</b> es una parte de tu meta. Por ejemplo, si ahorras para un auto: enganche, seguro y trámites. Cada fondo es un edificio en la maqueta 3D.'],
+  [/interes/, 'Los <b>intereses</b> son lo que te cobra el banco por deberle. Una tarjeta con tasa de 60% anual cobra cerca de 5% al mes de lo que debes. Pagar la de tasa más alta primero te ahorra más.'],
+  [/quincena/, 'Una <b>quincena</b> es cada pago de tu sueldo, normalmente el 15 y el último día del mes. En Ajustes puedes poner tus días de pago.']
+];
+const INTENTS = [
+  { id: 'saludo', w: 0.6, re: [/^(hola|buenas|buen dia|buenos dias|buenas tardes|buenas noches|hey|que onda|que tal)\b/], a: () => `<p>¡Hola${USER && USER.displayName ? ', ' + esc(USER.displayName.split(' ')[0]) : ''}! Pregúntame lo que quieras de tu dinero o de cómo usar la app.</p>`, next: ['¿Cómo voy?', '¿Qué tengo que pagar?', '¿Cómo registro un gasto?'] },
+  { id: 'gracias', re: [/^(gracias|muchas gracias|grax|ok|okay|va|perfecto|genial|listo|vale)\b/], a: () => '<p>¡Con gusto! Aquí estoy cuando me necesites.</p>', next: ['¿Cómo voy?', '¿Cuánto me sobra?'] },
+  { id: 'resumen', w: 0.6, re: [/como (voy|estoy|ando|va)/, /que tal voy/, /resumen/, /estado de mi/, /mis finanzas/], a: () => {
+    const s = monthStats(), M = metrics(), g = sum(monthGastos());
+    const meta = M.g ? `${B(GN())}: llevas ${money(M.saved)} de ${money(M.g)} (${Math.round(Math.min(1, M.saved / M.g) * 100)}%).` : 'Aún no pones el monto de tu meta.';
+    return `${noData()}<p>Así vas este mes:</p>${li([`Gastaste ${B(money(g))}.`, s.income ? `Te quedan ${B(money(s.libre))} de tu sueldo de ${money(s.income)}.` : 'Pon tu sueldo en Ajustes para saber cuánto te queda.', meta, totalDebt() ? `Debes ${B(money(totalDebt()))} en tarjetas y deudas.` : 'No tienes deudas registradas. 🎉'])}`;
+  }, next: ['¿En qué gasto más?', '¿Voy bien para mi meta?', '¿Qué tengo que pagar?'] },
+  { id: 'gasto_hoy', re: [/(gast|gaste|compre).*(hoy)|hoy.*(gast|compre)/], a: () => { const l = movs().filter(m => m.type === 'gasto' && m.date === TODAY); return l.length ? `<p>Hoy llevas ${B(money(sum(l)))} en ${l.length} gasto${l.length > 1 ? 's' : ''}:</p>${li(l.slice(0, 6).map(m => `${esc(m.note || catName(m.cat))}: ${money(m.amount)}`))}` : '<p>Hoy no has registrado gastos.</p>'; }, acts: ['gasto'], next: ['¿Cuánto gasté esta semana?', '¿Cuánto me sobra?'] },
+  { id: 'gasto_semana', re: [/(gast|gaste).*(semana)|semana.*(gast)/], a: () => { const l = movs().filter(m => m.type === 'gasto' && m.date > addDays(TODAY, -7)); return `<p>En los últimos 7 días gastaste ${B(money(sum(l)))} en ${l.length} gasto${l.length === 1 ? '' : 's'}.</p>${li(topCats(l))}`; }, next: ['¿Cuánto gasté este mes?', '¿En qué gasto más?'] },
+  { id: 'gasto_mes', re: [/cuanto (he |llevo )?gast/, /gaste (este|el) mes/, /mis gastos/, /total de gastos/, /gastado/], a: () => {
+    const l = monthGastos(), prevYm = ymAdd(CUR_YM, -1), d = +TODAY.slice(8), prev = monthGastos(prevYm).filter(m => +m.date.slice(8) <= d);
+    const diff = sum(l) - sum(prev);
+    return `${noData()}<p>Este mes llevas ${B(money(sum(l)))} en ${l.length} gasto${l.length === 1 ? '' : 's'}.</p>${li(topCats(l))}${prev.length ? `<p>A estas alturas del mes pasado llevabas ${money(sum(prev))}: ${diff > 0 ? `vas <b>${money(diff)} arriba</b>` : `vas <b>${money(-diff)} abajo</b> 👏`}.</p>` : ''}`;
+  }, acts: ['movs'], next: ['¿En qué gasto más?', '¿Cómo voy con mis límites?', 'Dame un consejo'] },
+  { id: 'top_cat', re: [/en que (gasto|gaste|se me va|se va)/, /(donde|a donde) se (me )?va/, /mas gasto/, /gasto mas/, /categoria/], a: () => { const l = monthGastos(); return l.length ? `<p>Este mes tu dinero se va sobre todo en:</p>${li(topCats(l, 5))}` : '<p>Este mes aún no tienes gastos registrados.</p>'; }, acts: ['movs'], next: ['Dame un consejo', '¿Cómo voy con mis límites?'] },
+  { id: 'sobra', re: [/(me )?(queda|sobra|resta)\b/, /cuanto (puedo|me alcanza) gastar/, /disponible/, /me alcanza/], a: () => {
+    const s = monthStats(); if (!s.income) return '<p>Para decirte cuánto te queda necesito tu sueldo. Ponlo en Ajustes → Tu plan.</p>';
+    const dl = daysToMonthEnd(), per = s.libre / dl;
+    return `<p>Te quedan ${B(money(s.libre))} este mes.</p>${li([`Sueldo: ${money(s.income)}`, `Gastos fijos: −${money(s.fixedM)}`, `Gastos variables: −${money(s.variable)}`, s.oneoff ? `Pagos únicos: −${money(s.oneoff)}` : '', s.pagos ? `Abonos a deudas: −${money(s.pagos)}` : '', s.ahorro ? `Ahorro: −${money(s.ahorro)}` : ''].filter(Boolean))}${s.libre > 0 ? `<p>Para que te alcance, gasta máximo ${B(money(per))} al día los ${dl} días que faltan.</p>` : '<p>⚠️ Vas en negativo: este mes salió más de lo que entra. Revisa tus gastos variables.</p>'}`;
+  }, acts: ['plan'], next: ['¿En qué gasto más?', 'Dame un consejo'] },
+  { id: 'meta', re: [/meta/, /voy bien/, /cuando (llego|termino|lo logro)/, /cuanto me falta/, /llegare/, /a tiempo/], a: () => {
+    const M = metrics(); if (!M.g) return '<p>Aún no defines cuánto necesitas. Ve a Ajustes → Fondos de tu meta.</p>';
+    const st = { done: '🎉 ¡Ya juntaste tu meta!', good: `✅ Vas a tiempo: a tu ritmo llegas el ${M.eta ? dateShort(M.eta) + ' ' + M.eta.slice(0, 4) : ''}.`, warn: `⚠️ Vas un poco justo: a tu ritmo llegas el ${M.eta ? dateShort(M.eta) + ' ' + M.eta.slice(0, 4) : ''}, un poco después de tu fecha.`, bad: `❗ A tu ritmo actual no llegas a tiempo${M.eta ? ` (llegarías el ${dateShort(M.eta)} ${M.eta.slice(0, 4)})` : ''}.`, none: 'Todavía no hay suficiente historial de ahorro para calcular cuándo llegas.' }[M.status];
+    return `<p>${B(GN())}: llevas ${B(money(M.saved))} de ${money(M.g)} (${Math.round(Math.min(1, M.saved / M.g) * 100)}%). Te faltan ${money(M.remaining)}.</p><p>${st}</p>${M.remaining > 0 ? `<p>Para llegar a tiempo necesitas ahorrar unos ${B(money(M.need))} al mes${payDays().length === 2 ? ` (${money(M.need / 2)} por quincena)` : ''}. Últimamente ahorras ${money(M.avg)} al mes.</p>` : ''}`;
+  }, acts: ['ahorro', 'funds'], next: ['¿Cuánto me sobra?', 'Dame un consejo', '¿Qué es un fondo?'] },
+  { id: 'ahorro', re: [/cuanto (he |llevo |tengo )?ahorr/, /ahorrado/, /mis ahorros/], a: () => { const M = metrics(), s = monthStats(); const byF = CFG.funds.map(f => `${B(f.n)}: ${money(fundSaved(f.id))} de ${money(+f.t || 0)}`); return `<p>Tienes ${B(money(M.saved))} ahorrado. Este mes apartaste ${money(s.ahorro)}.</p>${li(byF)}`; }, acts: ['ahorro'], next: ['¿Voy bien para mi meta?', '¿Cuánto me sobra?'] },
+  { id: 'deuda', re: [/debo/, /deuda/, /tarjeta/, /credito/, /intereses?/], a: () => {
+    const ds = CFG.debts.filter(d => debtLeft(d) > 0); if (!ds.length) return '<p>No tienes deudas registradas. 🎉 Si tienes alguna tarjeta, agrégala para que te avise sus fechas.</p>';
+    const top = [...ds].sort((a, b) => (+b.r || 0) - (+a.r || 0))[0];
+    return `<p>Debes ${B(money(totalDebt()))} en total:</p>${li(ds.map(d => { const c = cardInfo(d); return `${B(d.n)}: ${money(debtLeft(d))}${+d.r ? ` · ${d.r}% anual` : ''}${c && c.lim ? ` · paga antes del ${dateShort(c.lim)}` : ''}`; }))}${ds.length > 1 && +top.r ? `<p>💡 Si puedes abonar extra, empieza por ${B(top.n)}: es la que más intereses cobra.</p>` : ''}`;
+  }, acts: ['pago', 'debts'], next: ['¿Qué tengo que pagar?', '¿Qué es el día de corte?'] },
+  { id: 'pagar', re: [/que (tengo|me falta|debo) (que |por )?pagar/, /pendiente/, /por pagar/, /proximo pago/, /cuando (pago|tengo que pagar)/, /que vence/], a: () => { const l = pendingList(); return l.length ? `<p>Esto tienes pendiente, de lo más cercano a lo más lejano:</p>${li(l)}<p>Cuando pagues algo, tócalo en el panel para marcarlo. Si te equivocas, toca <b>Pagado ✓</b> para quitarlo.</p>` : '<p>¡Nada pendiente! Todo tu mes está pagado. 🎉</p>'; }, acts: ['panel'], next: ['¿Cuánto me sobra?', '¿Cuánto debo?'] },
+  { id: 'limites', re: [/limite/, /presupuesto/, /me pase/, /pasado de/], a: () => { const b = (CFG.budgets || []).filter(x => +x.a > 0); if (!b.length) return '<p>No tienes límites. Un límite es lo máximo que quieres gastar al mes en algo, por ejemplo $1,500 en salidas. La app te avisa si te acercas.</p>'; return `<p>Así vas con tus límites del mes:</p>${li(b.map(x => { const sp = sum(monthGastos().filter(m => m.cat === x.cat)); const p = sp / x.a; return `${p >= 1 ? '🔴' : p >= .8 ? '🟡' : '🟢'} ${B(catName(x.cat))}: ${money(sp)} de ${money(x.a)} (${Math.round(p * 100)}%)`; }))}`; }, acts: ['budgets'], next: ['¿En qué gasto más?', 'Dame un consejo'] },
+  { id: 'ingresos', re: [/cuanto (gano|me pagan|entra)/, /cuando me pagan/, /ingreso/, /sueldo/, /proxima quincena/], a: () => { const np = nextPayday(); const inc = sum(movs().filter(m => m.type === 'ingreso' && m.date.slice(0, 7) === CUR_YM)); return `<p>${CFG.income ? `Tu sueldo es ${B(money(CFG.income))} al mes.` : 'Aún no pones tu sueldo.'}${np ? ` Tu próximo pago es el ${B(dateShort(np))}.` : ''}</p>${inc ? `<p>Este mes registraste ${money(inc)} de ingresos.</p>` : ''}${(CFG.incoming || []).filter(i => inLeft(i) > 0).length ? `<p>Por recibir:</p>${li(CFG.incoming.filter(i => inLeft(i) > 0).map(i => `${B(i.n)}: ${money(inLeft(i))}${i.d ? ` · ${dateShort(i.d)}` : ''}`))}` : ''}`; }, acts: ['ingreso', 'plan'], next: ['¿Cuánto me sobra?', '¿Cómo registro un ingreso?'] },
+  { id: 'consejo', re: [/consejo/, /\btips?\b/, /como (puedo )?ahorr/, /recomienda/, /que hago/, /ayudame a/], a: () => {
+    const s = monthStats(), ds = CFG.debts.filter(d => debtLeft(d) > 0 && +d.r >= 30), l = monthGastos(), tc = topCats(l, 1)[0];
+    const tips = [];
+    if (ds.length) tips.push(`Tu deuda ${B(ds.sort((a, b) => b.r - a.r)[0].n)} cobra mucho interés. Cada peso extra que le abones rinde más que cualquier ahorro.`);
+    const over = (CFG.budgets || []).find(x => +x.a && sum(l.filter(m => m.cat === x.cat)) >= x.a);
+    if (over) tips.push(`Ya pasaste tu límite de ${B(catName(over.cat))}. Intenta no gastar más ahí lo que queda del mes.`);
+    if (s.income && s.libre > 0) tips.push(`Te quedan ${money(s.libre)} este mes. Si apartas ${B(money(Math.round(s.libre * 0.5)))} hoy para tu meta, no se te va en antojos.`);
+    if (tc) tips.push(`Donde más gastas es en ${tc}. Recortar 20% ahí es lo que más se nota.`);
+    tips.push('Págate primero: el día que te pagan, aparta tu ahorro antes de gastar.');
+    return `<p>💡 ${tips[0]}</p>${tips.length > 1 ? `<p>Otro: ${tips[1]}</p>` : ''}`;
+  }, next: ['¿Qué es la regla 50/30/20?', '¿Voy bien para mi meta?'] },
+  { id: 'h_registrar', re: [/(como|donde) (registr|agreg|anot|apunt|met|pong|captur|guard)\w* (un |una |mi |mis )?(gasto|ingreso|ahorro|compra|movimiento|pago)/, /(como|donde) (registro|anoto|apunto|capturo)\b/, /registrar (un |una )?(gasto|ingreso|ahorro|pago|compra)/, /nuevo (gasto|movimiento)/, /agregar (un )?(gasto|movimiento)/], a: q => { const t = /ingres|sueldo|me pagaron/.test(q) ? 'ingreso' : /ahorr/.test(q) ? 'ahorro' : /deuda|abono|tarjeta/.test(q) ? 'pago' : 'gasto'; const n = { gasto: 'gasto', ingreso: 'ingreso', ahorro: 'ahorro', pago: 'pago de deuda' }[t]; return `<p>Para registrar un ${n}:</p><ol><li>Toca el botón azul <b>+</b> de abajo a la derecha.</li><li>Elige <b>${{ gasto: 'Gasto', ingreso: 'Ingreso', ahorro: 'Ahorro', pago: 'Pago de deuda' }[t]}</b>.</li><li>Escribe el monto y elige la categoría.</li><li>Toca <b>Guardar</b>.</li></ol><p>Si te equivocas, toca <b>Deshacer</b> en el aviso de abajo.</p>`; }, actsFn: q => [/ingres|sueldo/.test(q) ? 'ingreso' : /ahorr/.test(q) ? 'ahorro' : /deuda|abono/.test(q) ? 'pago' : 'gasto'], next: ['Me equivoqué, ¿cómo corrijo?', '¿Puedo traer mis gastos del correo?'] },
+  { id: 'h_editar', re: [/(editar|corregir|cambiar|modificar) (un |el |una )?(movimiento|gasto|ahorro|ingreso|monto)/, /borrar|eliminar|quitar/, /me equivoque|equivocado|error|deshacer|regresar/, /no (lo )?pague|desmarcar|marque (mal|sin querer)/], a: () => '<p>Tranquilo, todo se puede corregir:</p><ul><li><b>Justo después</b> de guardar, marcar o borrar, toca <b>Deshacer</b> en el aviso de abajo (dura 7 segundos).</li><li><b>Marcaste algo como pagado sin querer:</b> en el panel toca el chip verde <b>Pagado ✓</b> y se quita.</li><li><b>Un movimiento viejo:</b> ve a <b>Movimientos</b>, busca la fila y toca <b>Editar</b> o <b>Borrar</b>.</li></ul>', acts: ['movs'], next: ['¿Cómo registro un gasto?', '¿Qué tengo que pagar?'] },
+  { id: 'h_gmail', re: [/gmail|correo|e-?mail/, /automatic/, /(importar|traer|jalar|sincronizar) (mis )?(gastos|compras|movimientos)/, /(compras|gastos|movimientos) (del|de mi|de la) (banco|tarjeta)/, /conectar (mi )?(banco|tarjeta)/], a: () => '<p>Puedo traer tus compras desde los avisos que te manda tu banco o PayPal a Gmail:</p><ol><li>Toca <b>✉ Gmail</b> (abajo) o el botón de aquí.</li><li>Elige tu cuenta de Google y acepta el permiso de <b>solo lectura</b>.</li><li>Listo: los gastos aparecen solos en Movimientos con el ícono ✉.</li></ol><p>Tus correos no se guardan; solo el monto, la fecha y el comercio. El permiso dura una hora; después vuelve a tocar el botón.</p>', acts: ['gmail'], next: ['¿Mis datos están seguros?', '¿Cuánto gasté este mes?'] },
+  { id: 'h_ajustes', re: [/cambi(o|ar|a) (mi |la |el |los )?(meta|fecha|sueldo|nombre|dias de pago|quincena)/, /(editar|configurar|modificar) (mi )?(meta|plan|sueldo)/, /ajustes|configuracion/], a: () => '<p>Todo lo de tu plan se cambia en <b>Ajustes</b>, arriba. En <b>Tu plan</b> están tu meta, tu fecha, tu sueldo y tus días de pago. Cuando termines, toca <b>Guardar</b>. Si te equivocas, también hay <b>Deshacer</b>.</p>', acts: ['plan'], next: ['¿Qué es un fondo?', '¿Cómo agrego una tarjeta?'] },
+  { id: 'h_deuda_add', re: [/(agreg|anad|registr|pon|met)\w* (una |mi |otra )?(tarjeta|deuda|credito|prestamo)/, /nueva (tarjeta|deuda)/], a: () => '<p>Ve a <b>Ajustes → Tarjetas y deudas</b> y toca <b>Agregar</b>. Pon cuánto debes hoy, la tasa anual y los días de corte y de pago (vienen en tu estado de cuenta). La app te avisa antes de cada fecha límite.</p><p>Cuando abones, registra un <b>Pago de deuda</b> con el botón <b>+</b>.</p>', acts: ['debts', 'pago'], next: ['¿Qué es el día de corte?', '¿Cuánto debo?'] },
+  { id: 'h_fijos', re: [/gastos? fijos?/, /renta|suscripcion|recurrente|cada mes/], a: () => '<p>Los <b>gastos fijos</b> son los que pagas siempre (renta, internet, gimnasio). Agrégalos una vez en <b>Ajustes → Gastos fijos</b>. Cada mes aparecen en el panel con un botón <b>Pagar</b>: lo tocas cuando pagues y se registra solo.</p>', acts: ['fixed'], next: ['Me equivoqué, ¿cómo corrijo?', '¿Qué tengo que pagar?'] },
+  { id: 'h_privacidad', re: [/segur|privad|quien (ve|puede ver)|mis datos|hacke|robar|vender/], a: () => '<p>🔒 Tus datos son solo tuyos:</p><ul><li>Se guardan en tu cuenta y las reglas del servidor impiden que otra persona los lea, ni siquiera otros usuarios de la app.</li><li>Este asistente funciona en tu teléfono: tus preguntas no se mandan a ningún lado.</li><li>Gmail es de solo lectura y no se guardan tus correos.</li><li>Puedes ocultar los montos con el ojo 👁 de arriba y poner un PIN en Ajustes → Seguridad.</li></ul>', acts: ['security'], next: ['¿Cómo oculto mis montos?', '¿Cómo hago un respaldo?'] },
+  { id: 'h_ocultar', re: [/ocult|escond|que no (se )?vean|\bpin\b|bloque|candado|contrasena de la app/], a: () => '<p>Toca el <b>ojo 👁</b> de arriba para ocultar todos los montos (útil en público). Para que pida un <b>PIN</b> al abrir, ve a <b>Ajustes → Seguridad</b>.</p>', acts: ['security'], next: ['¿Mis datos están seguros?'] },
+  { id: 'h_respaldo', re: [/respaldo|backup|exportar|descargar mis datos|importar respaldo|copia/], a: () => '<p>Toca tu foto arriba → <b>Descargar respaldo</b>. Se baja un archivo con todos tus datos. Para recuperarlos: tu foto → <b>Importar respaldo</b>.</p>', next: ['¿Mis datos están seguros?'] },
+  { id: 'h_cuenta', re: [/cerrar sesion|salir de (la|mi) cuenta|otra cuenta|cambiar de cuenta/, /olvide (mi )?contrasena|cambiar (mi )?contrasena|recuperar/], a: () => '<p><b>Cerrar sesión:</b> toca tu foto arriba → <b>Cerrar sesión</b>.</p><p><b>Olvidaste tu contraseña:</b> en la pantalla de entrada escribe tu correo y toca <b>¿Olvidaste tu contraseña?</b>. Te llega un enlace para crear otra.</p>', next: ['¿Mis datos están seguros?'] },
+  { id: 'h_moneda', re: [/moneda|dolar|yen|euro|tipo de cambio|divisa/], a: () => '<p>En <b>Ajustes → Tu plan</b> puedes activar <b>otra moneda</b> y poner el tipo de cambio. Tus montos se verán también en esa moneda.</p>', acts: ['plan'], next: ['¿Cómo voy?'] },
+  { id: 'h_3d', re: [/maqueta|3d|edificio|ciudad|animacion/], a: () => '<p>La <b>maqueta 3D</b> muestra tu meta: cada edificio es un fondo y se va construyendo conforme ahorras. Toca un edificio para ver su detalle. El escenario cambia según tu meta (auto, casa, viaje, estudios, negocio).</p>', acts: ['funds'], next: ['¿Qué es un fondo?', '¿Voy bien para mi meta?'] },
+  { id: 'h_periodo', re: [/periodo|ultimos (3|6|12) meses|filtro|ver otro mes/], a: () => '<p>Arriba está el selector <b>Este mes</b>. Cámbialo a 3, 6 o 12 meses para ver tus números de más tiempo. En Movimientos puedes filtrar por tipo con los botones de arriba de la lista.</p>', next: ['¿Cuánto gasté este mes?'] },
+  { id: 'h_que_hago', re: [/^(ayuda|help|como funciona|que (puedes|sabes) hacer|para que sirves|como se usa|no entiendo (la app|nada))/, /por donde empiezo|primeros pasos/], a: () => '<p>Soy tu asistente. Puedo:</p><ul><li>Decirte cómo vas: cuánto gastaste, cuánto te queda y si llegas a tu meta.</li><li>Recordarte qué tienes que pagar.</li><li>Explicarte palabras como "día de corte" o "tasa de ahorro".</li><li>Enseñarte a usar la app paso a paso.</li></ul><p><b>Para empezar:</b> 1) pon tu sueldo y tu meta en Ajustes, 2) agrega tus gastos fijos y tarjetas, 3) registra cada gasto con el botón <b>+</b>.</p>', acts: ['plan', 'gasto'], next: ['¿Cómo voy?', '¿Cómo registro un gasto?', '¿Qué es un fondo?'] }
+];
+function botAnswer(raw) {
+  const q = nrm(raw);
+  if (!q) return null;
+  // ¿Pregunta qué significa una palabra?
+  const asksDef = /\b(que es|que son|que significa|significa|explica|explicame|definicion)\b/.test(q);
+  const g = GLOS.find(([re]) => re.test(q));
+  if (asksDef && g) return { html: `<p>${g[1]}</p>`, next: ['¿Cómo voy?', 'Dame un consejo'] };
+  let best = null, score = 0;
+  // Puntaje: cuántas frases coinciden × peso, más lo largo de lo que coincidió (gana lo más específico).
+  for (const it of INTENTS) { let hits = 0, len = 0; it.re.forEach(re => { const m = q.match(re); if (m) { hits++; len += m[0].length; } }); if (!hits) continue; const s = hits * (it.w || 1) + len * 0.02 + (it.id.startsWith('h_') && /^(como|donde|puedo|que hago para)\b/.test(q) ? 0.5 : 0); if (s > score) { score = s; best = it; } }
+  if (best) return { html: best.a(q), acts: best.actsFn ? best.actsFn(q) : best.acts, next: best.next };
+  if (g) return { html: `<p>${g[1]}</p>`, next: ['¿Cómo voy?'] };
+  return { html: '<p>Perdón, no entendí esa pregunta 🙈. Escríbela con otras palabras o toca una de estas:</p>', next: ['¿Cómo voy?', '¿Cuánto gasté este mes?', '¿Qué tengo que pagar?', '¿Cómo registro un gasto?', 'Me equivoqué, ¿cómo corrijo?', '¿Qué puedes hacer?'] };
+}
+function botMsg(who, html, acts, next) {
+  const log = $('#botLog'), d = document.createElement('div'); d.className = 'bmsg ' + who;
+  if (who === 'me') d.textContent = html; else d.innerHTML = html;
+  if (acts && acts.length) { const w = document.createElement('div'); w.className = 'bacts'; acts.forEach(k => { const a = A[k]; if (!a) return; const b = document.createElement('button'); b.type = 'button'; b.className = 'btn small'; b.textContent = a[0]; b.addEventListener('click', a[1]); w.append(b); }); d.append(w); }
+  log.append(d);
+  const c = $('#botChips'); c.textContent = '';
+  (next || []).forEach(t => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.addEventListener('click', () => botAsk(t)); c.append(b); });
+  log.scrollTop = log.scrollHeight;
+}
+function botAsk(text) {
+  const t = String(text || '').trim().slice(0, 200); if (!t) return;
+  botMsg('me', t);
+  const r = botAnswer(t);
+  setTimeout(() => botMsg('bot', r.html, r.acts, r.next), 180);
+}
+function botOpen() {
+  BOT.open = true; $('#bot').hidden = false; $('#botBtn').hidden = true;
+  if (!$('#botLog').children.length) botMsg('bot', `<p>¡Hola${USER && USER.displayName ? ', ' + esc(USER.displayName.split(' ')[0]) : ''}! 👋 Soy tu asistente. Pregúntame cómo vas con tu dinero o cómo usar la app. Escribe como quieras o toca una pregunta:</p>`, null, ['¿Cómo voy?', '¿Cuánto gasté este mes?', '¿Qué tengo que pagar?', '¿Voy bien para mi meta?', '¿Cómo registro un gasto?', 'Me equivoqué, ¿cómo corrijo?']);
+  setTimeout(() => { if (matchMedia('(min-width:601px)').matches) $('#botIn').focus(); }, 50);
+}
+function botClose() { BOT.open = false; $('#bot').hidden = true; $('#botBtn').hidden = false; }
+$('#botBtn').addEventListener('click', botOpen);
+$('#botX').addEventListener('click', botClose);
+$('#botForm').addEventListener('submit', e => { e.preventDefault(); const i = $('#botIn'); botAsk(i.value); i.value = ''; });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && BOT.open) botClose(); });
+
 /* ---------- cuenta: menú, respaldo, salir ---------- */
 $('#ubtn').addEventListener('click', e => { e.stopPropagation(); const d = $('#udrop'); d.hidden = !d.hidden; $('#ubtn').setAttribute('aria-expanded', String(!d.hidden)); });
 document.addEventListener('click', e => { if (!e.target.closest('#umenu')) $('#udrop').hidden = true; });
@@ -2199,8 +2372,8 @@ function securitySection() {
   const on = pinOn(), m = CFG.lockMin ?? 5;
   return `<section class="cs card" id="ed-security"><div class="cs-h"><div><h2>Seguridad</h2><p>Quién puede ver tu panel y cómo bloquearlo.</p></div><span class="chip ${on ? 'good' : 'warn'}">${on ? 'PIN activo' : 'Sin PIN'}</span></div>
     <div class="sec-list">
-      <div class="sec-i"><span class="sec-ok">✓</span><div><b>Entras con tu cuenta de Claude</b><small>Tus datos están en un espacio privado de tu cuenta. Aunque compartas el enlace, nadie más ve tus números: cada persona ve solo los suyos.</small></div></div>
-      <div class="sec-i"><span class="sec-ok">✓</span><div><b>Revisión del correo solo de lectura</b><small>La tarea diaria lee tus avisos de compra y anota gastos. No envía correos ni mueve dinero.</small></div></div>
+      <div class="sec-i"><span class="sec-ok">✓</span><div><b>Tu cuenta es solo tuya</b><small>Entras con Google o con tu correo confirmado. Tus datos se guardan en un espacio privado y las reglas del servidor impiden que otra persona los vea, aunque compartas el enlace de la app.</small></div></div>
+      <div class="sec-i"><span class="sec-ok">✓</span><div><b>Gmail solo de lectura y solo si tú quieres</b><small>Únicamente cuando tocas ✉ Gmail se leen los avisos de compra de tu banco para anotar gastos. No se guardan tus correos, no se envía nada y no se mueve dinero.</small></div></div>
       <div class="sec-i"><span class="${on ? 'sec-ok' : 'sec-no'}">${on ? '✓' : '!'}</span><div><b>PIN para abrir el panel</b><small>Útil si alguien usa tu compu o tu celular. Se guarda cifrado (solo una huella, nunca el PIN).</small></div></div>
     </div>
     <form id="pinForm" class="pgrid" novalidate>
@@ -2210,7 +2383,7 @@ function securitySection() {
       <p id="pinErr" class="help" style="color:var(--bad);grid-column:1/-1" hidden></p>
       <div class="sr-actions"><button class="btn small" type="submit">${on ? 'Cambiar PIN' : 'Activar PIN'}</button>${on ? '<button type="button" class="btn small ghost-danger" data-act="pin-off">Quitar PIN</button>' : ''}</div>
     </form>
-    <p class="note-box">La protección de fondo es tu cuenta de Claude: usa una contraseña fuerte y activa la verificación en dos pasos en tu correo (Google), porque ese correo también recibe los avisos de tus bancos. El PIN es una cerradura extra para la pantalla.</p></section>`;
+    <p class="note-box">La protección más importante es tu cuenta: usa una contraseña fuerte y activa la verificación en dos pasos en tu correo, porque ese correo también recibe los avisos de tus bancos. El PIN es una cerradura extra para la pantalla.</p></section>`;
 }
 
 /* ---------- eventos ---------- */
