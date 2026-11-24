@@ -1,9 +1,31 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Cada persona solo puede leer y escribir sus propios datos.
+    // Dueño de los datos: sesión iniciada, mismo uid y correo confirmado.
+    // Google y el enlace por correo llegan confirmados; con contraseña hay que abrir el correo de confirmación.
+    function isOwner(uid) {
+      return request.auth != null
+        && request.auth.uid == uid
+        && request.auth.token.email_verified == true;
+    }
+    // Límites básicos para que nadie use la base como almacén: id corto y documentos chicos.
+    function validWrite(docId) {
+      return docId.size() <= 64
+        && docId.matches('^[A-Za-z0-9_-]+$')
+        && request.resource.data.keys().size() <= 80
+        && (docId == 'config' || (
+             request.resource.data.kind == 'mov'
+             && request.resource.data.amount is number
+             && request.resource.data.amount >= 0
+             && request.resource.data.amount < 100000000
+             && request.resource.data.date is string
+             && request.resource.data.date.size() == 10
+             && (!('note' in request.resource.data) || request.resource.data.note == null || (request.resource.data.note is string && request.resource.data.note.size() <= 200))
+           ));
+    }
     match /data/users/{uid}/{docId} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validWrite(docId);
     }
     match /{document=**} {
       allow read, write: if false;

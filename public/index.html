@@ -382,7 +382,9 @@ html{scroll-padding-top:70px}
 .sec-i{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start}.sec-i b{display:block;font-size:14px}.sec-i small{color:var(--muted);font-size:12.5px}
 .sec-ok,.sec-no{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-weight:800}.sec-ok{background:var(--good-soft);color:var(--good)}.sec-no{background:var(--warn-soft);color:var(--warn)}
 #tip{position:fixed;z-index:50;pointer-events:none;background:var(--fg);color:var(--surface);font-size:12px;font-weight:600;padding:6px 9px;border-radius:8px;max-width:240px;white-space:pre-line}
-#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--fg);color:var(--surface);padding:10px 16px;border-radius:10px;font-weight:600;box-shadow:var(--shadow)}
+#toast .tundo{margin-left:14px;border:0;background:none;color:var(--ai-soft,#9fb3ff);font-weight:800;text-decoration:underline;padding:6px 2px;min-height:32px}
+.chip.undoable{border:0;cursor:pointer;font:inherit;font-size:12px;font-weight:700}.chip.undoable:hover{filter:brightness(1.1);text-decoration:line-through}
+#toast{display:flex;align-items:center;max-width:calc(100vw - 32px);position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--fg);color:var(--surface);padding:10px 16px;border-radius:10px;font-weight:600;box-shadow:var(--shadow)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media(max-width:600px){.qt.stack tr{grid-template-columns:1fr 1fr;column-gap:14px;padding-block:12px}.qt.stack td{display:flex;justify-content:space-between;align-items:baseline;gap:6px;padding:2px 0!important;font-size:13.5px}.qt.stack td::before{float:none!important;width:auto!important;margin:0!important;font-size:12px}.qt.stack td:first-child{grid-column:1/-1;display:block;margin-bottom:4px}.qt.stack td:first-child::before{display:none}.qt.stack tfoot td:first-child{display:block}.secnav{margin-inline:-16px;padding-inline:16px;scrollbar-width:none}.secnav::-webkit-scrollbar{display:none}}
 </style>
@@ -394,11 +396,24 @@ html{scroll-padding-top:70px}
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#3355d6">
 <style>
-#login{position:fixed;inset:0;z-index:110;display:grid;place-items:center;background:var(--bg);padding:20px}
+#login{position:fixed;inset:0;z-index:110;display:grid;place-items:center;overflow-y:auto;overscroll-behavior:contain;background:var(--bg);padding:20px}
 .login-card{width:min(380px,100%);background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:30px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
 .login-card h1{font-size:24px;font-weight:900}
 .gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:12px;padding:12px 14px;font-weight:600;font-size:15px;min-height:48px}
 .gbtn:hover{border-color:var(--ai)}
+.or{display:flex;align-items:center;gap:10px;width:100%;margin:14px 0 4px;color:var(--muted);font-size:12.5px}.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.ltabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:100%;background:var(--surface-2);border-radius:12px;padding:4px}
+.ltabs button{border:0;background:none;border-radius:9px;padding:9px 4px;font-weight:700;font-size:13px;color:var(--muted);min-height:40px}
+.ltabs button.is-on{background:var(--surface);color:var(--fg);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.lform{display:flex;flex-direction:column;gap:6px;width:100%;text-align:left;margin-top:8px}
+.lform label{font-size:13px;font-weight:600;margin-top:4px}
+.lform input{width:100%;font-size:16px!important;padding:11px 12px!important;border-radius:11px}
+.lform .btn{margin-top:10px;min-height:48px;width:100%;justify-content:center}
+.pw{position:relative}.pw input{padding-right:58px!important}.pwEye{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--ai);font-weight:700;font-size:13px;padding:8px}
+.lnk{border:0;background:none;color:var(--ai);font-weight:600;font-size:13.5px;padding:8px 0;align-self:center}
+.lnk:disabled,.lform .btn:disabled{opacity:.55;cursor:not-allowed}
+.pwrules{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:3px;font-size:12.5px;color:var(--muted)}
+.pwrules li::before{content:"○ ";}.pwrules li.ok{color:var(--good)}.pwrules li.ok::before{content:"✓ "}
 .umenu{position:relative}
 .ubtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--ai-soft);color:var(--ai);font-weight:700;overflow:hidden;padding:0;display:grid;place-items:center}
 .ubtn img{width:100%;height:100%;object-fit:cover}
@@ -442,7 +457,7 @@ html{scroll-padding-top:70px}
   <main id="viewMovs" hidden></main>
   <main id="viewCfg" hidden></main>
 </div>
-<div id="login" hidden><div class="login-card"><div class="mark" aria-hidden="true" style="width:54px;height:54px;border-radius:16px"><svg width="30" height="30" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" stroke="#fff" stroke-width="2.2" fill="none"/><circle cx="12" cy="12" r="4.2" stroke="#fff" stroke-width="2.2" fill="none"/><circle cx="12" cy="12" r="1.3" fill="#fff"/></svg></div><h1>Mi plan de ahorro</h1><p class="help">Entra con tu cuenta de Google. Tus datos son privados y se guardan en tu cuenta.</p><button type="button" id="gLogin" class="gbtn"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Entrar con Google</button><p id="loginErr" class="help" style="color:var(--bad)" hidden></p></div></div>
+<div id="login" hidden><div class="login-card"><div class="mark" aria-hidden="true" style="width:54px;height:54px;border-radius:16px"><svg width="30" height="30" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" stroke="#fff" stroke-width="2.2" fill="none"/><circle cx="12" cy="12" r="4.2" stroke="#fff" stroke-width="2.2" fill="none"/><circle cx="12" cy="12" r="1.3" fill="#fff"/></svg></div><h1>Mi plan de ahorro</h1><p class="help">Tus datos son privados y solo tú puedes verlos.</p><button type="button" id="gLogin" class="gbtn"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Entrar con Google</button><div class="or"><span>o con tu correo</span></div><div class="ltabs" role="tablist"><button type="button" role="tab" data-lm="in" class="is-on">Entrar</button><button type="button" role="tab" data-lm="up">Crear cuenta</button><button type="button" role="tab" data-lm="link">Sin contraseña</button></div><form id="emForm" class="lform" novalidate autocomplete="on">  <label for="emEmail">Correo</label><input id="emEmail" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="254" required>  <div id="pwWrap"><label for="emPass">Contraseña</label><div class="pw"><input id="emPass" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="128" required><button type="button" class="pwEye" data-eye="emPass" aria-label="Mostrar contraseña">Ver</button></div></div>  <div id="pw2Wrap" hidden><label for="emPass2">Repite la contraseña</label><input id="emPass2" name="password2" type="password" autocomplete="new-password" maxlength="128"><ul id="pwRules" class="pwrules"><li data-r="len">Al menos 10 caracteres</li><li data-r="mix">Letras y números</li><li data-r="case">Una mayúscula y una minúscula</li><li data-r="same">Las dos contraseñas coinciden</li></ul></div>  <p id="linkHelp" class="help" hidden>Te mandamos un enlace a tu correo. Ábrelo en este mismo navegador y entras sin contraseña.</p>  <button type="submit" id="emSubmit" class="btn">Entrar</button>  <button type="button" id="emForgot" class="lnk">¿Olvidaste tu contraseña?</button></form><div id="verifyBox" class="lform" hidden><p class="help">Te mandamos un correo a <b id="vEmail"></b>. Abre el enlace para confirmar que es tuyo y luego toca <b>Ya lo confirmé</b>. Revisa también la carpeta de spam.</p><button type="button" id="vDone" class="btn">Ya lo confirmé</button><button type="button" id="vResend" class="lnk">Reenviar el correo</button><button type="button" id="vOut" class="lnk">Usar otra cuenta</button></div><p id="loginOk" class="help" style="color:var(--good)" hidden></p><p id="loginErr" role="alert" class="help" style="color:var(--bad)" hidden></p></div></div>
 <input type="file" id="impFile" accept="application/json,.json" hidden>
 <div id="tip" hidden></div>
 <div id="toast" hidden role="status"></div>
@@ -713,15 +728,15 @@ const editBtn = key => `<button type="button" class="back" data-act="edit-sec" d
 const act = (label, a, id, extra = '') => `<button class="btn small" data-act="${a}" data-id="${esc(id)}"${extra}>${label}</button>`;
 function fixedRow(f) {
   const paid = fixPaid(f);
-  return `<div class="list-row"><span class="dot" style="background:${(CAT[f.cat] || CAT.otros).c}"></span><div class="n"><div>${esc(f.n)}</div><small>${money(f.a)} ${esc(fixUnit(f))}${f.u !== 'mes' ? ` · ≈ ${money(fixMonthly(f))}/mes` : ''}</small></div>${paid ? '<span class="chip good">Pagado</span>' : act('Pagar', 'pay-fixed', f.id)}</div>`;
+  return `<div class="list-row"><span class="dot" style="background:${(CAT[f.cat] || CAT.otros).c}"></span><div class="n"><div>${esc(f.n)}</div><small>${money(f.a)} ${esc(fixUnit(f))}${f.u !== 'mes' ? ` · ≈ ${money(fixMonthly(f))}/mes` : ''}</small></div>${paid ? `<button type="button" class="chip good undoable" data-act="unpay" data-ref="${esc(f.id)}" title="¿Te equivocaste? Toca para marcarlo como no pagado" aria-label="Pagado. Toca para marcar ${esc(f.n)} como no pagado">Pagado ✓</button>` : act('Pagar', 'pay-fixed', f.id)}</div>`;
 }
 function upRow(u) {
   const left = upLeft(u);
-  return `<div class="list-row"><span class="dot" style="background:${(CAT[u.cat] || CAT.otros).c}"></span><div class="n"><div>${esc(u.n)}</div><small>${u.d ? `${dateShort(u.d)} · ` : ''}${left ? `${money(left)} pendiente` : 'Pagado'}</small></div>${left ? act('Ya lo pagué', 'pay-up', u.id) : '<span class="chip good">Listo</span>'}</div>`;
+  return `<div class="list-row"><span class="dot" style="background:${(CAT[u.cat] || CAT.otros).c}"></span><div class="n"><div>${esc(u.n)}</div><small>${u.d ? `${dateShort(u.d)} · ` : ''}${left ? `${money(left)} pendiente` : 'Pagado'}</small></div>${left ? act('Ya lo pagué', 'pay-up', u.id) : `<button type="button" class="chip good undoable" data-act="unpay" data-ref="${esc(u.id)}" title="¿Te equivocaste? Toca para marcarlo como no pagado" aria-label="Pagado. Toca para marcar ${esc(u.n)} como no pagado">Listo ✓</button>`}</div>`;
 }
 function inRow(i) {
   const left = inLeft(i);
-  return `<div class="list-row"><span class="dot" style="background:#11946f"></span><div class="n"><div>${esc(i.n)}</div><small>${i.d ? `${dateShort(i.d)} · ` : ''}${left ? `${money(left)} por recibir` : 'Recibido'}</small></div>${left ? act('Ya lo recibí', 'recv', i.id) : '<span class="chip good">Recibido</span>'}</div>`;
+  return `<div class="list-row"><span class="dot" style="background:#11946f"></span><div class="n"><div>${esc(i.n)}</div><small>${i.d ? `${dateShort(i.d)} · ` : ''}${left ? `${money(left)} por recibir` : 'Recibido'}</small></div>${left ? act('Ya lo recibí', 'recv', i.id) : `<button type="button" class="chip good undoable" data-act="unpay" data-ref="${esc(i.id)}" title="¿Te equivocaste? Toca para marcarlo como no recibido" aria-label="Recibido. Toca para marcar ${esc(i.n)} como no recibido">Recibido ✓</button>`}</div>`;
 }
 function debtRow(d) {
   const left = debtLeft(d), fr = d.t ? 1 - left / d.t : 1;
@@ -1807,7 +1822,12 @@ function render(rebuild) {
 }
 
 let toastT;
-function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2600); }
+// toast(msg, undo): si hay undo, muestra el botón "Deshacer" durante 7 s. Cualquier acción se puede revertir así.
+function toast(msg, undo) {
+  const t = $('#toast'); t.textContent = ''; t.append(document.createTextNode(msg));
+  if (typeof undo === 'function') { const b = document.createElement('button'); b.type = 'button'; b.className = 'tundo'; b.textContent = 'Deshacer'; b.addEventListener('click', () => { t.hidden = true; clearTimeout(toastT); undo(); }, { once: true }); t.append(b); }
+  t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, undo ? 7000 : 2600);
+}
 
 /* ---------- guardado ---------- */
 const LS_KEY = 'plan-ahorro-v1';
@@ -1818,17 +1838,17 @@ async function removeDoc(id) { if (MODE === 'db' && COL) { await COL.doc(id).del
 async function addMov(m) {
   const wasExample = EXAMPLE;
   REAL = [...REAL, m]; EXAMPLE = false; render();
-  try { if (wasExample || m.id === 'inicial') await writeDoc('config', CFG); await writeDoc(m.id, m); toast(m.id === 'inicial' ? '¡Listo! Tu plan arrancó' : 'Movimiento guardado'); }
+  try { if (wasExample || m.id === 'inicial') await writeDoc('config', CFG); await writeDoc(m.id, m); if (m.id === 'inicial') toast('¡Listo! Tu plan arrancó'); else toast(m.ref ? `${m.note || 'Pago'}: marcado` : 'Movimiento guardado', () => delMov(m.id, true)); }
   catch (e) { REAL = REAL.filter(x => x.id !== m.id); EXAMPLE = REAL.length === 0; render(); toast('No se pudo guardar. Revisa tu conexión e inténtalo otra vez.'); }
 }
-async function updMov(m) {
-  const prev = REAL; REAL = REAL.map(x => (x.id === m.id ? m : x)); render();
-  try { await writeDoc(m.id, m); toast('Cambios guardados'); } catch { REAL = prev; render(); toast('No se pudieron guardar los cambios.'); }
+async function updMov(m, isUndo) {
+  const prev = REAL, old = REAL.find(x => x.id === m.id); REAL = REAL.map(x => (x.id === m.id ? m : x)); render();
+  try { await writeDoc(m.id, m); toast(isUndo ? 'Cambio deshecho' : 'Cambios guardados', !isUndo && old ? () => updMov(old, true) : null); } catch { REAL = prev; render(); toast('No se pudieron guardar los cambios.'); }
 }
-async function delMov(id) {
+async function delMov(id, isUndo) {
   if (String(id).startsWith('gm-')) gmSkip(id);
-  const prev = REAL; REAL = REAL.filter(m => m.id !== id); EXAMPLE = REAL.length === 0; S.confirmDel = null; render();
-  try { await removeDoc(id); toast('Movimiento borrado'); } catch { REAL = prev; EXAMPLE = REAL.length === 0; render(); toast('No se pudo borrar. Inténtalo otra vez.'); }
+  const prev = REAL, item = REAL.find(m => m.id === id); REAL = REAL.filter(m => m.id !== id); EXAMPLE = REAL.length === 0; S.confirmDel = null; render();
+  try { await removeDoc(id); toast(isUndo ? 'Listo, se quitó' : item && item.ref ? `${item.note || 'Pago'}: ya no está marcado` : 'Movimiento borrado', !isUndo && item ? () => addMov(item) : null); } catch { REAL = prev; EXAMPLE = REAL.length === 0; render(); toast('No se pudo borrar. Inténtalo otra vez.'); }
 }
 async function saveCfg() {
   const d = cfgDraft;
@@ -1841,8 +1861,106 @@ async function saveCfg() {
   d.funds = d.funds.filter(f => f.n.trim()).map(f => ({ ...f, n: f.n.trim(), t: Math.max(0, +f.t || 0) }));
   if (!d.funds.length) { toast('Deja al menos un fondo.'); S.cfgSec = 'funds'; drawCfg(); return; }
   const prev = CFG; CFG = clone(d); CFG.kind = 'config'; CFG.plan = 'vivir'; CFG.plan2 = 2; CFG.plan3 = 3; CFG.plan4 = 4;
-  try { await writeDoc('config', CFG); toast('Cambios guardados'); S.cfgDirty = false; S.edRow = null; buildCfg(); render(); }
+  try { await writeDoc('config', CFG); toast('Ajustes guardados', async () => { CFG = prev; try { await writeDoc('config', prev); toast('Ajustes como estaban antes'); } catch { toast('No se pudo deshacer.'); } S.cfgDirty = false; cfgDraft = null; buildCfg(); render(); }); S.cfgDirty = false; S.edRow = null; buildCfg(); render(); }
   catch { CFG = prev; toast('No se pudieron guardar los ajustes.'); }
+}
+
+/* ---------- entrar con correo: contraseña o enlace ---------- */
+// Seguridad: mensajes genéricos (no revelan si un correo tiene cuenta), contraseña fuerte,
+// correo confirmado obligatorio (también lo exigen las reglas de Firestore), freno local tras varios intentos fallidos.
+const LM = { mode: 'in', fails: 0, until: 0, resendAt: 0 };
+const LINK_KEY = 'pa-link-email';
+const ACTION = () => ({ url: location.origin + '/', handleCodeInApp: true });
+const emailOk = e => /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/.test(e);
+const COMMON = /^(?:password|contrase[nñ]a|qwerty|123456|12345678|abc123|iloveyou|admin|welcome|letmein|monkey|dragon|football)/i;
+function pwChecks(p, p2, email) {
+  return { len: p.length >= 10, mix: /[a-zA-ZñÑ]/.test(p) && /\d/.test(p), case: /[a-zñ]/.test(p) && /[A-ZÑ]/.test(p), same: !!p && p === p2, notCommon: !COMMON.test(p) && !(email && p.toLowerCase().includes(email.split('@')[0].toLowerCase()) && email.split('@')[0].length >= 4) };
+}
+function loginMsg(err, ok) { const e = $('#loginErr'), o = $('#loginOk'); e.hidden = !err; e.textContent = err || ''; o.hidden = !ok; o.textContent = ok || ''; }
+function authErr(e) {
+  const c = (e && e.code) || '';
+  if (/wrong-password|user-not-found|invalid-credential|invalid-login-credentials|invalid-password/.test(c)) return 'Correo o contraseña incorrectos.';
+  if (c === 'auth/too-many-requests') return 'Demasiados intentos. Espera unos minutos y vuelve a intentar.';
+  if (c === 'auth/user-disabled') return 'Esta cuenta está desactivada.';
+  if (c === 'auth/invalid-email') return 'Ese correo no es válido.';
+  if (c === 'auth/network-request-failed') return 'Sin conexión. Revisa tu internet.';
+  if (c === 'auth/password-does-not-meet-requirements' || c === 'auth/weak-password') return 'La contraseña es muy débil. Usa al menos 10 caracteres con mayúsculas, minúsculas y números.';
+  if (c === 'auth/email-already-in-use') return 'No se pudo crear la cuenta. Si ya tienes una, entra o recupera tu contraseña.';
+  if (c === 'auth/invalid-action-code' || c === 'auth/expired-action-code') return 'Ese enlace ya se usó o venció. Pide uno nuevo.';
+  if (c === 'auth/operation-not-allowed') return 'Esta forma de entrar no está activada todavía.';
+  if (c === 'auth/missing-email') return 'Escribe tu correo.';
+  return 'No se pudo completar. Inténtalo otra vez.';
+}
+function setLoginMode(m) {
+  LM.mode = m; loginMsg();
+  document.querySelectorAll('[data-lm]').forEach(b => { b.classList.toggle('is-on', b.dataset.lm === m); b.setAttribute('aria-selected', String(b.dataset.lm === m)); });
+  $('#pwWrap').hidden = m === 'link'; $('#pw2Wrap').hidden = m !== 'up'; $('#linkHelp').hidden = m !== 'link'; $('#emForgot').hidden = m !== 'in';
+  $('#emPass').autocomplete = m === 'up' ? 'new-password' : 'current-password';
+  $('#emSubmit').textContent = m === 'in' ? 'Entrar' : m === 'up' ? 'Crear cuenta' : 'Mandarme el enlace';
+  pwPaint();
+}
+function pwPaint() { const r = pwChecks($('#emPass').value, $('#emPass2').value, $('#emEmail').value.trim()); document.querySelectorAll('#pwRules li').forEach(li => li.classList.toggle('ok', !!r[li.dataset.r])); }
+function showVerify(u) { $('#login').hidden = false; $('#umenu').hidden = true; $('#emForm').hidden = true; document.querySelector('.ltabs').hidden = true; document.querySelector('.or').hidden = true; $('#gLogin').hidden = true; $('#verifyBox').hidden = false; $('#vEmail').textContent = u.email || ''; }
+function hideVerify() { $('#emForm').hidden = false; document.querySelector('.ltabs').hidden = false; document.querySelector('.or').hidden = false; $('#gLogin').hidden = false; $('#verifyBox').hidden = true; }
+async function sendVerify(u) { if (Date.now() < LM.resendAt) { loginMsg(`Espera ${Math.ceil((LM.resendAt - Date.now()) / 1000)} s para reenviar.`); return; } LM.resendAt = Date.now() + 60e3; try { await u.sendEmailVerification({ url: location.origin + '/' }); loginMsg(null, 'Correo enviado.'); } catch (e) { loginMsg(authErr(e)); } }
+
+function initEmailAuth(auth) {
+  document.querySelectorAll('[data-lm]').forEach(b => b.addEventListener('click', () => setLoginMode(b.dataset.lm)));
+  document.querySelectorAll('[data-eye]').forEach(b => b.addEventListener('click', () => { const i = document.getElementById(b.dataset.eye); const show = i.type === 'password'; i.type = show ? 'text' : 'password'; b.textContent = show ? 'Ocultar' : 'Ver'; b.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña'); }));
+  ['emPass', 'emPass2', 'emEmail'].forEach(id => $('#' + id).addEventListener('input', pwPaint));
+  $('#emForm').addEventListener('submit', async e => {
+    e.preventDefault(); loginMsg();
+    if (Date.now() < LM.until) { loginMsg(`Demasiados intentos. Espera ${Math.ceil((LM.until - Date.now()) / 1000)} s.`); return; }
+    const email = $('#emEmail').value.trim().toLowerCase(), pass = $('#emPass').value;
+    if (!emailOk(email)) { loginMsg('Escribe un correo válido.'); $('#emEmail').focus(); return; }
+    const btn = $('#emSubmit'); btn.disabled = true;
+    try {
+      if (LM.mode === 'link') {
+        await auth.sendSignInLinkToEmail(email, ACTION());
+        lsSet(LINK_KEY, email);
+        loginMsg(null, 'Listo. Si el correo es correcto, te llegará un enlace en unos minutos. Ábrelo en este mismo navegador.');
+      } else if (LM.mode === 'up') {
+        const r = pwChecks(pass, $('#emPass2').value, email);
+        if (!r.len || !r.mix || !r.case) { loginMsg('La contraseña no cumple los requisitos.'); return; }
+        if (!r.notCommon) { loginMsg('Esa contraseña es fácil de adivinar. Elige otra.'); return; }
+        if (!r.same) { loginMsg('Las contraseñas no coinciden.'); return; }
+        const cred = await auth.createUserWithEmailAndPassword(email, pass);
+        LM.resendAt = 0; await sendVerify(cred.user);
+      } else {
+        if (!pass) { loginMsg('Escribe tu contraseña.'); return; }
+        await auth.signInWithEmailAndPassword(email, pass);
+        LM.fails = 0;
+      }
+      $('#emPass').value = ''; $('#emPass2').value = '';
+    } catch (err) {
+      if (LM.mode === 'in') { LM.fails++; if (LM.fails >= 5) { LM.until = Date.now() + Math.min(300, 30 * 2 ** (LM.fails - 5)) * 1000; } }
+      loginMsg(authErr(err));
+    } finally { btn.disabled = false; }
+  });
+  $('#emForgot').addEventListener('click', async () => {
+    const email = $('#emEmail').value.trim().toLowerCase();
+    if (!emailOk(email)) { loginMsg('Escribe tu correo arriba y vuelve a tocar aquí.'); $('#emEmail').focus(); return; }
+    const b = $('#emForgot'); b.disabled = true; setTimeout(() => { b.disabled = false; }, 60e3);
+    try { await auth.sendPasswordResetEmail(email, { url: location.origin + '/' }); } catch (e) { if (e && e.code === 'auth/invalid-email') { loginMsg(authErr(e)); return; } }
+    loginMsg(null, 'Si hay una cuenta con ese correo, te llegará un enlace para cambiar la contraseña.');
+  });
+  $('#vResend').addEventListener('click', () => auth.currentUser && sendVerify(auth.currentUser));
+  $('#vOut').addEventListener('click', async () => { await auth.signOut(); hideVerify(); setLoginMode('in'); });
+  $('#vDone').addEventListener('click', async () => {
+    const u = auth.currentUser; if (!u) return;
+    try { await u.reload(); if (u.emailVerified) { await u.getIdToken(true); hideVerify(); onUser(u); } else loginMsg('Todavía no aparece confirmado. Abre el enlace del correo y vuelve a intentar.'); } catch (e) { loginMsg(authErr(e)); }
+  });
+  setLoginMode('in');
+}
+// Termina el inicio con enlace si la página se abrió desde el correo.
+async function finishEmailLink(auth) {
+  if (!auth.isSignInWithEmailLink(location.href)) return;
+  const href = location.href;
+  history.replaceState(null, '', location.pathname); // no dejar el código de un solo uso en la barra ni en el historial
+  let email = lsGet(LINK_KEY);
+  if (!email) { $('#login').hidden = false; setLoginMode('link'); loginMsg('Abriste el enlace en otro navegador o dispositivo. Pide un enlace nuevo desde aquí y ábrelo en este mismo navegador.'); return; }
+  try { await auth.signInWithEmailLink(email, href); try { localStorage.removeItem(LINK_KEY); } catch {} }
+  catch (e) { $('#login').hidden = false; setLoginMode('link'); loginMsg(authErr(e)); }
 }
 
 let UNSUB = null, USER = null;
@@ -1857,14 +1975,22 @@ async function connect() {
     try { await auth.signInWithPopup(p); }
     catch (e) {
       if (e && (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment')) { try { await auth.signInWithRedirect(p); return; } catch (e2) { e = e2; } }
-      if (e && e.code === 'auth/popup-closed-by-user') return;
-      showLogin('No se pudo entrar: ' + ((e && e.message) || 'error desconocido'));
+      if (e && (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request')) return;
+      if (e && e.code === 'auth/account-exists-with-different-credential') { setLoginMode('in'); loginMsg('Ya tienes una cuenta con ese correo. Entra con tu correo y contraseña.'); return; }
+      loginMsg(authErr(e));
     }
   });
-  auth.onAuthStateChanged(u => {
+  initEmailAuth(auth);
+  finishEmailLink(auth);
+  auth.onAuthStateChanged(u => onUser(u));
+}
+function onUser(u) {
+    const fs = firebase.firestore();
     if (UNSUB) { UNSUB(); UNSUB = null; }
     USER = u; COL = null;
-    if (!u) { MODE = 'loading'; REAL = []; CFG = clone(DEFAULT_CFG); EXAMPLE = false; showLogin(); return; }
+    if (!u) { MODE = 'loading'; REAL = []; CFG = clone(DEFAULT_CFG); EXAMPLE = false; hideVerify(); showLogin(); return; }
+    // Cuentas con contraseña: primero confirmar el correo. Google y el enlace por correo ya llegan confirmados.
+    if (!u.emailVerified) { MODE = 'loading'; REAL = []; showVerify(u); return; }
     $('#login').hidden = true; $('#umenu').hidden = false;
     const b = $('#ubtn'); b.textContent = '';
     if (u.photoURL && /^https:\/\//.test(u.photoURL)) { const i = document.createElement('img'); i.src = u.photoURL; i.alt = ''; i.referrerPolicy = 'no-referrer'; b.appendChild(i); } else b.textContent = (u.displayName || u.email || '?').trim().charAt(0).toUpperCase();
@@ -1881,7 +2007,6 @@ async function connect() {
       syncLock();
       if (first) gmAuto();
     }, err => { toast('No se pudieron leer tus datos: ' + ((err && err.code) || 'error')); if (MODE === 'loading') { MODE = 'local'; loadLocal(); render(true); } });
-  });
 }
 
 /* ---------- gastos desde Gmail (solo lectura, todo ocurre en tu navegador) ---------- */
@@ -1895,8 +2020,10 @@ function gmSkip(id) { const st = gmState(); gmSave({ skip: [...(st.skip || []), 
 function gmToken() { try { const t = JSON.parse(sessionStorage.getItem('pa-gm-tok') || 'null'); return t && t.uid === (USER && USER.uid) && t.exp > Date.now() + 60e3 ? t.tok : null; } catch { return null; } }
 async function gmLogin() {
   const p = new firebase.auth.GoogleAuthProvider(); p.addScope(GM_SCOPE);
-  p.setCustomParameters({ login_hint: USER.email || '' });
-  const r = await USER.reauthenticateWithPopup(p);
+  // Ya entró con Google: se vuelve a pedir permiso a esa misma cuenta. Entró con correo: se vincula su Google a esta cuenta.
+  const hasGoogle = (USER.providerData || []).some(x => x && x.providerId === 'google.com');
+  if (hasGoogle) p.setCustomParameters({ login_hint: (USER.providerData.find(x => x.providerId === 'google.com') || {}).email || '' });
+  const r = hasGoogle ? await USER.reauthenticateWithPopup(p) : await USER.linkWithPopup(p);
   const tok = r && r.credential && r.credential.accessToken;
   if (!tok) throw new Error('Google no devolvió permiso para leer el correo.');
   try { sessionStorage.setItem('pa-gm-tok', JSON.stringify({ tok, uid: USER.uid, exp: Date.now() + 55 * 60e3 })); } catch {}
@@ -1995,12 +2122,13 @@ async function gmSync(interactive) {
       await batch.commit();
     }
     gmSave({ last: Date.now() });
-    if (interactive || keep.length) toast(keep.length ? `${keep.length} gasto${keep.length > 1 ? 's' : ''} nuevo${keep.length > 1 ? 's' : ''} desde Gmail` : 'Gmail revisado: no hay gastos nuevos');
+    if (interactive || keep.length) toast(keep.length ? `${keep.length} gasto${keep.length > 1 ? 's' : ''} nuevo${keep.length > 1 ? 's' : ''} desde Gmail` : 'Gmail revisado: no hay gastos nuevos', keep.length ? async () => { const b = firebase.firestore().batch(); keep.forEach(f => { gmSkip(f.id); b.delete(COL.doc(f.id)); }); try { await b.commit(); toast('Se quitaron los gastos importados'); } catch { toast('No se pudo deshacer.'); } } : null);
   } catch (e) {
     if (e && e.code === 'auth/popup-closed-by-user') return;
     if (e && e.code === 401) { if (interactive) toast('Tu permiso de Gmail venció. Toca ✉ Gmail otra vez.'); return; }
     if (e && e.code === 'auth/user-mismatch') { toast('Elige la misma cuenta de Google con la que entraste.'); return; }
     if (e && e.code === 'auth/popup-blocked') { toast('Tu navegador bloqueó la ventana de Google. Permite ventanas emergentes.'); return; }
+    if (e && (e.code === 'auth/credential-already-in-use' || e.code === 'auth/email-already-in-use')) { toast('Esa cuenta de Google ya está usada por otra cuenta de la app. Elige otra.'); return; }
     toast('No se pudo leer Gmail: ' + ((e && e.message) || 'error'));
   } finally { gmBusy = false; $('#gmBtn').classList.remove('busy'); }
 }
@@ -2120,6 +2248,7 @@ document.addEventListener('click', e => {
   else if (act === 'prefill') { const f = CFG.fixed.find(x => x.id === a.dataset.id), u = CFG.upcoming.find(x => x.id === a.dataset.id); const it = f || u; if (!it) return; S.formType = 'gasto'; S.formCat = it.cat; S.formRef = it.id; S.formAmt = f ? fixCharge(f) : upLeft(u); S.formNote = it.n; buildMovForm(); $('#fAmt').focus(); }
   else if (act === 'go-pay') { qaOpen('pago', a.dataset.id); }
   else if (act === 'go-pay-old') { S.view = 'movs'; S.formType = 'pago'; S.formCat = a.dataset.id; S.formRef = null; S.formAmt = ''; S.formNote = ''; render(true); setTimeout(() => $('#fAmt') && $('#fAmt').focus(), 0); }
+  else if (act === 'unpay') { const ref = a.dataset.ref; const last = movs().filter(m => m.ref === ref && !String(m.id).startsWith('ex-')).sort((x, y) => (x.date < y.date ? 1 : x.date > y.date ? -1 : (y.created || 0) - (x.created || 0)))[0]; if (last) delMov(last.id); else toast('No encontré ese pago en tus movimientos.'); }
   else if (act === 'q-more') { S.qAll = !S.qAll; render(); if (!S.qAll) { const q = document.getElementById('s-quin'); if (q) q.scrollIntoView({ block: 'start' }); } }
   else if (act === 'pay-fixed') { const f = CFG.fixed.find(x => x.id === a.dataset.id); if (f) addMov({ id: uid(), kind: 'mov', type: 'gasto', amount: fixCharge(f), date: TODAY, cat: f.cat, ref: f.id, note: f.n, created: Date.now() }); }
   else if (act === 'pay-up') { const u = CFG.upcoming.find(x => x.id === a.dataset.id); if (u) addMov({ id: uid(), kind: 'mov', type: 'gasto', amount: upLeft(u), date: TODAY, cat: u.cat, ref: u.id, note: u.n, created: Date.now() }); }
