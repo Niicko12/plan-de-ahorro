@@ -21,6 +21,7 @@ Es una sola página HTML. Entras con tu cuenta de Google y tus datos se guardan 
 - **Retiro e inversiones** a largo plazo, en pesos o en UDIs.
 - **Consejos con tus números**, por ejemplo "págate primero", qué hacer con el aguinaldo o cuánto ganas si recortas un gasto.
 - **Movimientos.** Registro rápido de gastos, ahorros, pagos de deuda e ingresos. Tiene atajos para tus gastos fijos, filtros y opciones para editar y borrar.
+- **Gastos desde Gmail.** Toca **✉ Gmail** y la app lee los avisos de compra que te mandan tu banco y PayPal, y los registra como gastos con su monto, fecha, comercio y categoría. Cada persona conecta su propio correo. Es de solo lectura y todo pasa en tu navegador: no hay servidor y no se guarda el correo, solo el gasto. El permiso dura una hora; mientras siga vigente, la app vuelve a revisar al abrirla y cada 10 minutos. Si borras un gasto importado, no se vuelve a importar.
 - **Otra moneda.** Muestra tus montos también en otra moneda con el tipo de cambio que tú pongas.
 - **Privacidad.** Botón para ocultar montos y bloqueo opcional con PIN.
 - **Respaldo.** Descarga e importa tus datos en JSON.
@@ -82,6 +83,12 @@ Necesitas Node.js y una cuenta de Google.
 3. Importa el repositorio en Vercel y agrega estas variables de entorno:
    `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_APP_ID` y `FIREBASE_MESSAGING_SENDER_ID`.
 4. En Firebase, **Authentication → Configuración → Dominios autorizados**, agrega tu dominio de Vercel (por ejemplo `tu-app.vercel.app`).
+
+### Gastos desde Gmail
+
+Para que funcione el botón **✉ Gmail**, activa la Gmail API en tu proyecto: abre `https://console.cloud.google.com/apis/library/gmail.googleapis.com?project=TU-PROYECTO` y toca **Habilitar**. Es gratis.
+
+Gmail es un permiso restringido de Google. Mientras tu app no pase la verificación de Google, cada persona verá el aviso "Google no verificó esta app" (toca **Configuración avanzada → Ir a…**) y el permiso se puede dar a un máximo de 100 cuentas.
 
 Para probarla en tu computadora usa `npx firebase-tools serve`. Abrir el archivo directamente no funciona, porque la configuración de Firebase solo existe en el servidor.
 

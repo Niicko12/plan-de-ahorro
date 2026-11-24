@@ -356,6 +356,8 @@ html{scroll-padding-top:70px}
 @media (max-width:600px){.yb{display:none}}
 #fab{position:fixed;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:45;width:58px;height:58px;border-radius:18px;border:0;background:var(--ai);color:#fff;font-size:30px;font-weight:400;line-height:1;box-shadow:0 10px 28px rgba(51,85,214,.45)}
 #fab:hover{transform:translateY(-2px)}
+#gmBtn{position:fixed;right:calc(max(18px,env(safe-area-inset-right,0px)) + 70px);bottom:calc(27px + env(safe-area-inset-bottom,0px));z-index:45;height:40px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-weight:700;font-size:14px;box-shadow:var(--shadow)}
+#gmBtn.busy{opacity:.6;pointer-events:none}
 #qa{position:fixed;inset:0;z-index:70;display:flex;align-items:flex-end;justify-content:center}
 .qa-back{position:absolute;inset:0;background:rgba(10,14,28,.45)}
 .qa-sheet{position:relative;background:var(--surface);border-radius:20px 20px 0 0;width:min(520px,100%);padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 40px rgba(0,0,0,.25)}
@@ -424,7 +426,7 @@ html{scroll-padding-top:70px}
       <span id="mode" class="pill">Conectando…</span>
       <button id="hideAmt" class="icon-btn" aria-label="Ocultar montos" title="Ocultar montos"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
       <button id="lockBtn" class="icon-btn" aria-label="Bloquear" title="Bloquear ahora" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></button>
-      <div class="umenu" id="umenu" hidden><button type="button" id="ubtn" class="ubtn" aria-label="Tu cuenta" aria-expanded="false"></button><div class="udrop" id="udrop" hidden><small id="uemail"></small><button type="button" id="uExp">Descargar respaldo</button><button type="button" id="uImp">Importar respaldo</button><button type="button" id="uOut">Cerrar sesión</button></div></div>
+      <div class="umenu" id="umenu" hidden><button type="button" id="ubtn" class="ubtn" aria-label="Tu cuenta" aria-expanded="false"></button><div class="udrop" id="udrop" hidden><small id="uemail"></small><button type="button" id="uGm">Traer gastos de Gmail</button><button type="button" id="uExp">Descargar respaldo</button><button type="button" id="uImp">Importar respaldo</button><button type="button" id="uOut">Cerrar sesión</button></div></div>
       <button id="theme" class="icon-btn" aria-label="Cambiar tema" title="Cambiar tema">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
       </button>
@@ -443,6 +445,7 @@ html{scroll-padding-top:70px}
 <div id="toast" hidden role="status"></div>
 <div id="lock" hidden><div class="lock-card" role="dialog" aria-modal="true" aria-labelledby="lockT"><div class="lock-ic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><h2 id="lockT">Panel bloqueado</h2><p class="help">Escribe tu PIN para entrar.</p><form id="lockForm" novalidate><input id="lockPin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8" placeholder="••••" aria-label="PIN"><button class="btn" type="submit">Entrar</button><p id="lockErr" class="help" style="color:var(--bad)" hidden></p></form></div></div>
 <button type="button" id="fab" aria-label="Registrar movimiento" title="Registrar movimiento">+</button>
+<button type="button" id="gmBtn" hidden title="Traer los gastos que te llegaron por correo">✉ Gmail</button>
 <div id="qa" hidden><div class="qa-back" data-act="qa-close"></div><div class="qa-sheet" role="dialog" aria-modal="true" aria-labelledby="qaT"><div class="card-h"><h2 id="qaT">Registrar</h2><button type="button" class="back" data-act="qa-close">Cerrar</button></div><div id="qaBody"></div></div></div>
 
 <script>try { if (localStorage.getItem('pa-pin-on') === '1' && sessionStorage.getItem('pa-unlocked') !== '1') document.getElementById('lock').hidden = false; } catch {}</script>
@@ -1784,6 +1787,7 @@ const markDirty = () => { if (!S.cfgDirty) { S.cfgDirty = true; const b = $('.sa
 /* ---------- render ---------- */
 function render(rebuild) {
   $('#fab').hidden = S.view === 'cfg' || S.onboard;
+  $('#gmBtn').hidden = $('#fab').hidden || MODE !== 'db';
   $('#brandT').textContent = CFG.title || 'Mi plan de ahorro'; $('#brandS').textContent = `Meta: ${GN()} · gastos del día a día`; document.title = CFG.title || 'Mi plan de ahorro'; Dio.label(GN());
   document.querySelectorAll('.nav button').forEach(b => { const on = b.dataset.view === S.view; b.classList.toggle('is-on', on); b.setAttribute('aria-selected', on); });
   $('#viewPanel').hidden = S.view !== 'panel'; $('#viewMovs').hidden = S.view !== 'movs'; $('#viewCfg').hidden = S.view !== 'cfg';
@@ -1817,6 +1821,7 @@ async function updMov(m) {
   try { await writeDoc(m.id, m); toast('Cambios guardados'); } catch { REAL = prev; render(); toast('No se pudieron guardar los cambios.'); }
 }
 async function delMov(id) {
+  if (String(id).startsWith('gm-')) gmSkip(id);
   const prev = REAL; REAL = REAL.filter(m => m.id !== id); EXAMPLE = REAL.length === 0; S.confirmDel = null; render();
   try { await removeDoc(id); toast('Movimiento borrado'); } catch { REAL = prev; EXAMPLE = REAL.length === 0; render(); toast('No se pudo borrar. Inténtalo otra vez.'); }
 }
@@ -1869,14 +1874,142 @@ async function connect() {
       REAL = list; EXAMPLE = REAL.length === 0;
       render(first || S.view !== 'cfg' ? first : false);
       syncLock();
+      if (first) gmAuto();
     }, err => { toast('No se pudieron leer tus datos: ' + ((err && err.code) || 'error')); if (MODE === 'loading') { MODE = 'local'; loadLocal(); render(true); } });
   });
 }
 
+/* ---------- gastos desde Gmail (solo lectura, todo ocurre en tu navegador) ---------- */
+// Cada usuario conecta SU propio Gmail. El token vive solo en esta pestaña (sessionStorage, ~1 hora).
+// De cada correo de compra se guarda solo: monto, fecha, comercio y categoría.
+const GM_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
+const GM_KEY = () => 'pa-gm-' + (USER ? USER.uid : 'x');
+const gmState = () => { try { return JSON.parse(lsGet(GM_KEY()) || '{}'); } catch { return {}; } };
+const gmSave = o => lsSet(GM_KEY(), JSON.stringify({ ...gmState(), ...o }));
+function gmSkip(id) { const st = gmState(); gmSave({ skip: [...(st.skip || []), id].slice(-500) }); }
+function gmToken() { try { const t = JSON.parse(sessionStorage.getItem('pa-gm-tok') || 'null'); return t && t.uid === (USER && USER.uid) && t.exp > Date.now() + 60e3 ? t.tok : null; } catch { return null; } }
+async function gmLogin() {
+  const p = new firebase.auth.GoogleAuthProvider(); p.addScope(GM_SCOPE);
+  p.setCustomParameters({ login_hint: USER.email || '' });
+  const r = await USER.reauthenticateWithPopup(p);
+  const tok = r && r.credential && r.credential.accessToken;
+  if (!tok) throw new Error('Google no devolvió permiso para leer el correo.');
+  try { sessionStorage.setItem('pa-gm-tok', JSON.stringify({ tok, uid: USER.uid, exp: Date.now() + 55 * 60e3 })); } catch {}
+  gmSave({ on: true });
+  return tok;
+}
+// Remitentes de bancos y pagos comunes en México. Los promocionales se descartan al leer el texto.
+const GM_FROM = ['santander.com.mx', 'bbva.mx', 'bbva.com', 'banorte.com', 'nu.com.mx', 'nubank', 'mercadopago', 'paypal', 'hsbc.com.mx', 'banamex.com', 'citibanamex', 'scotiabank', 'banregio', 'inbursa', 'bancoazteca', 'baz.app', 'banbajio', 'afirme', 'openbank', 'klar.mx', 'stori', 'spinbyoxxo', 'rappicard', 'plata.com.mx', 'didi', 'hey.inc', 'bancoppel', 'amex', 'americanexpress'];
+const GM_RULES = [
+  [/SUPER|OXXO|WALMART|WAL-MART|BODEGA|SORIANA|CHEDRAUI|COSTCO|SAMS|SAM'?S|\bHEB\b|7-?ELEVEN|MERCADO\b|ABARROTE|CARNICER|PANADER|TORTILLER|LA COMER|CITY MARKET|FRESKO/i, 'comida'],
+  [/RAPPI|DIDI ?FOOD|UBER ?EATS|STARBUCKS|RESTAUR|TAQUER|PIZZA|BURGER|MCDONALD|KFC|CAFE|CINEPOLIS|CINEMEX|DOMINO|LITTLE CAESAR/i, 'salidas'],
+  [/UBER|DIDI|CABIFY|PEMEX|GASOLIN|\bGAS\b|\bADO\b|AEROMEXICO|VOLARIS|VIVA ?AEROBUS|ESTACIONAM|CASETA|TELEPEAJE/i, 'transporte'],
+  [/STEAM|PLAYSTATION|\bSONY\b|XBOX|NINTENDO|EPIC GAMES|RIOT/i, 'juegos'],
+  [/NETFLIX|SPOTIFY|DISNEY|\bHBO\b|\bMAX\b|PRIME VIDEO|YOUTUBE|APPLE\.COM|ICLOUD|GOOGLE|MICROSOFT|ANTHROPIC|CLAUDE|OPENAI|CHATGPT|CANVA|ADOBE/i, 'suscripciones'],
+  [/FARMACIA|DOCTOR|DENTAL|HOSPITAL|LABORATORIO|SIMILARES|BENAVIDES|OPTICA/i, 'salud'],
+  [/\bGYM\b|SMART ?FIT|SPORTS? WORLD|FITNESS|ANYTIME/i, 'gym'],
+  [/\bCFE\b|TELMEX|IZZI|TOTALPLAY|TELCEL|AT&T|MEGACABLE|AGUA|RENTA|\bGAS NATURAL/i, 'casa'],
+  [/\bBAR\b|CANTINA|LICOR|VINOS|CERVECER|DEPOSITO/i, 'alcohol'],
+  [/AMAZON|MERCADO ?LIBRE|LIVERPOOL|COPPEL|ELEKTRA|SHEIN|TIKTOK|ALIEXPRESS|TEMU|ZARA|NIKE|ADIDAS|SEARS|PALACIO|SUBURBIA|HOME DEPOT|PAYPAL/i, 'compras']
+];
+function gmCat(name) {
+  const ids = new Set(cats().map(c => c.id));
+  for (const [re, c] of GM_RULES) if (re.test(name) && ids.has(c)) return c;
+  return ids.has('otros') ? 'otros' : (cats().slice(-1)[0] || {}).id || 'otros';
+}
+const gmNum = s => parseFloat(String(s).replace(/[,\s]/g, ''));
+function gmText(payload) {
+  const parts = []; const walk = p => { if (!p) return; if (p.parts) p.parts.forEach(walk); else if (p.body && p.body.data && /text\/(html|plain)/.test(p.mimeType || '')) parts.push([p.mimeType, p.body.data]); };
+  walk(payload);
+  const pick = parts.find(x => x[0] === 'text/html') || parts[0]; if (!pick) return '';
+  let raw = ''; try { const b = atob(pick[1].replace(/-/g, '+').replace(/_/g, '/')); raw = new TextDecoder().decode(Uint8Array.from(b, c => c.charCodeAt(0))); } catch { return ''; }
+  const d = new DOMParser().parseFromString(raw, 'text/html');
+  d.querySelectorAll('style,script,head').forEach(n => n.remove());
+  return (d.body ? d.body.textContent : raw).replace(/\s+/g, ' ').trim();
+}
+// Devuelve { comercio, monto } si el correo es un aviso de compra/cargo; null si no (promociones, estados de cuenta…).
+function gmParse(subject, text) {
+  const t = subject + ' · ' + text;
+  if (/promoci|oferta|black ?friday|descuento|cashback|meses sin intereses|\bMSI\b|estado de cuenta|pago recibido|abono|dep[oó]sito|transferencia recibida|te enviaron|reembolso|devoluci/i.test(subject)) return null;
+  if (/retiro de efectivo/i.test(t)) return null;
+  const AMT = '\\$\\s?([\\d,]+(?:\\.\\d{1,2})?)';
+  const pats = [
+    new RegExp(`Ha pagado ${AMT}\\s*MXN a (.+?)(?:\\s+Ver o administrar|\\s+Id\\. de transacci|\\.\\.\\.|\\s{2}|$)`, 'i'),               // PayPal
+    new RegExp(`compra en (?:el comercio )?(.+?) con tu tarjeta.{0,120}?monto de ${AMT}`, 'i'),                                          // Santander y similares
+    new RegExp(`(?:compra|cargo|consumo|pago) (?:de |por )?${AMT}(?:\\s*MXN)? (?:en|a) (.+?)(?: con | el | fue |\\.|,| por |$)`, 'i'),  // "compra de $X en COMERCIO"
+    new RegExp(`(?:compra|cargo|consumo) en (.+?) por (?:un monto de |la cantidad de )?${AMT}`, 'i'),                                    // "compra en COMERCIO por $X"
+    new RegExp(`(?:Comercio|Establecimiento|Negocio)\\s*:?\\s*(.+?)\\s+(?:Monto|Importe|Cantidad)\\s*:?\\s*${AMT}`, 'i'),                // tabla Comercio / Monto
+    new RegExp(`(?:Monto|Importe|Cantidad)\\s*:?\\s*${AMT}.{0,80}?(?:Comercio|Establecimiento|Negocio)\\s*:?\\s*(.+?)(?:\\s{2}|Fecha|Hora|Tarjeta|$)`, 'i')
+  ];
+  for (let i = 0; i < pats.length; i++) {
+    const m = t.match(pats[i]); if (!m) continue;
+    const amtFirst = i === 0 || i === 2 || i === 5;
+    const monto = gmNum(amtFirst ? m[1] : m[2]); let comercio = String(amtFirst ? m[2] : m[1]).trim().replace(/\s+/g, ' ').slice(0, 60);
+    if (!(monto > 0) || !comercio) continue;
+    if (i === 0) comercio += ' (PayPal)';
+    return { comercio, monto };
+  }
+  return null;
+}
+async function gmApi(tok, path) {
+  const r = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/' + path, { headers: { Authorization: 'Bearer ' + tok } });
+  if (r.status === 401) { try { sessionStorage.removeItem('pa-gm-tok'); } catch {} throw Object.assign(new Error('expired'), { code: 401 }); }
+  if (!r.ok) { let msg = ''; try { msg = (await r.json()).error.message; } catch {} throw new Error(msg || ('Gmail ' + r.status)); }
+  return r.json();
+}
+let gmBusy = false;
+async function gmSync(interactive) {
+  if (gmBusy || !USER || !COL) return;
+  gmBusy = true; $('#gmBtn').classList.add('busy');
+  try {
+    let tok = gmToken();
+    if (!tok) { if (!interactive) return; tok = await gmLogin(); }
+    const st = gmState();
+    const days = st.last ? Math.min(30, Math.max(3, Math.ceil((Date.now() - st.last) / 864e5) + 2)) : 10;
+    const q = `newer_than:${days}d from:(${GM_FROM.join(' OR ')})`;
+    const ids = []; let page = '';
+    do { const r = await gmApi(tok, `messages?maxResults=100&q=${encodeURIComponent(q)}${page ? '&pageToken=' + page : ''}`); (r.messages || []).forEach(m => ids.push(m.id)); page = r.nextPageToken || ''; } while (page && ids.length < 300);
+    const have = new Set(REAL.map(m => m.id)), skip = new Set(st.skip || []);
+    const found = [];
+    for (const id of ids) {
+      const mid = 'gm-' + id; if (have.has(mid) || skip.has(mid)) continue;
+      const msg = await gmApi(tok, `messages/${id}?format=full`);
+      const subject = ((msg.payload.headers || []).find(h => /^subject$/i.test(h.name)) || {}).value || '';
+      const from = ((msg.payload.headers || []).find(h => /^from$/i.test(h.name)) || {}).value || '';
+      const p = gmParse(subject, gmText(msg.payload) || msg.snippet || ''); if (!p) continue;
+      found.push({ ...p, id: mid, ms: +msg.internalDate, paypal: /paypal/i.test(from) });
+    }
+    // Una compra por PayPal puede llegar dos veces (PayPal + aviso del banco "PAYPAL*…"): se guarda una.
+    const pp = found.filter(f => f.paypal);
+    const keep = found.filter(f => f.paypal || !(/PAYPAL/i.test(f.comercio) && pp.some(x => Math.abs(x.monto - f.monto) < 0.01 && Math.abs(x.ms - f.ms) < 2 * 864e5)));
+    if (keep.length) {
+      const fs = firebase.firestore(), batch = fs.batch();
+      keep.forEach(f => { const d = new Date(f.ms); const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        batch.set(COL.doc(f.id), { id: f.id, kind: 'mov', type: 'gasto', amount: Math.round(f.monto * 100) / 100, date, cat: gmCat(f.comercio), ref: null, note: f.comercio.slice(0, 80), created: f.ms, src: 'gmail' }); });
+      if (EXAMPLE) batch.set(COL.doc('config'), CFG);
+      await batch.commit();
+    }
+    gmSave({ last: Date.now() });
+    if (interactive || keep.length) toast(keep.length ? `${keep.length} gasto${keep.length > 1 ? 's' : ''} nuevo${keep.length > 1 ? 's' : ''} desde Gmail` : 'Gmail revisado: no hay gastos nuevos');
+  } catch (e) {
+    if (e && e.code === 'auth/popup-closed-by-user') return;
+    if (e && e.code === 401) { if (interactive) toast('Tu permiso de Gmail venció. Toca ✉ Gmail otra vez.'); return; }
+    if (e && e.code === 'auth/user-mismatch') { toast('Elige la misma cuenta de Google con la que entraste.'); return; }
+    if (e && e.code === 'auth/popup-blocked') { toast('Tu navegador bloqueó la ventana de Google. Permite ventanas emergentes.'); return; }
+    toast('No se pudo leer Gmail: ' + ((e && e.message) || 'error'));
+  } finally { gmBusy = false; $('#gmBtn').classList.remove('busy'); }
+}
+// Al abrir la app (y cada 10 min) se revisa solo, mientras el permiso de esta sesión siga vigente.
+function gmAuto() { if (gmState().on && gmToken()) gmSync(false); }
+setInterval(() => { if (document.visibilityState === 'visible') gmAuto(); }, 10 * 60e3);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') gmAuto(); });
+$('#gmBtn').addEventListener('click', () => gmSync(true));
+$('#uGm').addEventListener('click', () => { $('#udrop').hidden = true; gmSync(true); });
+
 /* ---------- cuenta: menú, respaldo, salir ---------- */
 $('#ubtn').addEventListener('click', e => { e.stopPropagation(); const d = $('#udrop'); d.hidden = !d.hidden; $('#ubtn').setAttribute('aria-expanded', String(!d.hidden)); });
 document.addEventListener('click', e => { if (!e.target.closest('#umenu')) $('#udrop').hidden = true; });
-$('#uOut').addEventListener('click', async () => { $('#udrop').hidden = true; try { sessionStorage.removeItem('pa-unlocked'); } catch {} await firebase.auth().signOut(); });
+$('#uOut').addEventListener('click', async () => { $('#udrop').hidden = true; try { sessionStorage.removeItem('pa-unlocked'); sessionStorage.removeItem('pa-gm-tok'); } catch {} await firebase.auth().signOut(); });
 $('#uExp').addEventListener('click', () => {
   $('#udrop').hidden = true;
   const blob = new Blob([JSON.stringify({ app: 'plan-ahorro', v: 1, exported: new Date().toISOString(), cfg: CFG, movs: REAL }, null, 2)], { type: 'application/json' });
