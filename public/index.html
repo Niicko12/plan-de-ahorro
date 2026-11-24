@@ -226,6 +226,8 @@ td.note{color:var(--muted);max-width:260px;overflow:hidden;text-overflow:ellipsi
 html{scroll-padding-top:70px}
 .secnav{position:sticky;top:0;z-index:20;display:flex;gap:6px;overflow-x:auto;padding:8px 2px;margin:-4px 0 4px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .secnav button{flex:none;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 13px 7px 7px;font-weight:600;font-size:13px;min-height:38px}
+.qmore{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;min-height:44px;border:1px dashed var(--line);border-radius:12px;background:var(--surface-2);color:var(--ai);font-weight:700;font-size:14px}
+[id^="s-"]{scroll-margin-top:64px}
 .secnav button span{width:22px;height:22px;border-radius:50%;background:var(--ai);color:#fff;display:grid;place-items:center;font-size:11.5px;font-weight:700}
 .sec-h{display:flex;gap:12px;align-items:flex-start;margin:22px 0 10px}
 .sec-n{flex:none;width:34px;height:34px;border-radius:10px;background:var(--fg);color:var(--surface);display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:17px}
@@ -382,6 +384,7 @@ html{scroll-padding-top:70px}
 #tip{position:fixed;z-index:50;pointer-events:none;background:var(--fg);color:var(--surface);font-size:12px;font-weight:600;padding:6px 9px;border-radius:8px;max-width:240px;white-space:pre-line}
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--fg);color:var(--surface);padding:10px 16px;border-radius:10px;font-weight:600;box-shadow:var(--shadow)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media(max-width:600px){.qt.stack tr{grid-template-columns:1fr 1fr;column-gap:14px;padding-block:12px}.qt.stack td{display:flex;justify-content:space-between;align-items:baseline;gap:6px;padding:2px 0!important;font-size:13.5px}.qt.stack td::before{float:none!important;width:auto!important;margin:0!important;font-size:12px}.qt.stack td:first-child{grid-column:1/-1;display:block;margin-bottom:4px}.qt.stack td:first-child::before{display:none}.qt.stack tfoot td:first-child{display:block}.secnav{margin-inline:-16px;padding-inline:16px;scrollbar-width:none}.secnav::-webkit-scrollbar{display:none}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1493,10 +1496,12 @@ function controlsHtml(P) {
 
 function quincenaHtml(P) {
   if (!P.rows.length) return '<p class="help">Ya no quedan quincenas antes de tu fecha de renuncia. Cámbiala en Ajustes.</p>';
-  const rows = P.rows.map(r => `<tr${r.tags.some(t => t[0] === 'in') ? ' class="hl"' : ''}><td><b>${dateShort(r.date)}</b>${r.tags.length ? `<div class="tags">${r.tags.map(([k, n]) => `<span class="tg ${k}">${esc(n)}</span>`).join('')}</div>` : ''}</td><td class="amt pos">+${money(r.entra)}</td><td class="amt">−${money(r.gastos)}</td><td class="amt">${r.deudas ? '−' + money(r.deudas) : '—'}</td><td class="amt">${r.pagos ? '−' + money(r.pagos) : '—'}</td><td class="amt ${r.meta < 0 ? 'neg' : 'pos'}">${r.meta < 0 ? '−' : '+'}${money(Math.abs(r.meta))}</td><td class="amt"><b>${money(r.acc)}</b></td><td class="amt ${r.debt ? 'neg' : ''}">${r.debt ? money(r.debt) : '✓ 0'}</td></tr>`).join('');
+  const QN = matchMedia('(max-width:600px)').matches ? 4 : 6, more = P.rows.length - QN;
+  const rows = (S.qAll ? P.rows : P.rows.slice(0, QN)).map(r => `<tr${r.tags.some(t => t[0] === 'in') ? ' class="hl"' : ''}><td><b>${dateShort(r.date)}</b>${r.tags.length ? `<div class="tags">${r.tags.map(([k, n]) => `<span class="tg ${k}">${esc(n)}</span>`).join('')}</div>` : ''}</td><td class="amt pos">+${money(r.entra)}</td><td class="amt">−${money(r.gastos)}</td><td class="amt">${r.deudas ? '−' + money(r.deudas) : '—'}</td><td class="amt">${r.pagos ? '−' + money(r.pagos) : '—'}</td><td class="amt ${r.meta < 0 ? 'neg' : 'pos'}">${r.meta < 0 ? '−' : '+'}${money(Math.abs(r.meta))}</td><td class="amt"><b>${money(r.acc)}</b></td><td class="amt ${r.debt ? 'neg' : ''}">${r.debt ? money(r.debt) : '✓ 0'}</td></tr>`).join('');
   const s = P.sums;
   return `<div class="tbl"><table class="qt stack"><thead><tr><th>Quincena</th><th style="text-align:right">Entra</th><th style="text-align:right">Gastos</th><th style="text-align:right">Tarjetas</th><th style="text-align:right">Pagos</th><th style="text-align:right">A tu meta</th><th style="text-align:right">Ahorro total</th><th style="text-align:right">Deuda</th></tr></thead><tbody>${rows}</tbody>
     <tfoot><tr><td><b>Total</b></td><td class="amt pos">+${money(s.entra)}</td><td class="amt">−${money(s.gastos)}</td><td class="amt">−${money(s.deudas)}</td><td class="amt">−${money(s.pagos)}</td><td class="amt pos">+${money(s.meta)}</td><td class="amt"><b>${money(P.final)}</b></td><td></td></tr></tfoot></table></div>
+    ${more > 0 ? `<button type="button" class="qmore" data-act="q-more">${S.qAll ? 'Ver menos' : `Ver las ${more} quincenas que faltan`} <span aria-hidden="true">${S.qAll ? '▲' : '▼'}</span></button>` : ''}
     <p class="help" style="margin-top:8px">Gastos = fijos de media quincena + variable estimado. Incluye intereses de tarjeta mientras no las liquides (≈ ${money(P.interest)} en total). Partimos de tus ${money(P.saved)} ahorrados.</p>`;
 }
 
@@ -2115,6 +2120,7 @@ document.addEventListener('click', e => {
   else if (act === 'prefill') { const f = CFG.fixed.find(x => x.id === a.dataset.id), u = CFG.upcoming.find(x => x.id === a.dataset.id); const it = f || u; if (!it) return; S.formType = 'gasto'; S.formCat = it.cat; S.formRef = it.id; S.formAmt = f ? fixCharge(f) : upLeft(u); S.formNote = it.n; buildMovForm(); $('#fAmt').focus(); }
   else if (act === 'go-pay') { qaOpen('pago', a.dataset.id); }
   else if (act === 'go-pay-old') { S.view = 'movs'; S.formType = 'pago'; S.formCat = a.dataset.id; S.formRef = null; S.formAmt = ''; S.formNote = ''; render(true); setTimeout(() => $('#fAmt') && $('#fAmt').focus(), 0); }
+  else if (act === 'q-more') { S.qAll = !S.qAll; render(); if (!S.qAll) { const q = document.getElementById('s-quin'); if (q) q.scrollIntoView({ block: 'start' }); } }
   else if (act === 'pay-fixed') { const f = CFG.fixed.find(x => x.id === a.dataset.id); if (f) addMov({ id: uid(), kind: 'mov', type: 'gasto', amount: fixCharge(f), date: TODAY, cat: f.cat, ref: f.id, note: f.n, created: Date.now() }); }
   else if (act === 'pay-up') { const u = CFG.upcoming.find(x => x.id === a.dataset.id); if (u) addMov({ id: uid(), kind: 'mov', type: 'gasto', amount: upLeft(u), date: TODAY, cat: u.cat, ref: u.id, note: u.n, created: Date.now() }); }
   else if (act === 'recv') { const id = a.dataset.id, i = CFG.incoming.find(x => x.id === id); addMov({ id: uid(), kind: 'mov', type: 'ingreso', amount: i ? inLeft(i) : perPay(), date: TODAY, cat: id, ref: i ? id : null, note: i ? i.n : 'Quincena', created: Date.now() }); }
