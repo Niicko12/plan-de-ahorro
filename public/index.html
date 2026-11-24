@@ -387,6 +387,7 @@ html{scroll-padding-top:70px}
 #toast{display:flex;align-items:center;max-width:calc(100vw - 32px);position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--fg);color:var(--surface);padding:10px 16px;border-radius:10px;font-weight:600;box-shadow:var(--shadow)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media(max-width:600px){.qt.stack tr{grid-template-columns:1fr 1fr;column-gap:14px;padding-block:12px}.qt.stack td{display:flex;justify-content:space-between;align-items:baseline;gap:6px;padding:2px 0!important;font-size:13.5px}.qt.stack td::before{float:none!important;width:auto!important;margin:0!important;font-size:12px}.qt.stack td:first-child{grid-column:1/-1;display:block;margin-bottom:4px}.qt.stack td:first-child::before{display:none}.qt.stack tfoot td:first-child{display:block}.secnav{margin-inline:-16px;padding-inline:16px;scrollbar-width:none}.secnav::-webkit-scrollbar{display:none}}
+@media (pointer:coarse),(max-width:600px){.del,.back,.btn.small,.chip.undoable,button[data-prefill],.chips button{min-height:40px}.del{padding-inline:12px}.btn.small,.back{padding-inline:12px}.chip.undoable{padding:0 12px;display:inline-flex;align-items:center}input[type=checkbox],input[type=radio]{width:22px;height:22px;flex:none}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
