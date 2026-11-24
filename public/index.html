@@ -484,8 +484,8 @@ html{scroll-padding-top:70px}
 <div id="toast" hidden role="status"></div>
 <div id="lock" hidden><div class="lock-card" role="dialog" aria-modal="true" aria-labelledby="lockT"><div class="lock-ic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><h2 id="lockT">Panel bloqueado</h2><p class="help">Escribe tu PIN para entrar.</p><form id="lockForm" novalidate><input id="lockPin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8" placeholder="••••" aria-label="PIN"><button class="btn" type="submit">Entrar</button><p id="lockErr" class="help" style="color:var(--bad)" hidden></p></form></div></div>
 <button type="button" id="fab" aria-label="Registrar movimiento" title="Registrar movimiento">+</button>
-<button type="button" id="botBtn" aria-label="Abrir asistente" title="Pregúntame lo que quieras"><span aria-hidden="true">💬</span><em style="font-style:normal">Pregúntame</em></button>
-<section id="bot" hidden role="dialog" aria-label="Asistente"><div class="bot-h"><span style="font-size:24px" aria-hidden="true">🤖</span><b>Asistente<small>Funciona en tu teléfono · tus datos no salen</small></b><button type="button" id="botX" aria-label="Cerrar asistente">×</button></div><div id="botLog" aria-live="polite"></div><div id="botChips"></div><form id="botForm" autocomplete="off"><input id="botIn" type="text" maxlength="200" placeholder="Escribe tu pregunta…" aria-label="Escribe tu pregunta" enterkeyhint="send"><button type="submit">Enviar</button></form></section>
+<button type="button" id="botBtn" aria-label="Abrir a Moni, tu asistente" title="Pregúntale a Moni"><span aria-hidden="true">💬</span><em style="font-style:normal">Pregúntale a Moni</em></button>
+<section id="bot" hidden role="dialog" aria-label="Moni, tu asistente"><div class="bot-h"><span style="font-size:24px" aria-hidden="true">🐷</span><b>Moni · tu asistente</b><button type="button" id="botX" aria-label="Cerrar asistente">×</button></div><div id="botLog" aria-live="polite"></div><div id="botChips"></div><form id="botForm" autocomplete="off"><input id="botIn" type="text" maxlength="200" placeholder="Escribe tu pregunta…" aria-label="Escribe tu pregunta" enterkeyhint="send"><button type="submit">Enviar</button></form></section>
 <button type="button" id="gmBtn" hidden title="Traer los gastos que te llegaron por correo">✉ Gmail</button>
 <div id="qa" hidden><div class="qa-back" data-act="qa-close"></div><div class="qa-sheet" role="dialog" aria-modal="true" aria-labelledby="qaT"><div class="card-h"><h2 id="qaT">Registrar</h2><button type="button" class="back" data-act="qa-close">Cerrar</button></div><div id="qaBody"></div></div></div>
 
@@ -1139,14 +1139,48 @@ const Dio = (() => {
     for (let r = 0; r <= rows; r += 1) lanes.push({ h: true, v: z0 - id / 2 + r * cell, a: x0 - iw / 2 + .4, b: x0 + iw / 2 - .4 });
     for (let c = 0; c <= cols; c += 1) lanes.push({ h: false, v: x0 - iw / 2 + c * cell, a: z0 - id / 2 + .4, b: z0 + id / 2 - .4 });
     const shirts = ['#3355d6', '#e5533d', '#1fa596', '#ef9a35', '#7a68e0', '#d257a6', '#18213a', '#4fae52'], skin = mat('#f1c9a0');
+    // Muñequito estilo chibi: piernas y brazos que se balancean, ojos, cabello y un accesorio distinto por persona. El frente es +x.
+    const SKINS = ['#f6d3b3', '#e8b48f', '#c98b62', '#9a6342', '#f1c9a0'], HAIRS = ['#2b1d16', '#5a3825', '#c58b3a', '#1c1c24', '#8b2f2f', '#e8c46a'], PANTS = ['#2c3e66', '#3b3b46', '#5b4636', '#1f4e5f', '#6b5b95'];
+    const PG = { leg: new T.BoxGeometry(.075, .2, .085), arm: new T.BoxGeometry(.06, .19, .06), body: new T.CylinderGeometry(.1, .13, .26, 12), head: new T.SphereGeometry(.13, 16, 12), hair: new T.SphereGeometry(.138, 16, 10, 0, Math.PI * 2, 0, Math.PI * .55), eye: new T.SphereGeometry(.02, 6, 5), hand: new T.SphereGeometry(.035, 6, 5), shoe: new T.BoxGeometry(.11, .045, .09) };
+    const eyeM = mat('#15151f'), cheekM = mat('#ff9aa8'), whiteM = mat('#ffffff');
+    function person(k, parent, shirtC) {
+      const sh = mat(shirtC || shirts[k % shirts.length]), sk = mat(SKINS[k % SKINS.length]), hr = mat(HAIRS[(k * 3 + 1) % HAIRS.length]), pa = mat(PANTS[k % PANTS.length]), shoeM = mat(k % 3 ? '#222' : '#ffffff');
+      const g = new T.Group(); g.scale.setScalar(1.3); parent.add(g);
+      const mk = (geo, m, x, y, z, p) => { const me = new T.Mesh(geo, m); me.position.set(x, y, z); me.castShadow = true; (p || g).add(me); return me; };
+      const limb = (y, z, geo, m, len) => { const piv = new T.Group(); piv.position.set(0, y, z); g.add(piv); mk(geo, m, 0, -len / 2, 0, piv); return piv; };
+      const legL = limb(.25, .055, PG.leg, pa, .2), legR = limb(.25, -.055, PG.leg, pa, .2);
+      mk(PG.shoe, shoeM, .02, -.2, 0, legL); mk(PG.shoe, shoeM, .02, -.2, 0, legR);
+      mk(PG.body, sh, 0, .38, 0);
+      const armL = limb(.49, .145, PG.arm, sh, .19), armR = limb(.49, -.145, PG.arm, sh, .19);
+      mk(PG.hand, sk, 0, -.2, 0, armL); mk(PG.hand, sk, 0, -.2, 0, armR);
+      mk(PG.head, sk, 0, .66, 0);
+      mk(PG.eye, eyeM, .118, .68, .045); mk(PG.eye, eyeM, .118, .68, -.045);
+      mk(PG.eye, cheekM, .108, .635, .075).scale.set(1, .6, 1.3); mk(PG.eye, cheekM, .108, .635, -.075).scale.set(1, .6, 1.3);
+      const acc = k % 6;
+      if (acc === 0) { const c = mat(['#e5533d', '#3355d6', '#ffd166'][k % 3]); mk(PG.hair, c, 0, .68, 0).scale.set(1, .8, 1); mk(new T.BoxGeometry(.12, .02, .2), c, .12, .72, 0); }            // gorra
+      else if (acc === 3) { mk(PG.hair, hr, 0, .675, 0); const hat = mat('#d9a35f'); mk(new T.CylinderGeometry(.21, .21, .02, 16), hat, 0, .76, 0); mk(new T.CylinderGeometry(.1, .12, .1, 14), hat, 0, .81, 0); } // sombrero
+      else { mk(PG.hair, hr, 0, .675, 0); }
+      if (acc === 1) mk(new T.BoxGeometry(.1, .2, .17), mat(['#ef9a35', '#1fa596', '#d257a6'][k % 3]), -.15, .42, 0);                                                                   // mochila
+      if (acc === 2) { const bag = mk(new T.BoxGeometry(.1, .12, .06), whiteM, 0, -.27, 0, armR); mk(new T.BoxGeometry(.05, .04, .065), mat('#4fae52'), 0, -.19, 0, armR); bag.castShadow = true; } // bolsa del súper
+      if (acc === 4) { const b = mk(new T.SphereGeometry(.06, 8, 6), hr, -.13, .64, 0); b.scale.set(1, 1.6, 1); }                                                                         // cola de caballo
+      if (acc === 5) mk(new T.BoxGeometry(.02, .09, .05), mat('#18213a'), .05, -.2, 0, armL);                                                                                             // celular
+      return {
+        g,
+        walk(t, still) {
+          const s = still ? 0 : Math.sin(t * 8 + k * 1.3);
+          legL.rotation.z = s * .55; legR.rotation.z = -s * .55;
+          armL.rotation.z = -s * .6; armR.rotation.z = acc === 2 ? -s * .25 : s * .6;
+          if (acc === 5 && !still) armL.rotation.z = -1.1; // mira su celular
+        }
+      };
+    }
     for (let k = 0; k < Math.min(12, 4 + n); k += 1) {
-      const lane = lanes[(k * 3) % lanes.length], g = new T.Group(); world.add(g);
-      cyl(.11, .14, .42, mat(shirts[k % shirts.length]), 0, .37, 0, g, 10);
-      const hd = new T.Mesh(new T.SphereGeometry(.11, 10, 8), skin); hd.position.y = .68; hd.castShadow = true; g.add(hd);
+      const lane = lanes[(k * 3) % lanes.length], P = person(k, world), g = P.g;
       const sp = .55 + (k % 4) * .18, off = k * 1.7;
       movers.push(t => {
         const L = lane.b - lane.a, d = reduce ? L * ((k * .37) % 1) : ((t * sp + off) % (2 * L)), fwd = d < L, s = fwd ? d : 2 * L - d, p = lane.a + s, y = .12 + Math.abs(Math.sin(t * 7 + k)) * .04;
         if (lane.h) { g.position.set(p, y, lane.v); g.rotation.y = fwd ? 0 : Math.PI; } else { g.position.set(lane.v, y, p); g.rotation.y = fwd ? -Math.PI / 2 : Math.PI / 2; }
+        P.walk(t, reduce);
       });
     }
 
@@ -1198,15 +1232,13 @@ const Dio = (() => {
         movers.push(t => ffs.forEach((m, i) => { const a = t * .4 + i * .63; m.position.set(fx + Math.cos(a) * (1.6 + Math.sin(i) * .9), .5 + Math.sin(t * 1.5 + i) * .3, fz + Math.sin(a * 1.3) * (1.8 + Math.cos(i) * .6)); m.visible = reduce || Math.sin(t * 3 + i * 1.7) > -.3; }));
       }
       // persona paseando a su perro por la banqueta de enfrente
-      const walker = new T.Group(); world.add(walker);
-      cyl(.11, .14, .42, mat('#7a68e0'), 0, .37, 0, walker, 10);
-      add(new T.SphereGeometry(.11, 10, 8), mat('#f1c9a0'), 0, .68, 0, walker, true);
+      const WP = person(4, world, '#7a68e0'), walker = WP.g;
       const dog = new T.Group(); world.add(dog);
       add(new T.BoxGeometry(.32, .14, .14), mat('#b07a4a'), 0, .2, 0, dog, true); add(new T.BoxGeometry(.13, .13, .12), mat('#b07a4a'), .2, .28, 0, dog, true);
       const tail = add(new T.BoxGeometry(.12, .03, .03), mat('#8a5a33'), -.2, .28, 0, dog);
       const wz = rz1 + 1.35, wa = rx0 + .5, wb = rx1 - .5;
       movers.push(t => { const L = wb - wa, d = reduce ? L / 3 : (t * .45) % (2 * L), fwd = d < L, x = wa + (fwd ? d : 2 * L - d), dir = fwd ? 1 : -1, hop = reduce ? 0 : Math.abs(Math.sin(t * 7)) * .04;
-        walker.position.set(x, .12 + hop, wz); walker.rotation.y = fwd ? 0 : Math.PI;
+        walker.position.set(x, .12 + hop, wz); walker.rotation.y = fwd ? 0 : Math.PI; WP.walk(t * .7, reduce);
         dog.position.set(x + dir * .55, .12 + (reduce ? 0 : Math.abs(Math.sin(t * 10)) * .05), wz + .1); dog.rotation.y = fwd ? 0 : Math.PI; tail.rotation.y = reduce ? 0 : Math.sin(t * 14) * .6; });
     }
 
@@ -2274,7 +2306,7 @@ const GLOS = [
   [/quincena/, 'Una <b>quincena</b> es cada pago de tu sueldo, normalmente el 15 y el último día del mes. En Ajustes puedes poner tus días de pago.']
 ];
 const INTENTS = [
-  { id: 'saludo', w: 0.6, re: [/^(hola|buenas|buen dia|buenos dias|buenas tardes|buenas noches|hey|que onda|que tal)\b/], a: () => `<p>¡Hola${USER && USER.displayName ? ', ' + esc(USER.displayName.split(' ')[0]) : ''}! Pregúntame lo que quieras de tu dinero o de cómo usar la app.</p>`, next: ['¿Cómo voy?', '¿Qué tengo que pagar?', '¿Cómo registro un gasto?'] },
+  { id: 'saludo', w: 0.6, re: [/^(hola|buenas|buen dia|buenos dias|buenas tardes|buenas noches|hey|que onda|que tal)\b/, /^moni\b/], a: () => `<p>¡Hola${USER && USER.displayName ? ', ' + esc(USER.displayName.split(' ')[0]) : ''}! Soy Moni. Pregúntame lo que quieras de tu dinero o de cómo usar la app.</p>`, next: ['¿Cómo voy?', '¿Qué tengo que pagar?', '¿Cómo registro un gasto?'] },
   { id: 'gracias', re: [/^(gracias|muchas gracias|grax|ok|okay|va|perfecto|genial|listo|vale)\b/], a: () => '<p>¡Con gusto! Aquí estoy cuando me necesites.</p>', next: ['¿Cómo voy?', '¿Cuánto me sobra?'] },
   { id: 'resumen', w: 0.6, re: [/como (voy|estoy|ando|va)/, /que tal voy/, /resumen/, /estado de mi/, /mis finanzas/], a: () => {
     const s = monthStats(), M = metrics(), g = sum(monthGastos());
@@ -2332,7 +2364,7 @@ const INTENTS = [
   { id: 'h_moneda', re: [/moneda|dolar|yen|euro|tipo de cambio|divisa/], a: () => '<p>En <b>Ajustes → Tu plan</b> puedes activar <b>otra moneda</b> y poner el tipo de cambio. Tus montos se verán también en esa moneda.</p>', acts: ['plan'], next: ['¿Cómo voy?'] },
   { id: 'h_3d', re: [/maqueta|3d|edificio|ciudad|animacion/], a: () => '<p>La <b>maqueta 3D</b> muestra tu meta: cada edificio es un fondo y se va construyendo conforme ahorras. Toca un edificio para ver su detalle. El escenario cambia según tu meta (auto, casa, viaje, estudios, negocio).</p>', acts: ['funds'], next: ['¿Qué es un fondo?', '¿Voy bien para mi meta?'] },
   { id: 'h_periodo', re: [/periodo|ultimos (3|6|12) meses|filtro|ver otro mes/], a: () => '<p>Arriba está el selector <b>Este mes</b>. Cámbialo a 3, 6 o 12 meses para ver tus números de más tiempo. En Movimientos puedes filtrar por tipo con los botones de arriba de la lista.</p>', next: ['¿Cuánto gasté este mes?'] },
-  { id: 'h_que_hago', re: [/^(ayuda|help|como funciona|que (puedes|sabes) hacer|para que sirves|como se usa|no entiendo (la app|nada))/, /por donde empiezo|primeros pasos/], a: () => '<p>Soy tu asistente. Puedo:</p><ul><li>Decirte cómo vas: cuánto gastaste, cuánto te queda y si llegas a tu meta.</li><li>Recordarte qué tienes que pagar.</li><li>Explicarte palabras como "día de corte" o "tasa de ahorro".</li><li>Enseñarte a usar la app paso a paso.</li></ul><p><b>Para empezar:</b> 1) pon tu sueldo y tu meta en Ajustes, 2) agrega tus gastos fijos y tarjetas, 3) registra cada gasto con el botón <b>+</b>.</p>', acts: ['plan', 'gasto'], next: ['¿Cómo voy?', '¿Cómo registro un gasto?', '¿Qué es un fondo?'] }
+  { id: 'h_que_hago', re: [/(quien|que) eres|como te llamas|tu nombre/, /^(ayuda|help|como funciona|que (puedes|sabes) hacer|para que sirves|como se usa|no entiendo (la app|nada))/, /por donde empiezo|primeros pasos/], a: () => '<p>Soy <b>Moni</b>, tu asistente. Puedo:</p><ul><li>Decirte cómo vas: cuánto gastaste, cuánto te queda y si llegas a tu meta.</li><li>Recordarte qué tienes que pagar.</li><li>Explicarte palabras como "día de corte" o "tasa de ahorro".</li><li>Enseñarte a usar la app paso a paso.</li></ul><p><b>Para empezar:</b> 1) pon tu sueldo y tu meta en Ajustes, 2) agrega tus gastos fijos y tarjetas, 3) registra cada gasto con el botón <b>+</b>.</p>', acts: ['plan', 'gasto'], next: ['¿Cómo voy?', '¿Cómo registro un gasto?', '¿Qué es un fondo?'] }
 ];
 function botAnswer(raw) {
   const q = nrm(raw);
@@ -2365,7 +2397,7 @@ function botAsk(text) {
 }
 function botOpen() {
   BOT.open = true; $('#bot').hidden = false; $('#botBtn').hidden = true;
-  if (!$('#botLog').children.length) botMsg('bot', `<p>¡Hola${USER && USER.displayName ? ', ' + esc(USER.displayName.split(' ')[0]) : ''}! 👋 Soy tu asistente. Pregúntame cómo vas con tu dinero o cómo usar la app. Escribe como quieras o toca una pregunta:</p>`, null, ['¿Cómo voy?', '¿Cuánto gasté este mes?', '¿Qué tengo que pagar?', '¿Voy bien para mi meta?', '¿Cómo registro un gasto?', 'Me equivoqué, ¿cómo corrijo?']);
+  if (!$('#botLog').children.length) botMsg('bot', `<p>¡Hola${USER && USER.displayName ? ', ' + esc(USER.displayName.split(' ')[0]) : ''}! 👋 Soy <b>Moni</b>, tu asistente. Pregúntame cómo vas con tu dinero o cómo usar la app. Escribe como quieras o toca una pregunta:</p>`, null, ['¿Cómo voy?', '¿Cuánto gasté este mes?', '¿Qué tengo que pagar?', '¿Voy bien para mi meta?', '¿Cómo registro un gasto?', 'Me equivoqué, ¿cómo corrijo?']);
   setTimeout(() => { if (matchMedia('(min-width:601px)').matches) $('#botIn').focus(); }, 50);
 }
 function botClose() { BOT.open = false; $('#bot').hidden = true; $('#botBtn').hidden = false; }
