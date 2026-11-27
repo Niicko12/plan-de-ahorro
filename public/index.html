@@ -2276,6 +2276,20 @@ async function invBulkSave() {
   await invSet(L, `Listo: ${ok.length} ${ok.length === 1 ? 'acción' : 'acciones'} en tu portafolio${miss.length ? ` · sin precio: ${miss.join(', ')}` : ''}${bad.length ? ` · ${bad.length} renglón(es) no entendí` : ''}`);
   pxFetch(true);
 }
+// Enlace con la lista ya escrita: #pegar=<texto en base64url>. Se lee aquí y se borra de la barra de direcciones.
+(() => {
+  try {
+    const m = /^#pegar=([A-Za-z0-9_-]+)$/.exec(location.hash);
+    if (m) { const b = m[1].replace(/-/g, '+').replace(/_/g, '/'); const txt = decodeURIComponent(escape(atob(b + '==='.slice((b.length + 3) % 4)))); sessionStorage.setItem('pa-bulk', txt.slice(0, 8000)); history.replaceState(null, '', location.pathname + location.search); }
+  } catch {}
+})();
+function invBulkPending() {
+  let t = null; try { t = sessionStorage.getItem('pa-bulk'); } catch {}
+  if (!t || MODE === 'loading' || S.onboard || S.locked) return;
+  try { sessionStorage.removeItem('pa-bulk'); } catch {}
+  S.view = 'inv'; render(true);
+  setTimeout(() => { invBulkOpen(); const ta = $('#iBulk'); ta.value = t; ta.dispatchEvent(new Event('input', { bubbles: true })); toast('Revisa tu lista y toca Agregar.'); }, 50);
+}
 function invPinClose() { $('#invSh').hidden = true; }
 async function invSet(next, msg) {
   const prev = invList(); CFG.inv = next; invPinClose(); drawInv();
@@ -2319,6 +2333,7 @@ function render(rebuild) {
   else if (S.view === 'movs') { if (rebuild || !$('#movForm')) buildMovForm(); else renderTable(); }
   else if (S.view === 'cfg') { if (!cfgDraft || !S.cfgDirty) buildCfg(); else drawCfg(); }
   else if (S.view === 'inv') renderInv();
+  if (MODE !== 'loading') setTimeout(invBulkPending, 0);
 }
 
 let toastT;
@@ -2847,7 +2862,7 @@ async function tryUnlock() {
   if (Date.now() < failUntil) { err.textContent = `Demasiados intentos. Espera ${Math.ceil((failUntil - Date.now()) / 1000)} s.`; err.hidden = false; return; }
   if (!v) return;
   const h = await sha(CFG.pin.s + ':' + v);
-  if (h === CFG.pin.h) { failN = 0; S.locked = false; try { sessionStorage.setItem('pa-unlocked', '1'); } catch {} $('#lock').hidden = true; armIdle(); }
+  if (h === CFG.pin.h) { failN = 0; S.locked = false; try { sessionStorage.setItem('pa-unlocked', '1'); } catch {} $('#lock').hidden = true; armIdle(); setTimeout(invBulkPending, 0); }
   else { failN += 1; if (failN >= 5) { failUntil = Date.now() + 30000; failN = 0; } err.textContent = failUntil > Date.now() ? 'Demasiados intentos. Espera 30 s.' : 'PIN incorrecto.'; err.hidden = false; $('#lockPin').value = ''; }
 }
 async function setPin(pin) {
