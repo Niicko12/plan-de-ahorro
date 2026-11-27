@@ -236,7 +236,8 @@ html{scroll-padding-top:70px}
 .sec-n{flex:none;width:34px;height:34px;border-radius:10px;background:var(--fg);color:var(--surface);display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:17px}
 .sec-h h2{font-size:21px;font-weight:900;line-height:1.15}.sec-h p{margin:2px 0 0;color:var(--muted);font-size:13.5px;max-width:70ch}
 .kstrip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:14px}
-@media (max-width:1100px){.kstrip{grid-template-columns:repeat(3,minmax(0,1fr))}} @media (max-width:560px){.kstrip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kstrip.k7{grid-template-columns:repeat(7,minmax(0,1fr))}.kinv{text-align:left;font:inherit;color:var(--fg);cursor:pointer;border-color:color-mix(in srgb,var(--ai) 30%,var(--line))}.kinv:hover{border-color:var(--ai)}.kinv small{color:var(--ai)!important}.kinv em{font-style:normal;font-weight:700}
+@media (max-width:1100px){.kstrip{grid-template-columns:repeat(3,minmax(0,1fr))}.kstrip.k7{grid-template-columns:repeat(4,minmax(0,1fr))}} @media (max-width:560px){.kstrip,.kstrip.k7{grid-template-columns:repeat(2,minmax(0,1fr))}.kstrip.k7>:first-child{grid-column:1/-1}}
 .kt{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:2px;min-width:0}
 .kt small{color:var(--muted);font-weight:600;font-size:12px}.kt b{font-family:var(--display);font-size:clamp(19px,2vw,24px);font-weight:900;white-space:nowrap}.kt span{color:var(--muted);font-size:11.5px}
 .grid-hero{display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,1fr);gap:14px;align-items:start}
@@ -466,7 +467,7 @@ html{scroll-padding-top:70px}
 .inv-mkt .seg{min-width:300px}.inv-mkt .seg button{font-size:13px;padding:8px}
 .mkt-w[hidden]{display:none}.mkt-w .seg.three{margin-bottom:10px}.inv-search{display:flex!important;flex-direction:row!important;gap:8px;margin-bottom:6px}.inv-search .btn{width:auto!important;flex:none;margin:0!important}.inv-search input{width:auto!important;margin:0!important}.inv-search[hidden]{display:none}.inv-search input{flex:1;min-width:0;font-size:16px;min-height:42px}.inv-search .btn{min-height:42px}
 .mrow{display:grid;grid-template-columns:36px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
-.mlogo{width:36px;height:36px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;font-weight:800;font-size:10.5px;overflow:hidden;flex:none;color:var(--fg)}.mlogo img{width:100%;height:100%;object-fit:cover}
+.mlogo{width:36px;height:36px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;font-weight:800;font-size:10.5px;overflow:hidden;flex:none;color:var(--fg)}.mlogo img{width:100%;height:100%;object-fit:cover}.mlogo{position:relative}.mlogo img{position:absolute;inset:0;border-radius:50%;opacity:0;transition:opacity .2s}.mlogo img.ok{opacity:1}.mlogo.img img{background:#fff;object-fit:contain;padding:3px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
 .mn{min-width:0;display:flex;flex-direction:column}.mn b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mn small{color:var(--muted);font-size:12px}
 .mp{display:flex;flex-direction:column;align-items:flex-end;gap:3px}.mp b{font-size:14px}
 .mrow .btn{min-height:38px;white-space:nowrap}
@@ -1657,9 +1658,11 @@ function kpiStrip(M, P) {
   const iv = invValue(), net = M.saved + inc + iv + ltTotal() - debt, libre = (+CFG.income || 0) - fixedMonthlyTotal() - P.ve;
   const rate = CFG.income ? libre / CFG.income : 0;
   const t = (l, v, s, c) => `<div class="kt"><small>${l}</small><b class="num" style="${c ? `color:${c}` : ''}">${v}</b><span>${s}</span></div>`;
-  return `<div class="kstrip">
+  if (iv) setTimeout(pxFetch, 0);
+  return `<div class="kstrip${iv ? ' k7' : ''}">
     ${t('Patrimonio neto', money(net), iv ? 'ahorro + inversiones + retiro + por recibir − deudas' : 'ahorro + retiro + por recibir − deudas', net < 0 ? 'var(--bad)' : '')}
     ${t('Ahorrado hoy', money(M.saved), altAmt(M.saved))}
+    ${invTile()}
     ${t('Deudas', money(debt), debt ? `≈ ${money(CFG.debts.reduce((s, d) => s + debtLeft(d) * (+d.r || 60) / 1200, 0))}/mes de intereses` : 'sin deudas', debt ? 'var(--bad)' : 'var(--good)')}
     ${ltList().length ? t('Para tu retiro', money(ltTotal()), 'largo plazo, no se usa', 'var(--good)') : t('Por recibir', money(inc), 'sin contar lo que te deben', 'var(--good)')}
     ${t('Te sobra al mes', money(libre), 'sueldo − fijos − variable')}
@@ -2066,6 +2069,12 @@ const m2 = v => { if (S.hideAmt) return money(v); const a = Math.abs(v); try { r
 const moneyS = v => (S.hideAmt ? money(v) : `${sgn(v)}${m2(Math.abs(v))}`);
 const getJson = async url => { const r = await fetch(url); if (!r.ok) throw new Error(String(r.status)); return r.json(); };
 
+// Tile del panel principal: mismo total que el apartado Inversiones; al tocarlo te lleva ahí.
+function invTile() {
+  if (!invList().length) return '';
+  const T = invTotals();
+  return `<button type="button" class="kt kinv" id="kInv" data-view="inv" aria-label="Ver mis inversiones"><small>Tus inversiones ›</small><b class="num">${money(T.v)}</b><span>${T.gain != null ? `<em class="${updn(T.gain)}">${moneyS(T.gain)} (${pctS(T.gp * 100)})</em> · invertiste ${money(T.cost)}` : 'toca para ver el detalle'}</span></button>`;
+}
 async function pxFetch(force) {
   if (pxBusy || (!force && Date.now() - PX.at < 55e3)) return;
   pxBusy = true; pxErr = ''; const st = $('#pxSt'); if (st) st.textContent = 'Actualizando…';
@@ -2086,7 +2095,7 @@ async function pxFetch(force) {
   pxBusy = false;
   try { localStorage.setItem('pa-px', JSON.stringify(PX)); } catch {}
   invSnap();
-  if (S.view === 'inv') drawInv(); else if (first && S.view === 'panel' && invList().length && !S.onboard) render();
+  if (S.view === 'inv') drawInv(); else if (first && S.view === 'panel' && invList().length && !S.onboard) render(); else { const k = $('#kInv'); if (k) k.outerHTML = invTile(); }
 }
 // Una foto al día del valor de tu portafolio, para la gráfica de cómo ha cambiado.
 function invSnap() {
@@ -2109,10 +2118,19 @@ function invChart() {
   const up = H[H.length - 1].v >= (H[H.length - 1].c || H[0].v);
   return `<figure class="inv-chart"><svg viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none" role="img" aria-label="Valor de tu portafolio en los últimos ${H.length} días"><path d="${line('c')}" class="ic-cost"/><path d="${line('v')}" class="ic-val ${up ? 'up' : 'down'}"/></svg><figcaption><span><i class="ic-k ${up ? 'up' : 'down'}"></i>Lo que vale</span><span><i class="ic-k cost"></i>Lo que invertiste</span><span>${esc(dateShort(H[0].d))} – hoy</span></figcaption></figure>`;
 }
-function logo(k, sym, n) {
-  const c = k === 'cripto' && PX.c[sym];
-  return c && c.img ? `<span class="mlogo"><img src="${esc(c.img)}" alt="" loading="lazy" referrerpolicy="no-referrer"></span>` : `<span class="mlogo">${esc((k === 'cripto' && c ? c.sym : sym).slice(0, 4))}</span>`;
+// Logo: cripto desde CoinGecko; acciones desde /api/logo (Vercel). Si falla, se quedan las letras.
+const LOGO_URL = QUOTES_URL.replace(/quotes$/, 'logo'), LOGO_BAD = new Set();
+function logo(k, sym, lab) {
+  const c = k === 'cripto' && PX.c[sym], txt = esc(String(lab || (c && c.sym) || sym).replace(/\.MX$/, '').replace(/[\s*]+/g, '').slice(0, 4));
+  const src = c && c.img ? c.img : k === 'accion' && !LOGO_BAD.has(sym) ? `${LOGO_URL}?s=${encodeURIComponent(sym)}` : '';
+  return `<span class="mlogo${src && !(c && c.img) ? ' img' : ''}" data-t="${txt}">${txt}${src ? `<img src="${esc(src)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}</span>`;
 }
+document.addEventListener('load', e => { const i = e.target; if (i && i.tagName === 'IMG' && i.parentElement && i.parentElement.classList.contains('mlogo')) i.classList.add('ok'); }, true);
+document.addEventListener('error', e => {
+  const i = e.target, sp = i && i.tagName === 'IMG' && i.parentElement; if (!sp || !sp.classList.contains('mlogo')) return;
+  const m = /[?&]s=([^&]+)/.exec(i.src); if (m) LOGO_BAD.add(decodeURIComponent(m[1]));
+  sp.classList.remove('img'); sp.textContent = sp.dataset.t || '';
+}, true);
 // Grupos del portafolio. Colores categóricos en orden fijo (validados en claro y oscuro): siempre el mismo color por mercado.
 const GRPS = [['mx', 'Bolsa Mexicana', 'MXN', 'var(--s1)'], ['us', 'Acciones EE. UU.', 'USD', 'var(--s2)'], ['cripto', 'Cripto', '', 'var(--s3)'], ['cetes', 'CETES', 'gobierno de México', 'var(--s4)']];
 const grpOf = h => (h.k === 'cetes' ? 'cetes' : h.k === 'cripto' ? 'cripto' : isMx(h.sym) ? 'mx' : 'us');
@@ -2143,7 +2161,7 @@ function holdRow(r, max) {
       : [['Precio', q ? pxFmt(q.p) + (q.orig ? ` <small>(${q.qc === 'USD' ? usdFmt(q.orig) : esc(q.qc + ' ' + q.orig)})</small>` : '') : '—'], ['Hoy', q ? `<span class="${updn(q.dp)}">${pctS(q.dp)} · ${moneyS(r.day)}</span>` : '—'], ['Invertiste', r.cost ? m2(r.cost) + (h.cur && h.cur !== invCur() ? ` <small>(${h.cur === 'USD' ? usdFmt(+h.cost) : esc(h.cur + ' ' + h.cost)})</small>` : '') : '—'], ['Tienes', esc(qty)]];
     det = `<div class="hd">${cells.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}<button type="button" class="btn small ghost" data-act="inv-pin" data-k="${h.k}" data-sym="${esc(h.sym)}" data-n="${esc(h.n || '')}" data-t="${esc(h.t || '')}">Editar</button></div>${cet && r.done ? '<p class="help inv-err">Ya venció: reinviértelo o retíralo y actualiza la fecha.</p>' : ''}`;
   }
-  return `<div class="hr${open ? ' open' : ''}"><button type="button" class="hr-m" data-act="inv-open" data-id="${esc(h.id)}" aria-expanded="${open}">${cet ? '<span class="mlogo">MX</span>' : logo(h.k, h.k === 'cripto' ? h.sym : lab, h.n)}<span class="hr-n"><b>${esc(h.n || lab)}</b><small>${esc(cet ? qty : `${lab} · ${qty}`)}</small></span><span class="hr-v">${right}</span>${bar}</button>${det}</div>`;
+  return `<div class="hr${open ? ' open' : ''}"><button type="button" class="hr-m" data-act="inv-open" data-id="${esc(h.id)}" aria-expanded="${open}">${cet ? '<span class="mlogo">MX</span>' : logo(h.k, h.sym, lab)}<span class="hr-n"><b>${esc(h.n || lab)}</b><small>${esc(cet ? qty : `${lab} · ${qty}`)}</small></span><span class="hr-v">${right}</span>${bar}</button>${det}</div>`;
 }
 function groupSection([id, n, sub, c], T) {
   const R = T.R.filter(r => grpOf(r.h) === id).sort((a, b) => b.v - a.v); if (!R.length) return '';
@@ -2158,7 +2176,7 @@ function cetesRow([days, rate]) {
 }
 function mktRow(k, sym, n, t) {
   const q = pxOf(k, sym), own = invList().some(h => h.k === k && h.sym === sym), c = k === 'cripto' && PX.c[sym], lab = c ? c.sym : t || sym;
-  return `<div class="mrow">${logo(k, k === 'cripto' ? sym : lab, n)}<div class="mn"><b>${esc(n)}</b><small>${esc(lab)}</small></div><div class="mp"><b class="num">${q ? pxFmt(q.p) : '—'}</b>${q ? `<span class="chip ${q.dp > 0 ? 'good' : q.dp < 0 ? 'bad' : ''}">${q.dp > 0 ? '▲' : q.dp < 0 ? '▼' : '•'} ${Math.abs(q.dp).toFixed(2)} %</span>` : ''}</div><button type="button" class="btn small ${own ? 'ghost' : ''}" data-act="inv-pin" data-k="${k}" data-sym="${esc(sym)}" data-n="${esc(n)}" data-t="${esc(t || '')}">${own ? '✓ La tengo' : 'La tengo'}</button></div>`;
+  return `<div class="mrow">${logo(k, sym, lab)}<div class="mn"><b>${esc(n)}</b><small>${esc(lab)}</small></div><div class="mp"><b class="num">${q ? pxFmt(q.p) : '—'}</b>${q ? `<span class="chip ${q.dp > 0 ? 'good' : q.dp < 0 ? 'bad' : ''}">${q.dp > 0 ? '▲' : q.dp < 0 ? '▼' : '•'} ${Math.abs(q.dp).toFixed(2)} %</span>` : ''}</div><button type="button" class="btn small ${own ? 'ghost' : ''}" data-act="inv-pin" data-k="${k}" data-sym="${esc(sym)}" data-n="${esc(n)}" data-t="${esc(t || '')}">${own ? '✓ La tengo' : 'La tengo'}</button></div>`;
 }
 function renderInv() {
   const root = $('#viewInv');
