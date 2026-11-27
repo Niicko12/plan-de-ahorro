@@ -6,6 +6,8 @@ const SYM = /^[A-Z][A-Z0-9.&-]{0,15}$/;
 
 export default async function handler(req, res) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
+  // Imagen pública: se permite leerla desde la app para detectar logos blancos.
+  res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method !== 'GET') return res.status(405).end();
   const sym = String(req.query.s || '').toUpperCase();
   if (!SYM.test(sym)) return res.status(400).end();
