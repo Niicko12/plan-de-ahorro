@@ -115,6 +115,7 @@ select,input[type=text],input[type=search],input[type=number],input[type=date]{b
 .bar{height:5px;background:var(--surface-2);border-radius:5px;overflow:hidden}
 .bar i{display:block;height:100%;border-radius:5px}
 
+.alert.is-link{cursor:pointer}.sur-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.sur-row select{flex:1;min-width:0}.alert.is-link:hover .at{text-decoration:underline}
 .alert{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;padding:9px 0;border-top:1px solid var(--line);align-items:start}
 .alert:first-of-type{border-top:0}
 .ai{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:700;font-size:13px}
@@ -399,6 +400,10 @@ html{scroll-padding-top:70px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="/firebase-config.js"></script>
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ahorro">
 <meta name="theme-color" content="#3355d6">
 <style>
 #login{position:fixed;inset:0;z-index:110;display:grid;place-items:center;overflow-y:auto;overscroll-behavior:contain;background:var(--bg);padding:20px}
@@ -692,7 +697,9 @@ function rangeOf() {
 const inR = (m, a, b) => m.date >= a && m.date <= b;
 const fundOf = id => CFG.funds.find(f => f.id === id);
 const goal = () => CFG.funds.reduce((t, f) => t + (+f.t || 0), 0);
-const fundSaved = id => sum(movs().filter(m => m.type === 'ahorro' && m.cat === id));
+// «traspaso»: mueve dinero ya ahorrado de un fondo (cat) a otro (to). No cambia el total ahorrado.
+const fundSaved = id => sum(movs().filter(m => m.type === 'ahorro' && m.cat === id)) + sum(movs().filter(m => m.type === 'traspaso' && m.to === id)) - sum(movs().filter(m => m.type === 'traspaso' && m.cat === id));
+const fundExtra = f => Math.max(0, fundSaved(f.id) - (+f.t || 0));
 /* ---------- tu dinero: fijos, deudas, pendientes, por recibir ---------- */
 const workDays = () => +CFG.workDays || 20;
 const fixMonthly = f => f.u === '2meses' ? f.a / 2 : f.u === 'dia' ? f.a * workDays() * 30.44 / 30 : f.a;
@@ -723,11 +730,12 @@ function paydaysUntil(end) {
   return out;
 }
 const nextPayday = () => paydaysUntil(addDays(TODAY, 40))[0];
-const nameOfMov = m => m.type === 'ahorro' ? (fundOf(m.cat)?.n || (m.cat === 'inicial' ? 'Ahorro que ya tenías' : 'Fondo eliminado'))
+const nameOfMov = m => m.type === 'traspaso' ? `${fundOf(m.cat)?.n || 'Fondo eliminado'} → ${fundOf(m.to)?.n || 'Fondo eliminado'}`
+  : m.type === 'ahorro' ? (fundOf(m.cat)?.n || (m.cat === 'inicial' ? 'Ahorro que ya tenías' : 'Fondo eliminado'))
   : m.type === 'pago' ? (CFG.debts.find(d => d.id === m.cat)?.n || 'Deuda')
   : m.type === 'ingreso' ? ((CFG.incoming.find(i => i.id === m.cat) || {}).n || ({ quincena: 'Quincena', otro: 'Otro ingreso' })[m.cat] || 'Ingreso')
   : (CAT[m.cat] || CAT.otros).n;
-const colorOfMov = m => m.type === 'ahorro' ? (fundOf(m.cat)?.c || '#11946f') : m.type === 'pago' ? (CFG.debts.find(d => d.id === m.cat)?.c || '#d23f4b') : m.type === 'ingreso' ? '#11946f' : (CAT[m.cat] || CAT.otros).c;
+const colorOfMov = m => m.type === 'traspaso' ? (fundOf(m.to)?.c || '#5b6bd6') : m.type === 'ahorro' ? (fundOf(m.cat)?.c || '#11946f') : m.type === 'pago' ? (CFG.debts.find(d => d.id === m.cat)?.c || '#d23f4b') : m.type === 'ingreso' ? '#11946f' : (CAT[m.cat] || CAT.otros).c;
 
 function monthStats() {
   const all = movs().filter(m => m.date.slice(0, 7) === CUR_YM);
@@ -1546,7 +1554,8 @@ function heroHtml(M) {
 }
 
 const focusCats = () => (Array.isArray(CFG.focus) && CFG.focus.length ? CFG.focus : ['comida', 'salidas']);
-const focusName = () => focusCats().map(id => (CAT[id] || CAT.otros).n).join(' y ');
+// Nombre corto: «Comida y súper» + «Salidas y delivery» → «Comida y salidas».
+const focusName = () => { const ns = focusCats().map(id => (CAT[id] || CAT.otros).n.split(/\s+(?:y|e|\/|,)\s+|\s*[(,]/)[0].trim()).filter(Boolean); const u = [...new Set(ns.map(n => n.toLowerCase()))].map(l => ns.find(n => n.toLowerCase() === l)); if (u.length <= 1) return u[0] || 'Tus categorías'; const last = u.pop(); return `${u.map((n, i) => (i ? n.toLowerCase() : n)).join(', ')} y ${last.toLowerCase()}`; };
 function alcoholStats(M) {
   const F = focusCats(); const al = movs().filter(m => m.type === 'gasto' && F.includes(m.cat));
   const month = ym => sum(al.filter(m => m.date.slice(0, 7) === ym));
@@ -1573,26 +1582,30 @@ function alertsList(M) {
   const cur = byCat(rg.from, rg.to), prev = byCat(rg.pFrom, rg.pTo);
   Object.keys(cur).filter(c => !focusCats().includes(c)).map(c => ({ c, v: cur[c], p: prev[c] || 0 })).filter(x => x.p > 0 && x.v - x.p > 200 && x.v / x.p > 1.2).sort((a, b) => (b.v - b.p) - (a.v - a.p)).slice(0, 1)
     .forEach(x => out.push(['bad', '▲', `${(CAT[x.c] || CAT.otros).n} subió ${pctTxt(x.v / x.p - 1)}`, `${money(x.v)} contra ${money(x.p)} en el período anterior.`]));
-  CFG.funds.forEach(f => { const s = fundSaved(f.id); if (f.t && s >= f.t) out.push(['good', '✓', `Fondo completo: ${f.n}`, `${money(s)} de ${money(f.t)}.`]); });
+  CFG.funds.forEach(f => { const s = fundSaved(f.id), x = fundExtra(f); if (f.t && s >= f.t) out.push(x >= 1 && fundsNeeding(f.id).length ? ['good', '✓', `${f.n}: completo y te sobran ${money(x)}`, 'Toca aquí para pasar lo que sobra a otro fondo.', f.id] : ['good', '✓', `Fondo completo: ${f.n}`, `${money(s)} de ${money(f.t)}.`]); });
   return out.slice(0, 5);
 }
 
 function rightHtml(M) {
   if (S.fund && fundOf(S.fund)) return fundHtml(fundOf(S.fund));
   if (S.fund && moneyLots().some(l => l.id === S.fund)) return lotHtml(S.fund);
-  const items = alertsList(M).map(([k, ic, t, d]) => `<div class="alert"><div class="ai ${k}">${ic}</div><div><div class="at">${esc(t)}</div><div class="ad">${esc(d)}</div></div></div>`).join('');
+  const items = alertsList(M).map(([k, ic, t, d, fid]) => `<div class="alert${fid ? ' is-link' : ''}"${fid ? ` data-fund="${esc(fid)}" role="button" tabindex="0"` : ''}><div class="ai ${k}">${ic}</div><div><div class="at">${esc(t)}</div><div class="ad">${esc(d)}</div></div></div>`).join('');
   return `<div class="card-h"><h2>Alertas</h2><span class="chip">${esc(periodLabel())}</span></div>${items}
-    <div class="minis"><div class="mini"><small>Días para tu meta</small><b class="num">${M.daysLeft}</b></div><div class="mini"><small>Tasa de ahorro</small><b class="num">${pctTxt(M.rate)}</b></div><div class="mini"><small>Gasto diario</small><b class="num">${money(M.dailySpend)}</b></div></div>`;
+    <div class="minis"><div class="mini"><small>Días para tu meta</small><b class="num">${M.daysLeft}</b></div><div class="mini"><small title="Lo que ahorraste en este período contra lo que gastaste">Ahorro real</small><b class="num">${pctTxt(M.rate)}</b></div><div class="mini"><small>Gasto diario</small><b class="num">${money(M.dailySpend)}</b></div></div>`;
 }
 
+// Fondos que todavía no llegan a su meta, el más atrasado primero.
+const fundsNeeding = skip => CFG.funds.filter(d => d.id !== skip && +d.t > fundSaved(d.id)).sort((a, b) => fundSaved(a.id) / a.t - fundSaved(b.id) / b.t);
 function fundHtml(f) {
-  const ah = movs().filter(m => m.type === 'ahorro' && m.cat === f.id).sort((a, b) => (a.date < b.date ? 1 : -1));
-  const s = sum(ah); const fr = f.t ? s / f.t : 0;
-  const rows = ah.slice(0, 5).map(m => `<div class="list-row"><div class="n"><div>${esc(m.note || 'Aporte')}</div><small>${dateShort(m.date)}</small></div><span class="amt-in">+${money(m.amount)}</span></div>`).join('') || '<p class="help">Este fondo aún no tiene aportes.</p>';
+  const ah = movs().filter(m => (m.type === 'ahorro' && m.cat === f.id) || (m.type === 'traspaso' && (m.cat === f.id || m.to === f.id))).sort((a, b) => (a.date < b.date ? 1 : -1));
+  const s = fundSaved(f.id); const fr = f.t ? s / f.t : 0; const extra = fundExtra(f), dest = fundsNeeding(f.id);
+  const rows = ah.slice(0, 5).map(m => { const out = m.type === 'traspaso' && m.cat === f.id; const lbl = m.type === 'traspaso' ? (out ? `Pasado a ${fundOf(m.to)?.n || 'otro fondo'}` : `Viene de ${fundOf(m.cat)?.n || 'otro fondo'}`) : (m.note || 'Aporte'); return `<div class="list-row"><div class="n"><div>${esc(lbl)}</div><small>${dateShort(m.date)}</small></div><span class="${out ? 'amt' : 'amt-in'}">${out ? '−' : '+'}${money(m.amount)}</span></div>`; }).join('') || '<p class="help">Este fondo aún no tiene aportes.</p>';
   return `<div class="card-h"><h2 style="display:flex;align-items:center;gap:8px"><span class="dot" style="background:${f.c}"></span>${esc(f.n)}</h2><button class="back" data-act="back">← Alertas</button></div>
     <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">${ring(fr, f.c, pctTxt(Math.min(fr, 1)))}<div><div class="ks">Ahorrado</div><div class="kv" style="text-align:left">${money(s)}</div><div class="ks">de ${money(f.t)}</div><div class="ks" style="margin-top:6px">${f.t > s ? `Faltan <b style="color:var(--fg)">${money(f.t - s)}</b>` : '<b style="color:var(--good)">Completo</b>'}</div></div></div>
     ${f.h ? `<p class="note-box">${esc(f.h)}</p>` : ''}
-    <h3 style="font-size:13px;margin:14px 0 4px">Últimos aportes</h3>${rows}
+    ${extra >= 1 && dest.length && !EXAMPLE ? `<div class="note-box sur"><b>Te sobran ${money(extra)}</b> en este fondo. Pásalos a uno que todavía no se llena:
+      <div class="sur-row"><select id="surTo" aria-label="Fondo destino">${dest.map(d => `<option value="${esc(d.id)}">${esc(d.n)} · faltan ${money(d.t - fundSaved(d.id))}</option>`).join('')}</select><button class="btn small" data-act="move-surplus" data-id="${esc(f.id)}">Pasar ${money(extra)}</button></div></div>` : ''}
+    <h3 style="font-size:13px;margin:14px 0 4px">Últimos movimientos</h3>${rows}
     <button class="btn" style="width:100%;margin-top:12px" data-act="add-fund" data-id="${esc(f.id)}">Agregar aporte a este fondo</button>`;
 }
 
@@ -1671,7 +1684,7 @@ function kpiStrip(M, P) {
     ${t('Deudas', money(debt), debt ? `≈ ${money(CFG.debts.reduce((s, d) => s + debtLeft(d) * (+d.r || 60) / 1200, 0))}/mes de intereses` : 'sin deudas', debt ? 'var(--bad)' : 'var(--good)')}
     ${ltList().length ? t('Para tu retiro', money(ltTotal()), 'largo plazo, no se usa', 'var(--good)') : t('Por recibir', money(inc), 'sin contar lo que te deben', 'var(--good)')}
     ${t('Te sobra al mes', money(libre), 'sueldo − fijos − variable')}
-    ${t('Tasa de ahorro', pctTxt(Math.max(0, rate)), rate >= .3 ? 'excelente (meta ≥ 20 %)' : rate >= .2 ? 'sana (meta ≥ 20 %)' : 'baja (meta ≥ 20 %)', rate >= .2 ? 'var(--good)' : 'var(--warn)')}
+    ${t('Ahorro planeado', pctTxt(Math.max(0, rate)), `de tu sueldo · ${rate >= .3 ? 'excelente' : rate >= .2 ? 'sano' : 'bajo'} (meta ≥ 20 %)`, rate >= .2 ? 'var(--good)' : 'var(--warn)')}
   </div>`;
 }
 
@@ -1938,14 +1951,14 @@ function buildMovForm() {
 }
 function renderTable() {
   const f = $('#filters'); if (!f) return;
-  f.innerHTML = [['all', 'Todos'], ['gasto', 'Gastos'], ['ahorro', 'Ahorros'], ['pago', 'Deudas'], ['ingreso', 'Ingresos'], ['focus', 'Comida y salidas'], ['gmail', '✉ Del correo']].map(([k, n]) => `<button data-filter="${k}" class="${S.filter === k ? 'is-on' : ''}">${n}</button>`).join('');
+  f.innerHTML = [['all', 'Todos'], ['gasto', 'Gastos'], ['ahorro', 'Ahorros'], ...(movs().some(m => m.type === 'traspaso') ? [['traspaso', 'Traspasos']] : []), ['pago', 'Deudas'], ['ingreso', 'Ingresos'], ['focus', esc(focusName())], ['gmail', '✉ Del correo']].map(([k, n]) => `<button data-filter="${k}" class="${S.filter === k ? 'is-on' : ''}">${n}</button>`).join('');
   const list = movs().filter(m => S.filter === 'all' || (S.filter === 'focus' ? focusCats().includes(m.cat) && m.type === 'gasto' : S.filter === 'gmail' ? m.src === 'gmail' : m.type === S.filter)).sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
   if (!list.length) { $('#tbl').innerHTML = '<p class="empty">No hay movimientos todavía. Agrega el primero con el formulario.</p>'; return; }
-  const TY = { ahorro: ['good', 'Ahorro'], gasto: ['bad', 'Gasto'], pago: ['warn', 'Pago deuda'], ingreso: ['', 'Ingreso'] };
+  const TY = { ahorro: ['good', 'Ahorro'], gasto: ['bad', 'Gasto'], pago: ['warn', 'Pago deuda'], ingreso: ['', 'Ingreso'], traspaso: ['', 'Traspaso'] };
   $('#tbl').innerHTML = `<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Nota</th><th style="text-align:right">Monto</th><th></th></tr></thead><tbody>${list.slice(0, 300).map(m => {
     const plus = m.type === 'ahorro' || m.type === 'ingreso', ty = TY[m.type] || TY.gasto;
-    const del = EXAMPLE ? '' : (S.confirmDel === m.id ? '' : `<button class="del" data-edit="${esc(m.id)}" aria-label="Editar movimiento">Editar</button> `) + (S.confirmDel === m.id ? `<button class="btn danger small" data-delyes="${esc(m.id)}">Borrar</button> <button class="btn ghost small" data-delno="1">No</button>` : `<button class="del" data-del="${esc(m.id)}" aria-label="Borrar movimiento">Borrar</button>`);
-    return `<tr><td class="num">${dateShort(m.date)} ${m.date.slice(2, 4)}</td><td><span class="chip ${ty[0]}">${ty[1]}</span></td><td><span class="tag"><span class="dot" style="background:${colorOfMov(m)}"></span>${esc(nameOfMov(m))}</span></td><td class="note">${m.src === 'gmail' ? `<span class="mail" title="Detectado en tu correo${m.via ? ' · ' + esc(m.via) : ''}">✉</span> ` : ''}${esc(m.note)}</td><td class="amt ${plus ? 'amt-in' : ''}">${plus ? '+' : '−'}${money(m.amount)}</td><td style="white-space:nowrap;text-align:right">${del}</td></tr>`;
+    const del = EXAMPLE ? '' : (S.confirmDel === m.id || m.type === 'traspaso' ? '' : `<button class="del" data-edit="${esc(m.id)}" aria-label="Editar movimiento">Editar</button> `) + (S.confirmDel === m.id ? `<button class="btn danger small" data-delyes="${esc(m.id)}">Borrar</button> <button class="btn ghost small" data-delno="1">No</button>` : `<button class="del" data-del="${esc(m.id)}" aria-label="Borrar movimiento">Borrar</button>`);
+    return `<tr><td class="num">${dateShort(m.date)} ${m.date.slice(2, 4)}</td><td><span class="chip ${ty[0]}">${ty[1]}</span></td><td><span class="tag"><span class="dot" style="background:${colorOfMov(m)}"></span>${esc(nameOfMov(m))}</span></td><td class="note">${m.src === 'gmail' ? `<span class="mail" title="Detectado en tu correo${m.via ? ' · ' + esc(m.via) : ''}">✉</span> ` : ''}${esc(m.note)}</td><td class="amt ${plus ? 'amt-in' : ''}">${m.type === 'traspaso' ? '⇄ ' : plus ? '+' : '−'}${money(m.amount)}</td><td style="white-space:nowrap;text-align:right">${del}</td></tr>`;
   }).join('')}</tbody></table>`;
 }
 
@@ -3010,6 +3023,7 @@ document.addEventListener('click', e => {
   else if (act === 'inv-close') invPinClose();
   else if (act === 'inv-refresh') pxFetch(true);
   else if (act === 'inv-del') { const f = $('#invForm'); if (f) { const { k, sym, n } = f.dataset; invSet(invList().filter(x => !(x.k === k && x.sym === sym)), `${n} ya no está en tus inversiones`); } }
+  else if (act === 'move-surplus') { const f = fundOf(a.dataset.id), sel = $('#surTo'), to = sel && fundOf(sel.value); if (!f || !to) return; const amt = Math.round(fundExtra(f) * 100) / 100; if (!(amt > 0)) return; addMov({ id: uid(), kind: 'mov', type: 'traspaso', amount: amt, date: TODAY, cat: f.id, to: to.id, note: `Sobrante de ${f.n} a ${to.n}`, created: Date.now() }); }
   else if (act === 'add-fund') { S.view = 'movs'; S.formType = 'ahorro'; S.formCat = a.dataset.id; render(true); setTimeout(() => $('#fAmt') && $('#fAmt').focus(), 0); }
   else if (act === 'rm-fund') { cfgDraft.funds.splice(+a.dataset.i, 1); drawCfg(); }
   else if (act === 'add-fund-row') { const used = cfgDraft.funds.map(f => f.c); cfgDraft.funds.push({ id: 'f' + Date.now().toString(36), n: 'Nuevo fondo', t: 5000, c: FUND_COLORS.find(c => !used.includes(c)) || FUND_COLORS[cfgDraft.funds.length % FUND_COLORS.length] }); drawCfg(); }
