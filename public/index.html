@@ -115,6 +115,7 @@ select,input[type=text],input[type=search],input[type=number],input[type=date]{b
 .bar{height:5px;background:var(--surface-2);border-radius:5px;overflow:hidden}
 .bar i{display:block;height:100%;border-radius:5px}
 
+.alert.is-link{cursor:pointer}.sur-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.sur-row select{flex:1;min-width:0}.alert.is-link:hover .at{text-decoration:underline}
 .alert{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;padding:9px 0;border-top:1px solid var(--line);align-items:start}
 .alert:first-of-type{border-top:0}
 .ai{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:700;font-size:13px}
@@ -126,6 +127,7 @@ select,input[type=text],input[type=search],input[type=number],input[type=date]{b
 /* alcohol */
 .alc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr);gap:22px;align-items:center}
 @media (max-width:900px){.alc{grid-template-columns:minmax(0,1fr)}}
+.bank{padding:12px 14px;border:1px solid var(--line);border-radius:14px;margin:4px 0 6px}.bank-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.kv2{font-family:var(--display);font-weight:800;font-size:20px}.bankf{display:grid;gap:8px;margin:4px 0 10px}.bankf input[type=number]{flex:1;min-width:0;font-size:16px}.chk{display:flex;gap:8px;align-items:center;font-size:14px}
 .alc-big{font-family:var(--display);font-weight:900;font-size:clamp(28px,3.4vw,38px);line-height:1.05;white-space:nowrap}
 .meter{height:10px;background:var(--surface-2);border-radius:6px;overflow:hidden;margin:10px 0 5px}
 .meter i{display:block;height:100%;border-radius:6px}
@@ -399,6 +401,10 @@ html{scroll-padding-top:70px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="/firebase-config.js"></script>
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ahorro">
 <meta name="theme-color" content="#3355d6">
 <style>
 #login{position:fixed;inset:0;z-index:110;display:grid;place-items:center;overflow-y:auto;overscroll-behavior:contain;background:var(--bg);padding:20px}
@@ -692,7 +698,9 @@ function rangeOf() {
 const inR = (m, a, b) => m.date >= a && m.date <= b;
 const fundOf = id => CFG.funds.find(f => f.id === id);
 const goal = () => CFG.funds.reduce((t, f) => t + (+f.t || 0), 0);
-const fundSaved = id => sum(movs().filter(m => m.type === 'ahorro' && m.cat === id));
+// «traspaso»: mueve dinero ya ahorrado de un fondo (cat) a otro (to). No cambia el total ahorrado.
+const fundSaved = id => sum(movs().filter(m => m.type === 'ahorro' && m.cat === id)) + sum(movs().filter(m => m.type === 'traspaso' && m.to === id)) - sum(movs().filter(m => m.type === 'traspaso' && m.cat === id));
+const fundExtra = f => Math.max(0, fundSaved(f.id) - (+f.t || 0));
 /* ---------- tu dinero: fijos, deudas, pendientes, por recibir ---------- */
 const workDays = () => +CFG.workDays || 20;
 const fixMonthly = f => f.u === '2meses' ? f.a / 2 : f.u === 'dia' ? f.a * workDays() * 30.44 / 30 : f.a;
@@ -723,11 +731,12 @@ function paydaysUntil(end) {
   return out;
 }
 const nextPayday = () => paydaysUntil(addDays(TODAY, 40))[0];
-const nameOfMov = m => m.type === 'ahorro' ? (fundOf(m.cat)?.n || (m.cat === 'inicial' ? 'Ahorro que ya tenías' : 'Fondo eliminado'))
+const nameOfMov = m => m.type === 'traspaso' ? `${fundOf(m.cat)?.n || 'Fondo eliminado'} → ${fundOf(m.to)?.n || 'Fondo eliminado'}`
+  : m.type === 'ahorro' ? (fundOf(m.cat)?.n || (m.cat === 'inicial' ? 'Ahorro que ya tenías' : 'Fondo eliminado'))
   : m.type === 'pago' ? (CFG.debts.find(d => d.id === m.cat)?.n || 'Deuda')
   : m.type === 'ingreso' ? ((CFG.incoming.find(i => i.id === m.cat) || {}).n || ({ quincena: 'Quincena', otro: 'Otro ingreso' })[m.cat] || 'Ingreso')
   : (CAT[m.cat] || CAT.otros).n;
-const colorOfMov = m => m.type === 'ahorro' ? (fundOf(m.cat)?.c || '#11946f') : m.type === 'pago' ? (CFG.debts.find(d => d.id === m.cat)?.c || '#d23f4b') : m.type === 'ingreso' ? '#11946f' : (CAT[m.cat] || CAT.otros).c;
+const colorOfMov = m => m.type === 'traspaso' ? (fundOf(m.to)?.c || '#5b6bd6') : m.type === 'ahorro' ? (fundOf(m.cat)?.c || '#11946f') : m.type === 'pago' ? (CFG.debts.find(d => d.id === m.cat)?.c || '#d23f4b') : m.type === 'ingreso' ? '#11946f' : (CAT[m.cat] || CAT.otros).c;
 
 function monthStats() {
   const all = movs().filter(m => m.date.slice(0, 7) === CUR_YM);
@@ -853,6 +862,45 @@ function debtRow(d) {
   return `<div class="debt"><div class="debt-h"><span class="dot" style="background:${d.c}"></span><b>${esc(d.n)}</b><span class="num">${left ? money(left) : 'Pagada'}</span></div><div class="bar"><i style="width:${(fr * 100).toFixed(1)}%;background:var(--good)"></i></div>${cardLine(d)}<div class="debt-f"><small>Pagado ${money(d.t - left)} de ${money(d.t)}${+d.r ? ` · ${d.r} % anual` : ''}</small>${left ? `<form class="abono" data-debt="${esc(d.id)}" novalidate><label class="sr-only" for="ab-${esc(d.id)}">Monto a abonar a ${esc(d.n)}</label><input id="ab-${esc(d.id)}" type="number" inputmode="decimal" min="0" step="any" placeholder="$ Monto"><button class="btn small" type="submit">Abonar</button></form>` : ''}</div></div>`;
 }
 
+/* Saldo real de la cuenta: lo escribe la persona y la app lo ajusta con lo que registra después
+   (ingresos, abonos a tarjetas y pagos fijos o únicos marcados). Las compras con tarjeta de crédito no bajan el saldo. */
+function bankInfo() {
+  const b = CFG.bank; if (!b || b.a === '' || b.a == null || !(+b.a >= 0)) return null;
+  const refs = new Set([...CFG.fixed.map(f => f.id), ...CFG.upcoming.map(u => u.id)]);
+  const after = movs().filter(m => (m.created || 0) > (b.t || 0) && m.date >= b.d);
+  const inc = sum(after.filter(m => m.type === 'ingreso')), out = sum(after.filter(m => m.type === 'pago' || (m.type === 'gasto' && refs.has(m.ref))));
+  const now = (+b.a) + inc - out;
+  const np = nextPayday() || addDays(TODAY, 15), days = Math.max(1, diffDays(TODAY, np));
+  const res = [];
+  fixedNow().filter(f => !fixPaid(f)).forEach(f => {
+    if (f.u === 'dia') { res.push([f.n, Math.round(f.a * workDays() * days / 30)]); return; }
+    const d = +f.dia; if (d) { const t = new Date(`${TODAY}T00:00:00`); const due = iso(new Date(t.getFullYear(), t.getMonth(), Math.min(d, lastDay(t.getFullYear(), t.getMonth())))); if (due >= np) return; }
+    res.push([f.n, fixCharge(f)]);
+  });
+  CFG.upcoming.filter(u => u.d && u.d < np && upLeft(u)).forEach(u => res.push([u.n, upLeft(u)]));
+  const reserve = res.reduce((t, r) => t + r[1], 0);
+  const saved = b.inc === false ? 0 : Math.min(Math.max(0, now), sum(movs().filter(m => m.type === 'ahorro')));
+  const libre = now - saved - reserve;
+  return { b, now, inc, out, np, days, res, reserve, saved, libre, perDay: libre / days };
+}
+function bankHtml() {
+  const B = bankInfo();
+  if (!B || S.bankEd) { const b = CFG.bank || {};
+    return `<form class="bankf" novalidate><label for="bankAmt" class="ks">¿Cuánto tienes hoy en tu cuenta de banco?</label>
+      <div class="sur-row"><input id="bankAmt" type="number" inputmode="decimal" min="0" step="any" placeholder="$ Saldo de hoy" value="${b.a != null && b.a !== '' ? esc(String(b.a)) : ''}"><button class="btn small" type="submit">Guardar</button>${B ? '<button type="button" class="back" data-act="bank-cancel">Cancelar</button>' : ''}</div>
+      <label class="chk"><input type="checkbox" id="bankInc" ${b.inc === false ? '' : 'checked'}> Mi ahorro está en esta misma cuenta</label>
+      <small class="help">Es el número que ves en la app de tu banco. Con él te digo cuánto puedes gastar hasta tu próxima quincena.</small></form>`; }
+  const col = B.libre < 0 ? 'var(--bad)' : 'var(--fg)';
+  const lines = [B.saved ? `tu ahorro ${money(B.saved)}` : '', ...B.res.map(([n, v]) => `${esc(n)} ${money(v)}`)].filter(Boolean);
+  return `<div class="bank">
+    <div class="bank-top"><div><div class="ks">En tu cuenta</div><div class="kv2 num">${money(B.now)}</div><small class="ks">al ${dateShort(B.b.d)}${B.inc || B.out ? ` · con lo que registraste después` : ''}</small></div>
+      <button type="button" class="back" data-act="bank-edit">Actualizar</button></div>
+    <div class="ks" style="margin-top:10px">${B.libre < 0 ? `Te faltan para llegar al ${dateShort(B.np)}` : `Puedes gastar hasta el ${dateShort(B.np)}`}</div>
+    <div class="alc-big num" style="color:${col}">${money(Math.abs(B.libre))}</div>
+    <div class="ks">${B.libre > 0 ? `≈ ${money(B.perDay)} al día por ${B.days} días` : B.libre < 0 ? 'Para cubrir lo apartado tendrías que tomar de tu ahorro o esperar la quincena' : 'Justo, sin margen'}</div>
+    ${lines.length ? `<small class="help">Ya aparté: ${lines.join(' · ')}</small>` : ''}
+  </div>`;
+}
 function monthHtml() {
   const s = monthStats();
   const parts = [['Fijos', s.fixedM, 'var(--ai)'], ['Variables', s.variable, 'var(--shu)'], ['Pagos únicos', s.oneoff, 'var(--warn)'], ['Deudas', s.pagos, '#d23f4b'], ['Ahorro', s.ahorro, 'var(--good)']];
@@ -861,9 +909,9 @@ function monthHtml() {
   const fx = fixedNow().map(fixedRow).join('');
   const pending = fixedNow().filter(f => !fixPaid(f)).length;
   return `<div class="card-h"><h2>Tu mes</h2><span style="display:flex;gap:6px;align-items:center"><span class="chip">${esc(ymLabel(CUR_YM, true))}</span>${editBtn('fixed')}</span></div>
-    <div class="ks">Te quedan este mes</div>
-    <div class="alc-big num" style="color:${s.libre < 0 ? 'var(--bad)' : 'var(--fg)'}">${money(s.libre)}</div>
-    <div class="ks">de un sueldo de ${money(s.income)} · te pagan de nuevo el ${nextPayday() ? dateShort(nextPayday()) : '—'}</div>
+    ${bankHtml()}
+    <h3 class="sub">Plan del mes <span class="ks">· si cobras tu sueldo completo de ${money(s.income)}</span></h3>
+    <div class="ks">Al final del mes te sobrarían <b class="num" style="color:${s.libre < 0 ? 'var(--bad)' : 'var(--fg)'}">${money(s.libre)}</b></div>
     <div class="stack-bar">${bar}</div>
     <div class="legend">${parts.map(([n, v, c]) => `<span><span class="dot" style="background:${c}"></span>${n} ${money(v)}</span>`).join('')}</div>
     <h3 class="sub">Gastos fijos <span class="ks">· ${pending ? `${pending} por pagar` : 'todo pagado'} · ≈ ${money(s.fixedM)}/mes</span></h3>${fx || '<p class="help">Agrega tus gastos fijos en Ajustes.</p>'}`;
@@ -1535,7 +1583,7 @@ function heroHtml(M) {
   if (dinero) {
     const ms = monthStats(), td = totalDebt();
     top = `<div><div class="eyebrow">Tu dinero hoy</div><div class="big num" style="color:${td ? 'var(--bad)' : 'var(--good)'}">${td ? money(td) : 'Sin deudas'}</div><div class="hero-sub">${td ? `Debes en ${CFG.debts.filter(d => debtLeft(d)).length} tarjetas o préstamos` : 'Todo pagado'}</div></div>
-      <div style="text-align:right"><div class="eyebrow">Te quedan este mes</div><div class="big num">${money(ms.libre)}</div><div class="hero-sub">Sueldo ${money(ms.income)} · fijos ≈ ${money(ms.fixedM)}</div></div>`;
+      ${(() => { const B = bankInfo(); return B ? `<div style="text-align:right"><div class="eyebrow">${B.libre < 0 ? 'Te faltan para el' : 'Puedes gastar hasta el'} ${dateShort(B.np)}</div><div class="big num" style="color:${B.libre < 0 ? 'var(--bad)' : ''}">${money(Math.abs(B.libre))}</div><div class="hero-sub">En tu cuenta ${money(B.now)}</div></div>` : `<div style="text-align:right"><div class="eyebrow">Plan del mes: te sobrarían</div><div class="big num">${money(ms.libre)}</div><div class="hero-sub">Sueldo ${money(ms.income)} · fijos ≈ ${money(ms.fixedM)}</div></div>`; })()}`;
     chips = moneyLots().map(L => `<button class="fund${S.fund === L.id ? ' is-on' : ''}" data-fund="${esc(L.id)}"><span class="fund-n"><span class="dot" style="background:${L.c}"></span><span>${esc(L.n)}</span></span><span class="fund-v"><b style="color:${L.vc || 'var(--fg)'}">${esc(L.val)}</b></span>${L.kind === 'debt' ? `<span class="bar"><i style="width:${((1 - L.f) * 100).toFixed(1)}%;background:var(--good)"></i></span>` : ''}</button>`).join('');
   } else {
     top = `<div><div class="eyebrow">${esc(GN())}</div><div class="big num">${M.daysLeft} días</div><div class="hero-sub">Fecha meta: ${dateLong(CFG.tripDate)}</div></div>
@@ -1546,7 +1594,8 @@ function heroHtml(M) {
 }
 
 const focusCats = () => (Array.isArray(CFG.focus) && CFG.focus.length ? CFG.focus : ['comida', 'salidas']);
-const focusName = () => focusCats().map(id => (CAT[id] || CAT.otros).n).join(' y ');
+// Nombre corto: «Comida y súper» + «Salidas y delivery» → «Comida y salidas».
+const focusName = () => { const ns = focusCats().map(id => (CAT[id] || CAT.otros).n.split(/\s+(?:y|e|\/|,)\s+|\s*[(,]/)[0].trim()).filter(Boolean); const u = [...new Set(ns.map(n => n.toLowerCase()))].map(l => ns.find(n => n.toLowerCase() === l)); if (u.length <= 1) return u[0] || 'Tus categorías'; const last = u.pop(); return `${u.map((n, i) => (i ? n.toLowerCase() : n)).join(', ')} y ${last.toLowerCase()}`; };
 function alcoholStats(M) {
   const F = focusCats(); const al = movs().filter(m => m.type === 'gasto' && F.includes(m.cat));
   const month = ym => sum(al.filter(m => m.date.slice(0, 7) === ym));
@@ -1573,26 +1622,30 @@ function alertsList(M) {
   const cur = byCat(rg.from, rg.to), prev = byCat(rg.pFrom, rg.pTo);
   Object.keys(cur).filter(c => !focusCats().includes(c)).map(c => ({ c, v: cur[c], p: prev[c] || 0 })).filter(x => x.p > 0 && x.v - x.p > 200 && x.v / x.p > 1.2).sort((a, b) => (b.v - b.p) - (a.v - a.p)).slice(0, 1)
     .forEach(x => out.push(['bad', '▲', `${(CAT[x.c] || CAT.otros).n} subió ${pctTxt(x.v / x.p - 1)}`, `${money(x.v)} contra ${money(x.p)} en el período anterior.`]));
-  CFG.funds.forEach(f => { const s = fundSaved(f.id); if (f.t && s >= f.t) out.push(['good', '✓', `Fondo completo: ${f.n}`, `${money(s)} de ${money(f.t)}.`]); });
+  CFG.funds.forEach(f => { const s = fundSaved(f.id), x = fundExtra(f); if (f.t && s >= f.t) out.push(x >= 1 && fundsNeeding(f.id).length ? ['good', '✓', `${f.n}: completo y te sobran ${money(x)}`, 'Toca aquí para pasar lo que sobra a otro fondo.', f.id] : ['good', '✓', `Fondo completo: ${f.n}`, `${money(s)} de ${money(f.t)}.`]); });
   return out.slice(0, 5);
 }
 
 function rightHtml(M) {
   if (S.fund && fundOf(S.fund)) return fundHtml(fundOf(S.fund));
   if (S.fund && moneyLots().some(l => l.id === S.fund)) return lotHtml(S.fund);
-  const items = alertsList(M).map(([k, ic, t, d]) => `<div class="alert"><div class="ai ${k}">${ic}</div><div><div class="at">${esc(t)}</div><div class="ad">${esc(d)}</div></div></div>`).join('');
+  const items = alertsList(M).map(([k, ic, t, d, fid]) => `<div class="alert${fid ? ' is-link' : ''}"${fid ? ` data-fund="${esc(fid)}" role="button" tabindex="0"` : ''}><div class="ai ${k}">${ic}</div><div><div class="at">${esc(t)}</div><div class="ad">${esc(d)}</div></div></div>`).join('');
   return `<div class="card-h"><h2>Alertas</h2><span class="chip">${esc(periodLabel())}</span></div>${items}
-    <div class="minis"><div class="mini"><small>Días para tu meta</small><b class="num">${M.daysLeft}</b></div><div class="mini"><small>Tasa de ahorro</small><b class="num">${pctTxt(M.rate)}</b></div><div class="mini"><small>Gasto diario</small><b class="num">${money(M.dailySpend)}</b></div></div>`;
+    <div class="minis"><div class="mini"><small>Días para tu meta</small><b class="num">${M.daysLeft}</b></div><div class="mini"><small title="Lo que ahorraste en este período contra lo que gastaste">Ahorro real</small><b class="num">${pctTxt(M.rate)}</b></div><div class="mini"><small>Gasto diario</small><b class="num">${money(M.dailySpend)}</b></div></div>`;
 }
 
+// Fondos que todavía no llegan a su meta, el más atrasado primero.
+const fundsNeeding = skip => CFG.funds.filter(d => d.id !== skip && +d.t > fundSaved(d.id)).sort((a, b) => fundSaved(a.id) / a.t - fundSaved(b.id) / b.t);
 function fundHtml(f) {
-  const ah = movs().filter(m => m.type === 'ahorro' && m.cat === f.id).sort((a, b) => (a.date < b.date ? 1 : -1));
-  const s = sum(ah); const fr = f.t ? s / f.t : 0;
-  const rows = ah.slice(0, 5).map(m => `<div class="list-row"><div class="n"><div>${esc(m.note || 'Aporte')}</div><small>${dateShort(m.date)}</small></div><span class="amt-in">+${money(m.amount)}</span></div>`).join('') || '<p class="help">Este fondo aún no tiene aportes.</p>';
+  const ah = movs().filter(m => (m.type === 'ahorro' && m.cat === f.id) || (m.type === 'traspaso' && (m.cat === f.id || m.to === f.id))).sort((a, b) => (a.date < b.date ? 1 : -1));
+  const s = fundSaved(f.id); const fr = f.t ? s / f.t : 0; const extra = fundExtra(f), dest = fundsNeeding(f.id);
+  const rows = ah.slice(0, 5).map(m => { const out = m.type === 'traspaso' && m.cat === f.id; const lbl = m.type === 'traspaso' ? (out ? `Pasado a ${fundOf(m.to)?.n || 'otro fondo'}` : `Viene de ${fundOf(m.cat)?.n || 'otro fondo'}`) : (m.note || 'Aporte'); return `<div class="list-row"><div class="n"><div>${esc(lbl)}</div><small>${dateShort(m.date)}</small></div><span class="${out ? 'amt' : 'amt-in'}">${out ? '−' : '+'}${money(m.amount)}</span></div>`; }).join('') || '<p class="help">Este fondo aún no tiene aportes.</p>';
   return `<div class="card-h"><h2 style="display:flex;align-items:center;gap:8px"><span class="dot" style="background:${f.c}"></span>${esc(f.n)}</h2><button class="back" data-act="back">← Alertas</button></div>
     <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">${ring(fr, f.c, pctTxt(Math.min(fr, 1)))}<div><div class="ks">Ahorrado</div><div class="kv" style="text-align:left">${money(s)}</div><div class="ks">de ${money(f.t)}</div><div class="ks" style="margin-top:6px">${f.t > s ? `Faltan <b style="color:var(--fg)">${money(f.t - s)}</b>` : '<b style="color:var(--good)">Completo</b>'}</div></div></div>
     ${f.h ? `<p class="note-box">${esc(f.h)}</p>` : ''}
-    <h3 style="font-size:13px;margin:14px 0 4px">Últimos aportes</h3>${rows}
+    ${extra >= 1 && dest.length && !EXAMPLE ? `<div class="note-box sur"><b>Te sobran ${money(extra)}</b> en este fondo. Pásalos a uno que todavía no se llena:
+      <div class="sur-row"><select id="surTo" aria-label="Fondo destino">${dest.map(d => `<option value="${esc(d.id)}">${esc(d.n)} · faltan ${money(d.t - fundSaved(d.id))}</option>`).join('')}</select><button class="btn small" data-act="move-surplus" data-id="${esc(f.id)}">Pasar ${money(extra)}</button></div></div>` : ''}
+    <h3 style="font-size:13px;margin:14px 0 4px">Últimos movimientos</h3>${rows}
     <button class="btn" style="width:100%;margin-top:12px" data-act="add-fund" data-id="${esc(f.id)}">Agregar aporte a este fondo</button>`;
 }
 
@@ -1671,7 +1724,7 @@ function kpiStrip(M, P) {
     ${t('Deudas', money(debt), debt ? `≈ ${money(CFG.debts.reduce((s, d) => s + debtLeft(d) * (+d.r || 60) / 1200, 0))}/mes de intereses` : 'sin deudas', debt ? 'var(--bad)' : 'var(--good)')}
     ${ltList().length ? t('Para tu retiro', money(ltTotal()), 'largo plazo, no se usa', 'var(--good)') : t('Por recibir', money(inc), 'sin contar lo que te deben', 'var(--good)')}
     ${t('Te sobra al mes', money(libre), 'sueldo − fijos − variable')}
-    ${t('Tasa de ahorro', pctTxt(Math.max(0, rate)), rate >= .3 ? 'excelente (meta ≥ 20 %)' : rate >= .2 ? 'sana (meta ≥ 20 %)' : 'baja (meta ≥ 20 %)', rate >= .2 ? 'var(--good)' : 'var(--warn)')}
+    ${t('Ahorro planeado', pctTxt(Math.max(0, rate)), `de tu sueldo · ${rate >= .3 ? 'excelente' : rate >= .2 ? 'sano' : 'bajo'} (meta ≥ 20 %)`, rate >= .2 ? 'var(--good)' : 'var(--warn)')}
   </div>`;
 }
 
@@ -1938,14 +1991,14 @@ function buildMovForm() {
 }
 function renderTable() {
   const f = $('#filters'); if (!f) return;
-  f.innerHTML = [['all', 'Todos'], ['gasto', 'Gastos'], ['ahorro', 'Ahorros'], ['pago', 'Deudas'], ['ingreso', 'Ingresos'], ['focus', 'Comida y salidas'], ['gmail', '✉ Del correo']].map(([k, n]) => `<button data-filter="${k}" class="${S.filter === k ? 'is-on' : ''}">${n}</button>`).join('');
+  f.innerHTML = [['all', 'Todos'], ['gasto', 'Gastos'], ['ahorro', 'Ahorros'], ...(movs().some(m => m.type === 'traspaso') ? [['traspaso', 'Traspasos']] : []), ['pago', 'Deudas'], ['ingreso', 'Ingresos'], ['focus', esc(focusName())], ['gmail', '✉ Del correo']].map(([k, n]) => `<button data-filter="${k}" class="${S.filter === k ? 'is-on' : ''}">${n}</button>`).join('');
   const list = movs().filter(m => S.filter === 'all' || (S.filter === 'focus' ? focusCats().includes(m.cat) && m.type === 'gasto' : S.filter === 'gmail' ? m.src === 'gmail' : m.type === S.filter)).sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
   if (!list.length) { $('#tbl').innerHTML = '<p class="empty">No hay movimientos todavía. Agrega el primero con el formulario.</p>'; return; }
-  const TY = { ahorro: ['good', 'Ahorro'], gasto: ['bad', 'Gasto'], pago: ['warn', 'Pago deuda'], ingreso: ['', 'Ingreso'] };
+  const TY = { ahorro: ['good', 'Ahorro'], gasto: ['bad', 'Gasto'], pago: ['warn', 'Pago deuda'], ingreso: ['', 'Ingreso'], traspaso: ['', 'Traspaso'] };
   $('#tbl').innerHTML = `<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Nota</th><th style="text-align:right">Monto</th><th></th></tr></thead><tbody>${list.slice(0, 300).map(m => {
     const plus = m.type === 'ahorro' || m.type === 'ingreso', ty = TY[m.type] || TY.gasto;
-    const del = EXAMPLE ? '' : (S.confirmDel === m.id ? '' : `<button class="del" data-edit="${esc(m.id)}" aria-label="Editar movimiento">Editar</button> `) + (S.confirmDel === m.id ? `<button class="btn danger small" data-delyes="${esc(m.id)}">Borrar</button> <button class="btn ghost small" data-delno="1">No</button>` : `<button class="del" data-del="${esc(m.id)}" aria-label="Borrar movimiento">Borrar</button>`);
-    return `<tr><td class="num">${dateShort(m.date)} ${m.date.slice(2, 4)}</td><td><span class="chip ${ty[0]}">${ty[1]}</span></td><td><span class="tag"><span class="dot" style="background:${colorOfMov(m)}"></span>${esc(nameOfMov(m))}</span></td><td class="note">${m.src === 'gmail' ? `<span class="mail" title="Detectado en tu correo${m.via ? ' · ' + esc(m.via) : ''}">✉</span> ` : ''}${esc(m.note)}</td><td class="amt ${plus ? 'amt-in' : ''}">${plus ? '+' : '−'}${money(m.amount)}</td><td style="white-space:nowrap;text-align:right">${del}</td></tr>`;
+    const del = EXAMPLE ? '' : (S.confirmDel === m.id || m.type === 'traspaso' ? '' : `<button class="del" data-edit="${esc(m.id)}" aria-label="Editar movimiento">Editar</button> `) + (S.confirmDel === m.id ? `<button class="btn danger small" data-delyes="${esc(m.id)}">Borrar</button> <button class="btn ghost small" data-delno="1">No</button>` : `<button class="del" data-del="${esc(m.id)}" aria-label="Borrar movimiento">Borrar</button>`);
+    return `<tr><td class="num">${dateShort(m.date)} ${m.date.slice(2, 4)}</td><td><span class="chip ${ty[0]}">${ty[1]}</span></td><td><span class="tag"><span class="dot" style="background:${colorOfMov(m)}"></span>${esc(nameOfMov(m))}</span></td><td class="note">${m.src === 'gmail' ? `<span class="mail" title="Detectado en tu correo${m.via ? ' · ' + esc(m.via) : ''}">✉</span> ` : ''}${esc(m.note)}</td><td class="amt ${plus ? 'amt-in' : ''}">${m.type === 'traspaso' ? '⇄ ' : plus ? '+' : '−'}${money(m.amount)}</td><td style="white-space:nowrap;text-align:right">${del}</td></tr>`;
   }).join('')}</tbody></table>`;
 }
 
@@ -2453,6 +2506,11 @@ async function delMov(id, isUndo) {
   const prev = REAL, item = REAL.find(m => m.id === id); REAL = REAL.filter(m => m.id !== id); EXAMPLE = REAL.length === 0; S.confirmDel = null; render();
   try { await removeDoc(id); toast(isUndo ? 'Listo, se quitó' : item && item.ref ? `${item.note || 'Pago'}: ya no está marcado` : 'Movimiento borrado', !isUndo && item ? () => addMov(item) : null); } catch { REAL = prev; EXAMPLE = REAL.length === 0; render(); toast('No se pudo borrar. Inténtalo otra vez.'); }
 }
+async function saveBank(bank) {
+  const prev = CFG.bank; CFG.bank = bank; S.bankEd = false; render();
+  try { await writeDoc('config', CFG); toast('Saldo actualizado', async () => { CFG.bank = prev; render(); try { await writeDoc('config', CFG); } catch {} }); }
+  catch { CFG.bank = prev; render(); toast('No se pudo guardar el saldo.'); }
+}
 async function saveCfg() {
   const d = cfgDraft;
   { const pd = String(Array.isArray(d.paydays) ? d.paydays.join(',') : d.paydays || '').split(/[^0-9]+/).map(Number).filter(x => x >= 1 && x <= 31); d.paydays = pd.length ? pd : [15, 30]; }
@@ -2463,7 +2521,7 @@ async function saveCfg() {
   Object.keys(LISTS).forEach(k => { d[k] = (d[k] || []).filter(r => k === 'budgets' || String(r.n || '').trim()).map(r => { const o = { ...r }; if ('n' in o) o.n = String(o.n).trim(); ['a', 't', 'r', 'bal', 'hasta'].forEach(x => { if (x in o) o[x] = Math.max(0, +o[x] || 0); }); ['corte', 'compra', 'pagar', 'limite'].forEach(x => { if (x in o) { const v = Math.round(+o[x]); if (v >= 1 && v <= 31) o[x] = v; else delete o[x]; } }); if (k === 'cats' && !o.id) o.id = 'c' + Math.random().toString(36).slice(2, 7); if (!o.d) delete o.d; return o; }); });
   d.funds = d.funds.filter(f => f.n.trim()).map(f => ({ ...f, n: f.n.trim(), t: Math.max(0, +f.t || 0) }));
   if (!d.funds.length) { toast('Deja al menos un fondo.'); S.cfgSec = 'funds'; drawCfg(); return; }
-  d.inv = clone(invList()); if (CFG.invHist) d.invHist = clone(CFG.invHist);
+  d.inv = clone(invList()); if (CFG.bank) d.bank = clone(CFG.bank); else delete d.bank; if (CFG.invHist) d.invHist = clone(CFG.invHist);
   const prev = CFG; CFG = clone(d); CFG.kind = 'config'; CFG.plan = 'vivir'; CFG.plan2 = 2; CFG.plan3 = 3; CFG.plan4 = 4;
   try { await writeDoc('config', CFG); toast('Ajustes guardados', async () => { CFG = prev; try { await writeDoc('config', prev); toast('Ajustes como estaban antes'); } catch { toast('No se pudo deshacer.'); } S.cfgDirty = false; cfgDraft = null; buildCfg(); render(); }); S.cfgDirty = false; S.edRow = null; buildCfg(); render(); }
   catch { CFG = prev; toast('No se pudieron guardar los ajustes.'); }
@@ -2820,7 +2878,7 @@ const INTENTS = [
   { id: 'sobra', re: [/(me )?(queda|sobra|resta)\b/, /cuanto (puedo|me alcanza) gastar/, /disponible/, /me alcanza/], a: () => {
     const s = monthStats(); if (!s.income) return '<p>Para decirte cuánto te queda necesito tu sueldo. Ponlo en Ajustes → Tu plan.</p>';
     const dl = daysToMonthEnd(), per = s.libre / dl;
-    return `<p>Te quedan ${B(money(s.libre))} este mes.</p>${li([`Sueldo: ${money(s.income)}`, s.fixedM ? `Gastos fijos: −${money(s.fixedM)}` : '', s.variable ? `Gastos variables: −${money(s.variable)}` : '', s.oneoff ? `Pagos únicos: −${money(s.oneoff)}` : '', s.pagos ? `Abonos a deudas: −${money(s.pagos)}` : '', s.ahorro ? `Ahorro: −${money(s.ahorro)}` : ''].filter(Boolean))}${s.libre > 0 ? `<p>Para que te alcance, gasta máximo ${B(money(per))} al día los ${dl} días que faltan.</p>` : '<p>⚠️ Vas en negativo: este mes salió más de lo que entra. Revisa tus gastos variables.</p>'}`;
+    const BK = bankInfo(); return `${BK ? `<p>En tu cuenta tienes ${B(money(BK.now))} y puedes gastar ${B(money(BK.libre))} hasta el ${dateShort(BK.np)}${BK.libre > 0 ? ` (≈ ${money(BK.perDay)} al día)` : ''}.</p><p>Si cobras todo el mes, este es tu plan:</p>` : ''}<p>Plan del mes: te sobrarían ${B(money(s.libre))}.</p>${li([`Sueldo: ${money(s.income)}`, s.fixedM ? `Gastos fijos: −${money(s.fixedM)}` : '', s.variable ? `Gastos variables: −${money(s.variable)}` : '', s.oneoff ? `Pagos únicos: −${money(s.oneoff)}` : '', s.pagos ? `Abonos a deudas: −${money(s.pagos)}` : '', s.ahorro ? `Ahorro: −${money(s.ahorro)}` : ''].filter(Boolean))}${s.libre > 0 ? `<p>Para que te alcance, gasta máximo ${B(money(per))} al día los ${dl} días que faltan.</p>` : '<p>⚠️ Vas en negativo: este mes salió más de lo que entra. Revisa tus gastos variables.</p>'}`;
   }, acts: ['plan'], next: ['¿En qué gasto más?', 'Dame un consejo'] },
   { id: 'meta', re: [/meta/, /voy bien/, /cuando (llego|termino|lo logro)/, /cuanto me falta/, /llegare/, /a tiempo/], a: () => {
     const M = metrics(); if (!M.g) return '<p>Aún no defines cuánto necesitas. Ve a Ajustes → Fondos de tu meta.</p>';
@@ -3010,6 +3068,9 @@ document.addEventListener('click', e => {
   else if (act === 'inv-close') invPinClose();
   else if (act === 'inv-refresh') pxFetch(true);
   else if (act === 'inv-del') { const f = $('#invForm'); if (f) { const { k, sym, n } = f.dataset; invSet(invList().filter(x => !(x.k === k && x.sym === sym)), `${n} ya no está en tus inversiones`); } }
+  else if (act === 'bank-edit') { S.bankEd = true; render(); setTimeout(() => $('#bankAmt') && $('#bankAmt').focus(), 0); }
+  else if (act === 'bank-cancel') { S.bankEd = false; render(); }
+  else if (act === 'move-surplus') { const f = fundOf(a.dataset.id), sel = $('#surTo'), to = sel && fundOf(sel.value); if (!f || !to) return; const amt = Math.round(fundExtra(f) * 100) / 100; if (!(amt > 0)) return; addMov({ id: uid(), kind: 'mov', type: 'traspaso', amount: amt, date: TODAY, cat: f.id, to: to.id, note: `Sobrante de ${f.n} a ${to.n}`, created: Date.now() }); }
   else if (act === 'add-fund') { S.view = 'movs'; S.formType = 'ahorro'; S.formCat = a.dataset.id; render(true); setTimeout(() => $('#fAmt') && $('#fAmt').focus(), 0); }
   else if (act === 'rm-fund') { cfgDraft.funds.splice(+a.dataset.i, 1); drawCfg(); }
   else if (act === 'add-fund-row') { const used = cfgDraft.funds.map(f => f.c); cfgDraft.funds.push({ id: 'f' + Date.now().toString(36), n: 'Nuevo fondo', t: 5000, c: FUND_COLORS.find(c => !used.includes(c)) || FUND_COLORS[cfgDraft.funds.length % FUND_COLORS.length] }); drawCfg(); }
@@ -3052,6 +3113,7 @@ document.addEventListener('submit', e => {
   if (e.target.id === 'onbForm') { finishOnboard(); return; }
   if (e.target.id === 'lockForm') { tryUnlock(); return; }
   if (e.target.id === 'pinForm') { const a = $('#pinNew').value.trim(), b = $('#pinNew2').value.trim(), er = $('#pinErr'); if (!/^\d{4,8}$/.test(a)) { er.textContent = 'El PIN debe tener de 4 a 8 números.'; er.hidden = false; return; } if (a !== b) { er.textContent = 'Los PIN no coinciden.'; er.hidden = false; return; } er.hidden = true; setPin(a).then(() => drawCfg()); return; }
+  if (e.target.classList && e.target.classList.contains('bankf')) { const v = $('#bankAmt').value; if (v === '' || !(+v >= 0)) { $('#bankAmt').focus(); toast('Escribe tu saldo de hoy'); return; } saveBank({ a: Math.round(+v * 100) / 100, d: TODAY, t: Date.now(), inc: $('#bankInc').checked }); return; }
   if (e.target.classList && e.target.classList.contains('abono')) { const f = e.target, amt = +f.querySelector('input').value || 0, d = CFG.debts.find(x => x.id === f.dataset.debt); if (!(amt > 0) || !d) { f.querySelector('input').focus(); toast('Escribe cuánto abonaste'); return; } addMov({ id: uid(), kind: 'mov', type: 'pago', amount: Math.round(amt * 100) / 100, date: TODAY, cat: d.id, note: `Abono a ${d.n}`, created: Date.now() }); return; }
   if (e.target.id === 'qaForm') { const amt = +$('#qaAmt').value || 0, err = $('#qaErr'); if (!(amt > 0)) { err.textContent = 'Escribe un monto mayor que cero.'; err.hidden = false; $('#qaAmt').focus(); return; } const t = S.qaType, cat = $('#qaCat').value; addMov({ id: uid(), kind: 'mov', type: t, amount: Math.round(amt * 100) / 100, date: $('#qaDate').value || TODAY, cat, ref: t === 'ingreso' && CFG.incoming.some(i => i.id === cat) ? cat : null, note: $('#qaNote').value.trim().slice(0, 80), created: Date.now() }); qaClose(); return; }
   if (e.target.id !== 'movForm') return;

@@ -1,0 +1,43 @@
+# Publica la app en Firebase Hosting (https://mi-ahorro-j3s3f.web.app) cada vez que
+# algo entra a main, y deja una vista previa temporal en cada pull request.
+# Requiere una sola vez el secreto FIREBASE_SERVICE_ACCOUNT (ver README, «Publicación automática»).
+# Si el secreto no existe, el flujo se salta la publicación sin fallar.
+name: Publicar en Firebase Hosting
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  deploy:
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      HAS_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Falta configurar el secreto
+        if: env.HAS_SA != 'true'
+        run: echo "::notice::Agrega el secreto FIREBASE_SERVICE_ACCOUNT para publicar automáticamente."
+      - name: Vista previa del pull request
+        if: env.HAS_SA == 'true' && github.event_name == 'pull_request'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: mi-ahorro-j3s3f
+          expires: 7d
+      - name: Publicar en el sitio
+        if: env.HAS_SA == 'true' && github.event_name == 'push'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: mi-ahorro-j3s3f
+          channelId: live

@@ -94,6 +94,16 @@ Necesitas Node.js y una cuenta de Google.
    ```
    Al terminar te da una dirección como `https://mi-ahorro-xxxx.web.app`.
 
+### Publicación automática (GitHub → Firebase Hosting)
+
+El flujo `.github/workflows/firebase-hosting.yml` publica la página en tu sitio de Firebase cada vez que algo entra a `main`, y deja una vista previa de 7 días en cada pull request. Solo publica la página (Hosting); las reglas de Firestore se siguen publicando a mano con `npx firebase-tools deploy --only firestore:rules`. Se configura una sola vez:
+
+1. En la consola de Firebase: **⚙ Configuración del proyecto → Cuentas de servicio → Generar nueva clave privada.** Se descarga un archivo `.json`. No lo subas al repositorio.
+2. En GitHub: **Settings → Secrets and variables → Actions → New repository secret.** Nombre: `FIREBASE_SERVICE_ACCOUNT`. Valor: pega todo el contenido del `.json`.
+3. Borra el `.json` de tu equipo.
+
+Si usas otro proyecto, cambia `projectId` en el flujo. Mientras no exista el secreto, el flujo no publica nada y tampoco falla.
+
 ### En Vercel
 
 1. Haz los pasos 1 a 4 de arriba y publica solo las reglas: `npx firebase-tools deploy --only firestore:rules`.
