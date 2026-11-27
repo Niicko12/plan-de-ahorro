@@ -8,6 +8,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,7 +17,7 @@ permissions:
 
 jobs:
   deploy:
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     env:
       HAS_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}
@@ -34,7 +35,7 @@ jobs:
           projectId: mi-ahorro-j3s3f
           expires: 7d
       - name: Publicar en el sitio
-        if: env.HAS_SA == 'true' && github.event_name == 'push'
+        if: env.HAS_SA == 'true' && github.event_name != 'pull_request'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
