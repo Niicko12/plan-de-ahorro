@@ -449,7 +449,7 @@ html{scroll-padding-top:70px}
 .up{color:var(--good)!important}.down{color:var(--bad)!important}
 .seg button.is-on{background:var(--surface);color:var(--fg);box-shadow:0 1px 4px rgba(0,0,0,.15)}
 .inv-sum .card-h,.inv-empty .card-h{align-items:center}
-.inv-st{display:flex;align-items:center;gap:10px;margin-left:auto}
+.inv-st{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-left:auto}.inv-st #pxSt{margin-right:auto}
 .inv-err{color:var(--warn)!important;margin-top:4px}
 .inv-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .inv-tiles .kt{box-shadow:none;background:var(--surface-2)}
@@ -465,7 +465,7 @@ html{scroll-padding-top:70px}
 .ih-top{display:flex;align-items:center;gap:10px}.ih-n{flex:1;min-width:0;display:flex;flex-direction:column}.ih-n b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ih-n small{color:var(--muted);font-size:12px}
 .ih-v{display:flex;flex-direction:column}.ih-v small{color:var(--muted);font-size:12px;font-weight:600}.ih-v b{font-family:var(--display);font-size:24px;font-weight:900}.ih-v span{font-weight:700;font-size:14px}
 .ih-d{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0;padding-top:10px;border-top:1px solid var(--line)}.ih-d dt{color:var(--muted);font-size:11.5px;font-weight:600}.ih-d dd{margin:0;font-size:13px;font-weight:600;overflow-wrap:anywhere}.ih-d dd small{color:var(--muted);font-weight:500}
-.seg.three{grid-template-columns:repeat(3,1fr)}.inv-prev{background:var(--good-soft);border-radius:12px;padding:10px 12px}.inv-prev:empty{display:none}.inv-prev p{margin:0 0 4px}
+.seg.three{grid-template-columns:repeat(3,1fr)}.mkt2{margin:8px 0 4px}.flab{display:block;font-weight:600;font-size:14px;margin-bottom:4px}.gainrow{display:flex;gap:8px}.gainrow select{flex:none;width:auto}.gainrow input{flex:1;min-width:0}.inv-ex{background:var(--surface-2);border-radius:10px;padding:8px 10px;font-size:12.5px;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}#iBulk{width:100%;font:14px/1.5 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--surface);color:var(--fg);resize:vertical}.qa-sheet{max-height:92dvh;overflow-y:auto}.inv-prev{background:var(--good-soft);border-radius:12px;padding:10px 12px}.inv-prev:empty{display:none}.inv-prev p{margin:0 0 4px}
 .inv-mkt .seg{min-width:300px}.inv-mkt .seg button{font-size:13px;padding:8px}
 .inv-search{display:flex;gap:8px;margin-bottom:6px}.inv-search[hidden]{display:none}.inv-search input{flex:1;min-width:0;font-size:16px;min-height:42px}.inv-search .btn{min-height:42px}
 .mrow{display:grid;grid-template-columns:36px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
@@ -2004,15 +2004,22 @@ const MKT_STOCKS = [['AAPL', 'Apple'], ['MSFT', 'Microsoft'], ['NVDA', 'NVIDIA']
 const CETES = [[28, 6.20], [91, 6.49], [182, 6.66], [364, 6.88]], CETES_AL = '2026-11-24', ISR_CAP = 0.009;
 // Rendimiento de CETES: interés simple base 360; el ISR se retiene sobre el capital (0.90 % anual, base 365).
 const cetesNet = (cap, rate, days) => cap * (rate / 100) * days / 360 - cap * ISR_CAP * days / 365;
+// Bolsa Mexicana: [símbolo como sale en GBM, nombre]. El precio se pide como SIMBOLO.MX (sin espacios ni *).
+const MKT_MX = [['WALMEX *', 'Walmart de México'], ['AMX B', 'América Móvil'], ['GFNORTE O', 'Banorte'], ['FEMSA UBD', 'FEMSA'], ['GMEXICO B', 'Grupo México'], ['CEMEX CPO', 'Cemex'], ['BIMBO A', 'Grupo Bimbo'], ['ASUR B', 'Aeropuerto del Sureste'], ['GAP B', 'Aeropuerto del Pacífico'], ['OMA B', 'Aeropuerto Centro Norte'], ['KOF UBL', 'Coca-Cola FEMSA'], ['AC *', 'Arca Continental'], ['VOLAR A', 'Volaris'], ['AERO *', 'Aeroméxico'], ['ORBIA *', 'Orbia'], ['CUERVO *', 'Becle (Cuervo)'], ['TLEVISA CPO', 'Televisa'], ['ALSEA *', 'Alsea'], ['LIVEPOL C-1', 'Liverpool'], ['GCARSO A1', 'Grupo Carso']];
+const gbmSym = t => String(t || '').toUpperCase().replace(/[\s*]+/g, '') + '.MX';
+const isMx = sym => /\.MX$/.test(sym);
 const PX = (() => { try { const o = JSON.parse(localStorage.getItem('pa-px') || 'null'); if (o && o.s && o.c) return o; } catch {} return { s: {}, c: {}, top: [], fx: 0, at: 0, cur: '' }; })();
 let pxBusy = false, pxErr = '';
 const invList = () => (Array.isArray(CFG.inv) ? CFG.inv : []);
 const invCur = () => String(CFG.currency || 'MXN').toUpperCase();
+// Convierte entre monedas con el tipo de cambio del día (base USD).
+const conv = (v, from, to) => { from = from || to; if (from === to) return v; const r = PX.rates || {}, a = from === 'USD' ? 1 : +r[from], b = to === 'USD' ? 1 : +r[to]; return a > 0 && b > 0 ? v / a * b : NaN; };
 // Precio en tu moneda: las acciones vienen en dólares y se convierten con el tipo de cambio del día.
 function pxOf(k, sym) {
   if (k === 'cripto') { const c = PX.c[sym]; return c && c.p > 0 && PX.cur === invCur() ? c : null; }
-  const s = PX.s[sym], fx = invCur() === 'USD' ? 1 : +PX.fx;
-  return s && s.p > 0 && fx > 0 ? { ...s, p: s.p * fx, usd: s.p } : null;
+  const s = PX.s[sym]; if (!(s && s.p > 0)) return null;
+  const qc = s.cur || 'USD', p = conv(s.p, qc, invCur());
+  return p > 0 ? { ...s, p, orig: qc !== invCur() ? s.p : 0, qc } : null;
 }
 function invRow(h) {
   if (h.k === 'cetes') {
@@ -2020,7 +2027,7 @@ function invRow(h) {
     const v = cap + cetesNet(cap, +h.rate || 0, el), done = el >= days;
     return { h, q: { cetes: true, p: 0, dp: 0 }, qty: 0, v, cost: cap, gain: v - cap, gp: cap ? (v - cap) / cap : null, day: done ? 0 : cetesNet(cap, +h.rate || 0, 1), end, done, fin: cap + cetesNet(cap, +h.rate || 0, days) };
   }
-  const q = pxOf(h.k, h.sym), qty = +h.qty || 0, cost = +h.cost || 0;
+  const q = pxOf(h.k, h.sym), qty = +h.qty || 0, cost = conv(+h.cost || 0, h.cur || invCur(), invCur()) || 0;
   const v = q ? qty * q.p : cost, day = q && q.dp ? v - v / (1 + q.dp / 100) : 0;
   return { h, q, qty, v, cost, gain: q && cost ? v - cost : null, gp: q && cost ? (v - cost) / cost : null, day };
 }
@@ -2035,7 +2042,9 @@ const usdFmt = v => new Intl.NumberFormat('en-US', { style: 'currency', currency
 const sgn = v => (v > 0 ? '+' : v < 0 ? '−' : '');
 const pctS = v => `${sgn(v)}${Math.abs(v).toFixed(2)} %`;
 const updn = v => (v > 0 ? 'up' : v < 0 ? 'down' : '');
-const moneyS = v => (S.hideAmt ? money(v) : `${sgn(v)}${money(Math.abs(v))}`);
+// Montos de inversiones: con centavos si son menores a $1,000 (acciones baratas mueven centavos).
+const m2 = v => { if (S.hideAmt) return money(v); const a = Math.abs(v); try { return new Intl.NumberFormat('es-MX', { style: 'currency', currency: invCur(), minimumFractionDigits: a < 1000 ? 2 : 0, maximumFractionDigits: a < 1000 ? 2 : 0 }).format(v); } catch { return money(v); } };
+const moneyS = v => (S.hideAmt ? money(v) : `${sgn(v)}${m2(Math.abs(v))}`);
 const getJson = async url => { const r = await fetch(url); if (!r.ok) throw new Error(String(r.status)); return r.json(); };
 
 async function pxFetch(force) {
@@ -2043,11 +2052,12 @@ async function pxFetch(force) {
   pxBusy = true; pxErr = ''; const st = $('#pxSt'); if (st) st.textContent = 'Actualizando…';
   const first = !PX.at, cur = invCur(), lc = cur.toLowerCase();
   if (PX.cur !== cur) { PX.c = {}; PX.top = []; }
-  const stocks = [...new Set([...MKT_STOCKS.map(s => s[0]), ...invList().filter(h => h.k !== 'cripto').map(h => h.sym)])];
+  const stocks = [...new Set([...invList().filter(h => h.k === 'accion').map(h => h.sym), ...MKT_STOCKS.map(s => s[0]), ...MKT_MX.map(s => gbmSym(s[0]))])];
+  const chunks = []; for (let i = 0; i < stocks.length; i += 30) chunks.push(stocks.slice(i, i + 30));
   let bad = 0;
   await Promise.all([
-    getJson(`${QUOTES_URL}?s=${encodeURIComponent(stocks.join(','))}`).then(j => { Object.entries(j.q || {}).forEach(([k, v]) => { if (v && v.p > 0) PX.s[k] = { ...(PX.s[k] || {}), ...v }; }); }).catch(() => { bad |= 1; }),
-    cur === 'USD' ? (PX.fx = 1) : getJson('https://open.er-api.com/v6/latest/USD').then(j => { const f = j && j.rates && +j.rates[cur]; if (f > 0) PX.fx = f; }).catch(() => {}),
+    Promise.all(chunks.map(c => getJson(`${QUOTES_URL}?s=${encodeURIComponent(c.join(','))}`).then(j => { Object.entries(j.q || {}).forEach(([k, v]) => { if (v && v.p > 0) PX.s[k] = { ...(PX.s[k] || {}), ...v }; }); }))).catch(() => { bad |= 1; }),
+    getJson('https://open.er-api.com/v6/latest/USD').then(j => { if (j && j.rates && j.rates.MXN > 0) { PX.rates = j.rates; PX.fx = +j.rates[cur] || 0; } }).catch(() => {}),
     getJson(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${lc}&order=market_cap_desc&per_page=20&page=1`).then(a => { PX.top = a.map(c => c.id); a.forEach(c => { PX.c[c.id] = { p: +c.current_price, dp: +c.price_change_percentage_24h || 0, n: c.name, sym: String(c.symbol).toUpperCase(), img: c.image }; }); PX.cur = cur; }).catch(() => { bad |= 2; })
   ]);
   const miss = invList().filter(h => h.k === 'cripto' && !PX.top.includes(h.sym)).map(h => h.sym);
@@ -2092,21 +2102,21 @@ function mineCard(r) {
       <dl class="ih-d"><div><dt>${r.done ? 'Venció' : 'Vence'}</dt><dd class="${r.done ? 'down' : ''}">${esc(dateShort(r.end))}${r.done ? '' : ` <small>(en ${dl} ${dl === 1 ? 'día' : 'días'})</small>`}</dd></div><div><dt>Al vencer recibes</dt><dd>${money(r.fin)}</dd></div><div><dt>Invertiste</dt><dd>${money(r.cost)}</dd></div></dl>
       ${r.done ? '<p class="help inv-err">Ya venció: reinviértelo o retíralo en tu app de CETES y luego actualiza la fecha aquí.</p>' : ''}</article>`;
   }
-  const { h, q } = r, sym = h.k === 'cripto' ? ((PX.c[h.sym] && PX.c[h.sym].sym) || h.sym.toUpperCase()) : h.sym;
+  const { h, q } = r, sym = h.k === 'cripto' ? ((PX.c[h.sym] && PX.c[h.sym].sym) || h.sym.toUpperCase()) : (h.t || h.sym.replace(/\.MX$/, ''));
   const qtyTxt = `${(+h.qty || 0).toLocaleString('es-MX', { maximumFractionDigits: 8 })} ${h.k === 'cripto' ? sym : (+h.qty === 1 ? 'acción' : 'acciones')}`;
   return `<article class="ih ${updn(r.gain ?? (q ? q.dp : 0))}">
-    <div class="ih-top">${logo(h.k, h.sym, h.n)}<div class="ih-n"><b>${esc(h.n || sym)}</b><small>${esc(sym)} · ${qtyTxt}</small></div><button type="button" class="sr-btn" data-act="inv-pin" data-k="${h.k}" data-sym="${esc(h.sym)}" data-n="${esc(h.n || '')}">Editar</button></div>
-    <div class="ih-v"><small>Vale hoy</small><b class="num">${q ? money(r.v) : '—'}</b>${r.gain != null ? `<span class="${updn(r.gain)}">${moneyS(r.gain)} (${pctS(r.gp * 100)})</span>` : q ? '<span class="help">Pon cuánto invertiste para ver tu ganancia</span>' : ''}</div>
-    <dl class="ih-d"><div><dt>Hoy</dt><dd class="${updn(q && q.dp)}">${q ? `${pctS(q.dp)} · ${moneyS(r.day)}` : '—'}</dd></div><div><dt>Precio</dt><dd>${q ? pxFmt(q.p) + (q.usd ? ` <small>(${usdFmt(q.usd)})</small>` : '') : 'sin precio'}</dd></div><div><dt>Invertiste</dt><dd>${r.cost ? money(r.cost) : '—'}</dd></div></dl>
+    <div class="ih-top">${logo(h.k, h.k === 'cripto' ? h.sym : sym, h.n)}<div class="ih-n"><b>${esc(h.n || sym)}</b><small>${esc(sym)}${isMx(h.sym) ? ' · BMV' : ''} · ${qtyTxt}</small></div><button type="button" class="sr-btn" data-act="inv-pin" data-k="${h.k}" data-sym="${esc(h.sym)}" data-n="${esc(h.n || '')}" data-t="${esc(h.t || '')}">Editar</button></div>
+    <div class="ih-v"><small>Vale hoy</small><b class="num">${q ? m2(r.v) : '—'}</b>${r.gain != null ? `<span class="${updn(r.gain)}">${moneyS(r.gain)} (${pctS(r.gp * 100)})</span>` : q ? '<span class="help">Pon cuánto invertiste para ver tu ganancia</span>' : ''}</div>
+    <dl class="ih-d"><div><dt>Hoy</dt><dd class="${updn(q && q.dp)}">${q ? `${pctS(q.dp)} · ${moneyS(r.day)}` : '—'}</dd></div><div><dt>Precio</dt><dd>${q ? pxFmt(q.p) + (q.orig ? ` <small>(${q.qc === 'USD' ? usdFmt(q.orig) : esc(q.qc + ' ' + q.orig)})</small>` : '') : 'sin precio'}</dd></div><div><dt>Invertiste</dt><dd>${r.cost ? m2(r.cost) : '—'}</dd></div></dl>
   </article>`;
 }
 function cetesRow([days, rate]) {
   const sym = 'C' + days, own = invList().some(h => h.k === 'cetes' && h.sym === sym), n = `CETES ${days} días`;
   return `<div class="mrow"><span class="mlogo">${days}d</span><div class="mn"><b>${n}</b><small>Con $10,000 ganas ≈ ${pxFmt(cetesNet(10000, rate, days))} en ${days} días (ya sin ISR)</small></div><div class="mp"><b class="num">${rate.toFixed(2)} %</b><span class="chip good">anual</span></div><button type="button" class="btn small ${own ? 'ghost' : ''}" data-act="inv-pin" data-k="cetes" data-sym="${sym}" data-n="${n}">${own ? '✓ Lo tengo' : 'Simular'}</button></div>`;
 }
-function mktRow(k, sym, n) {
-  const q = pxOf(k, sym), own = invList().some(h => h.k === k && h.sym === sym), c = k === 'cripto' && PX.c[sym];
-  return `<div class="mrow">${logo(k, sym, n)}<div class="mn"><b>${esc(n)}</b><small>${esc(c ? c.sym : sym)}</small></div><div class="mp"><b class="num">${q ? pxFmt(q.p) : '—'}</b>${q ? `<span class="chip ${q.dp > 0 ? 'good' : q.dp < 0 ? 'bad' : ''}">${q.dp > 0 ? '▲' : q.dp < 0 ? '▼' : '•'} ${Math.abs(q.dp).toFixed(2)} %</span>` : ''}</div><button type="button" class="btn small ${own ? 'ghost' : ''}" data-act="inv-pin" data-k="${k}" data-sym="${esc(sym)}" data-n="${esc(n)}">${own ? '✓ La tengo' : 'La tengo'}</button></div>`;
+function mktRow(k, sym, n, t) {
+  const q = pxOf(k, sym), own = invList().some(h => h.k === k && h.sym === sym), c = k === 'cripto' && PX.c[sym], lab = c ? c.sym : t || sym;
+  return `<div class="mrow">${logo(k, k === 'cripto' ? sym : lab, n)}<div class="mn"><b>${esc(n)}</b><small>${esc(lab)}</small></div><div class="mp"><b class="num">${q ? pxFmt(q.p) : '—'}</b>${q ? `<span class="chip ${q.dp > 0 ? 'good' : q.dp < 0 ? 'bad' : ''}">${q.dp > 0 ? '▲' : q.dp < 0 ? '▼' : '•'} ${Math.abs(q.dp).toFixed(2)} %</span>` : ''}</div><button type="button" class="btn small ${own ? 'ghost' : ''}" data-act="inv-pin" data-k="${k}" data-sym="${esc(sym)}" data-n="${esc(n)}" data-t="${esc(t || '')}">${own ? '✓ La tengo' : 'La tengo'}</button></div>`;
 }
 function renderInv() {
   const root = $('#viewInv');
@@ -2120,7 +2130,7 @@ function drawInv() {
   if (!$('#invBody')) return;
   const T = invTotals(), tab = S.invTab || 'accion', when = PX.at ? new Date(PX.at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '';
   const tile = (l, v, s, cls) => `<div class="kt"><small>${l}</small><b class="num ${cls || ''}">${v}</b><span class="${cls || ''}">${s || ''}</span></div>`;
-  const status = `<div class="inv-st"><span id="pxSt" class="help">${pxBusy ? 'Actualizando…' : when ? `Precios de las ${when}` : ''}</span><button type="button" class="btn small ghost" data-act="inv-refresh">Actualizar</button></div>${pxErr ? `<p class="help inv-err">${esc(pxErr)}</p>` : ''}`;
+  const status = `<div class="inv-st"><span id="pxSt" class="help">${pxBusy ? 'Actualizando…' : when ? `Precios de las ${when}` : ''}</span><button type="button" class="btn small ghost" data-act="inv-bulk">Pegar lista</button><button type="button" class="btn small ghost" data-act="inv-refresh">Actualizar</button></div>${pxErr ? `<p class="help inv-err">${esc(pxErr)}</p>` : ''}`;
   $('#invBody').innerHTML = T.R.length ? `<section class="card inv-sum"><div class="card-h"><h2>Mi portafolio</h2>${status}</div>
       <div class="inv-tiles">${tile('Vale hoy', money(T.v), altAmt(T.v))}${tile('Invertiste', T.cost ? money(T.cost) : '—', T.cost ? '' : 'pon cuánto invertiste')}${tile('Ganas o pierdes', T.gain == null ? '—' : moneyS(T.gain), T.gain == null ? '' : pctS(T.gp * 100), updn(T.gain))}${tile('Hoy', moneyS(T.day), T.v ? pctS(T.day / (T.v - T.day || 1) * 100) : '', updn(T.day))}</div>
       ${invChart()}</section>
@@ -2129,13 +2139,25 @@ function drawInv() {
   document.querySelectorAll('.inv-mkt [data-act="inv-tab"]').forEach(b => { const on = b.dataset.k === tab; b.classList.toggle('is-on', on); b.setAttribute('aria-selected', on); });
   $('#invSearch').hidden = tab === 'cetes';
   if (tab === 'cetes') { $('#invMkt').innerHTML = CETES.map(cetesRow).join('') + `<p class="help inv-note">Tasas de la subasta del ${esc(dateShort(CETES_AL))} (Banxico). Cambian cada semana: al registrar el tuyo puedes poner la tasa que te tocó. El ISR que se descuenta es la retención de 2026: 0.90 % anual sobre lo invertido.</p>`; return; }
-  const q = $('#invQ'); if (q) q.placeholder = tab === 'cripto' ? 'Buscar cripto (ej. PEPE, Cardano)' : 'Buscar símbolo (ej. INTC, BRK.B)';
-  const extra = invList().filter(h => h.k === tab && (tab === 'cripto' ? !PX.top.includes(h.sym) : !MKT_STOCKS.some(s => s[0] === h.sym))).map(h => [h.sym, h.n || h.sym]);
-  const list = tab === 'cripto' ? [...PX.top.map(id => [id, PX.c[id].n]), ...extra] : [...MKT_STOCKS, ...extra];
-  $('#invMkt').innerHTML = list.length ? list.map(([s, n]) => mktRow(tab, s, n)).join('') : `<p class="help">${pxBusy ? 'Cargando precios…' : 'No hay precios por ahora. Toca Actualizar.'}</p>`;
+  const q = $('#invQ'); if (q) q.placeholder = tab === 'cripto' ? 'Buscar cripto (ej. PEPE, Cardano)' : S.invMx ? 'Buscar como en GBM (ej. ALPEK A)' : 'Buscar símbolo (ej. INTC, BRK.B)';
+  const mx = (S.invMx ?? false) && tab === 'accion';
+  let list;
+  if (tab === 'cripto') list = [...PX.top.map(id => [id, PX.c[id].n]), ...invList().filter(h => h.k === 'cripto' && !PX.top.includes(h.sym)).map(h => [h.sym, h.n || h.sym])];
+  else if (mx) list = [...invList().filter(h => h.k === 'accion' && isMx(h.sym) && !MKT_MX.some(m => gbmSym(m[0]) === h.sym)).map(h => [h.sym, h.n, h.t]), ...MKT_MX.map(([t, n]) => [gbmSym(t), n, t])];
+  else list = [...invList().filter(h => h.k === 'accion' && !isMx(h.sym) && !MKT_STOCKS.some(m => m[0] === h.sym)).map(h => [h.sym, h.n || h.sym]), ...MKT_STOCKS];
+  $('#invMkt').innerHTML = (tab === 'accion' ? `<div class="seg mkt2" role="tablist"><button type="button" role="tab" data-act="inv-mx" data-v="0" class="${mx ? '' : 'is-on'}">EE. UU. (USD)</button><button type="button" role="tab" data-act="inv-mx" data-v="1" class="${mx ? 'is-on' : ''}">México · BMV (MXN)</button></div>` : '')
+    + (list.length ? list.map(([s, n, t]) => mktRow(tab, s, n, t)).join('') : `<p class="help">${pxBusy ? 'Cargando precios…' : 'No hay precios por ahora. Toca Actualizar.'}</p>`);
 }
 async function invSearch(raw) {
   const tab = S.invTab || 'accion', qv = String(raw || '').trim(); if (!qv) return;
+  if (tab === 'accion' && S.invMx) {
+    const t = qv.toUpperCase().replace(/\s+/g, ' ').trim(), sym = gbmSym(t), known = MKT_MX.find(m => gbmSym(m[0]) === sym);
+    if (!/^[A-Z][A-Z0-9&-]{0,13}\.MX$/.test(sym)) { toast('Escribe la clave como sale en GBM, por ejemplo ALPEK A.'); return; }
+    toast('Buscando…');
+    try { const j = await getJson(`${QUOTES_URL}?s=${encodeURIComponent(sym)}`), v = j.q && j.q[sym]; if (!(v && v.p > 0)) throw 0; PX.s[sym] = v; invPinOpen('accion', sym, (known && known[1]) || v.n || t, (known && known[0]) || t); }
+    catch { toast(`No encontré «${t}» en la Bolsa Mexicana. Revisa la clave en GBM.`); }
+    return;
+  }
   if (tab === 'accion') {
     const sym = qv.toUpperCase().replace(/\s*\*$/, '').replace(/[^A-Z0-9.-]/g, '');
     if (!/^[A-Z][A-Z0-9.-]{0,9}$/.test(sym)) { toast('Escribe el símbolo de la acción, por ejemplo INTC.'); return; }
@@ -2157,19 +2179,43 @@ async function invSearch(raw) {
   } catch { toast(`No encontré «${qv}».`); }
 }
 // Hoja para decir cuántas tienes y cuánto invertiste. Se guarda en tu cuenta y se puede deshacer.
-function invPinOpen(k, sym, n) {
+function invPinOpen(k, sym, n, t) {
   if (k === 'cetes') { cetesOpen(sym, n); return; }
-  const h = invList().find(x => x.k === k && x.sym === sym), q = pxOf(k, sym), tk = k === 'cripto' ? ((PX.c[sym] && PX.c[sym].sym) || sym.toUpperCase()) : sym;
+  const h = invList().find(x => x.k === k && x.sym === sym), q = pxOf(k, sym);
+  const tk = k === 'cripto' ? ((PX.c[sym] && PX.c[sym].sym) || sym.toUpperCase()) : (t || (h && h.t) || sym.replace(/\.MX$/, ''));
+  const qc = k === 'cripto' ? invCur() : ((PX.s[sym] && PX.s[sym].cur) || (isMx(sym) ? 'MXN' : 'USD'));
+  const cur = h ? (h.cur || invCur()) : qc, mode = h ? 'cost' : 'gbm';
+  const curBtns = [...new Set([qc, invCur(), 'USD'])].map(c => `<button type="button" data-act="inv-cur" data-v="${c}" class="${c === cur ? 'is-on' : ''}">${c === 'USD' ? 'Dólares (USD)' : c === 'MXN' ? 'Pesos (MXN)' : c}</button>`).join('');
   $('#invShB').innerHTML = `<div class="card-h"><h2 id="invShT">${esc(n || tk)} <small class="help">${esc(tk)}</small></h2><button type="button" class="back" data-act="inv-close">Cerrar</button></div>
-    ${q ? `<p class="help">Precio ahora: <b>${pxFmt(q.p)}</b>${q.usd ? ` (${usdFmt(q.usd)})` : ''} · hoy <span class="${updn(q.dp)}">${pctS(q.dp)}</span></p>` : ''}
-    <form id="invForm" class="inv-form" novalidate data-k="${k}" data-sym="${esc(sym)}" data-n="${esc(n || tk)}">
-      <label for="iQty">¿Cuántas tienes? <span class="h">${k === 'cripto' ? `cantidad de ${esc(tk)}, ej. 0.0025` : 'en GBM sale como «Títulos»; puede tener decimales'}</span><input id="iQty" type="number" inputmode="decimal" min="0" step="any" value="${h ? esc(h.qty) : ''}" required></label>
-      <label for="iCost">¿Cuánto invertiste en total? <span class="h">opcional, en ${esc(invCur())}</span><input id="iCost" type="number" inputmode="decimal" min="0" step="any" value="${h && h.cost ? esc(h.cost) : ''}"></label>
-      <p class="help">${k === 'cripto' ? 'Es lo que pagaste por todas juntas.' : 'En GBM: costo promedio × títulos. Con esto calculo cuánto ganas o pierdes.'}</p>
+    ${q ? `<p class="help">Precio ahora: <b>${pxFmt(q.p)}</b>${q.orig && q.qc === 'USD' ? ` (${usdFmt(q.orig)})` : ''} · hoy <span class="${updn(q.dp)}">${pctS(q.dp)}</span></p>` : ''}
+    <form id="invForm" class="inv-form" novalidate data-k="${k}" data-sym="${esc(sym)}" data-n="${esc(n || tk)}" data-t="${esc(k === 'accion' ? tk : '')}" data-cur="${cur}" data-mode="${mode}">
+      <label for="iQty">${k === 'cripto' ? '¿Cuántas tienes?' : 'Títulos'} <span class="h">${k === 'cripto' ? `cantidad de ${esc(tk)}, ej. 0.0025` : 'en GBM es el número antes del «•», ej. 1.76734'}</span><input id="iQty" type="number" inputmode="decimal" min="0" step="any" value="${h ? esc(h.qty) : ''}" required></label>
+      <div><span class="flab">Los montos están en</span><div class="seg" role="group">${curBtns}</div></div>
+      <div class="seg" role="tablist"><button type="button" data-act="inv-mode" data-v="gbm" class="${mode === 'gbm' ? 'is-on' : ''}">Copiar de ${k === 'cripto' ? 'mi app' : 'GBM'}</button><button type="button" data-act="inv-mode" data-v="cost" class="${mode === 'cost' ? 'is-on' : ''}">Sé cuánto invertí</button></div>
+      <div id="iGbm" ${mode === 'gbm' ? '' : 'hidden'} class="inv-form">
+        <label for="iVal">Valor de tu posición <span class="h">el monto junto a los títulos, ej. $146.32</span><input id="iVal" type="number" inputmode="decimal" min="0" step="any"></label>
+        <label for="iGain">Ganancia o pérdida <span class="h">el monto de abajo, ej. $11.31</span><span class="gainrow"><select id="iSign" aria-label="Sube o baja"><option value="1">↗ Gano</option><option value="-1">↘ Pierdo</option></select><input id="iGain" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></span></label>
+      </div>
+      <div id="iCostW" ${mode === 'cost' ? '' : 'hidden'}><label for="iCost">¿Cuánto invertiste en total? <span class="h">lo que pagaste por todas</span><input id="iCost" type="number" inputmode="decimal" min="0" step="any" value="${h && h.cost ? esc(h.cost) : ''}"></label></div>
+      <div id="iPrev" class="inv-prev"></div>
       <p id="iErr" class="help inv-err" hidden></p>
       <div class="sr-actions"><button type="submit" class="btn">${h ? 'Guardar cambios' : 'Guardar'}</button>${h ? '<button type="button" class="btn ghost-danger" data-act="inv-del">Ya no la tengo</button>' : ''}</div>
     </form>`;
-  $('#invSh').hidden = false; setTimeout(() => { const i = $('#iQty'); if (i) i.focus(); }, 30);
+  $('#invSh').hidden = false; invPrev(); setTimeout(() => { const i = $('#iQty'); if (i) i.focus(); }, 30);
+}
+// Lo que invertiste, según el modo: valor − ganancia (como lo muestra GBM) o el monto directo.
+function invFormCost() {
+  const f = $('#invForm'); if (!f) return NaN;
+  if (f.dataset.mode === 'cost') return $('#iCost').value === '' ? 0 : +$('#iCost').value;
+  const v = +$('#iVal').value, g = ($('#iGain').value === '' ? 0 : +$('#iGain').value) * +$('#iSign').value;
+  return $('#iVal').value === '' ? 0 : v - g;
+}
+function invPrev() {
+  const f = $('#invForm'), box = $('#iPrev'); if (!f || f.dataset.k === 'cetes' || !box) return;
+  const qty = +$('#iQty').value || 0, q = pxOf(f.dataset.k, f.dataset.sym), cost = invFormCost(), cur = f.dataset.cur, costL = conv(cost, cur, invCur());
+  if (!(qty > 0) || !q) { box.innerHTML = ''; return; }
+  const v = qty * q.p, g = cost > 0 && costL > 0 ? v - costL : null;
+  box.innerHTML = `<p>Vale hoy <b>${pxFmt(v)}</b>${cost > 0 ? ` · invertiste ${pxFmt(costL)}${cur !== invCur() ? ` (${cur === 'USD' ? usdFmt(cost) : esc(cur + ' ' + cost)})` : ''}` : ''}</p>${g != null ? `<p class="${updn(g)}"><b>${g >= 0 ? 'Ganas' : 'Pierdes'} ${pxFmt(Math.abs(g))} (${pctS(g / costL * 100)})</b></p>` : ''}`;
 }
 function cetesOpen(sym, n) {
   const h = invList().find(x => x.k === 'cetes' && x.sym === sym), days = +sym.slice(1), def = (CETES.find(c => c[0] === days) || [0, 6])[1];
@@ -2190,6 +2236,46 @@ function cetesPrev() {
   const gross = cap * rate / 100 * days / 360, isr = cap * ISR_CAP * days / 365, net = gross - isr;
   box.innerHTML = cap > 0 ? `<p>Al vencer, el <b>${esc(dateLong(addDays(d, days)))}</b>, recibes <b>${pxFmt(cap + net)}</b>.</p><p class="help">Intereses ${pxFmt(gross)} − ISR ${pxFmt(isr)} = ganas <b class="up">${pxFmt(net)}</b> (${pctS(net / cap * 100)} en ${days} días). Si lo reinviertes un año a esta tasa: ≈ ${pxFmt(cetesNet(cap, rate, 364))}.</p>` : '';
 }
+// Pegar varias de golpe. Una por renglón: CLAVE, títulos, valor, ganancia (con − si es pérdida), moneda.
+function invBulkOpen() {
+  $('#invShB').innerHTML = `<div class="card-h"><h2 id="invShT">Pegar mi lista</h2><button type="button" class="back" data-act="inv-close">Cerrar</button></div>
+    <form id="invBulk" class="inv-form" novalidate>
+      <p class="help">Una acción por renglón, separada por comas, como la ves en GBM:<br><b>CLAVE, títulos, valor, ganancia, moneda</b>. Si es pérdida, pon un <b>−</b> antes.</p>
+      <pre class="inv-ex">ANT, 1.76734, 146.32, -11.31, USD
+ASUR B, 1, 545.93, 130.38, MXN</pre>
+      <textarea id="iBulk" rows="9" spellcheck="false" autocapitalize="characters" aria-label="Tu lista"></textarea>
+      <p class="help">Las que van en <b>MXN</b> se buscan en la Bolsa Mexicana y las de <b>USD</b> en EE. UU. Si ya tenías alguna, se actualiza.</p>
+      <div id="iBulkPrev" class="help"></div>
+      <div class="sr-actions"><button type="submit" class="btn">Agregar</button></div>
+    </form>`;
+  $('#invSh').hidden = false; setTimeout(() => $('#iBulk').focus(), 30);
+}
+function invBulkParse(txt) {
+  const ok = [], bad = [];
+  String(txt || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean).forEach(l => {
+    const p = l.split(/\s*[,;\t]\s*/), num = x => +String(x || '').replace(/[$\s]/g, '').replace(/^[−–]/, '-');
+    const cur = String(p[4] || '').toUpperCase().includes('MXN') ? 'MXN' : 'USD', t = String(p[0] || '').toUpperCase().replace(/\s+/g, ' ').trim();
+    const qty = num(p[1]), val = num(p[2]), gain = p[3] == null || p[3] === '' ? 0 : num(p[3]);
+    if (!t || !(qty > 0) || !(val >= 0) || !Number.isFinite(gain) || /^CLAVE/.test(t)) { if (!/^CLAVE/.test(t)) bad.push(l); return; }
+    const sym = cur === 'MXN' ? gbmSym(t) : t.replace(/[^A-Z0-9.-]/g, '');
+    if (!/^[A-Z][A-Z0-9.&-]{0,15}$/.test(sym)) { bad.push(l); return; }
+    ok.push({ k: 'accion', sym, t: t.slice(0, 20), qty, cost: Math.max(0, Math.round((val - gain) * 100) / 100), cur });
+  });
+  return { ok, bad };
+}
+async function invBulkSave() {
+  const { ok, bad } = invBulkParse($('#iBulk').value), pv = $('#iBulkPrev');
+  if (!ok.length) { pv.innerHTML = '<span class="inv-err">No entendí ningún renglón. Revisa el ejemplo de arriba.</span>'; return; }
+  pv.textContent = 'Revisando precios…';
+  const found = {}; const syms = ok.map(r => r.sym);
+  for (let i = 0; i < syms.length; i += 30) { try { const j = await getJson(`${QUOTES_URL}?s=${encodeURIComponent(syms.slice(i, i + 30).join(','))}`); Object.assign(found, j.q || {}); } catch {} }
+  Object.entries(found).forEach(([k, v]) => { if (v && v.p > 0) PX.s[k] = v; });
+  const miss = ok.filter(r => !(found[r.sym] && found[r.sym].p > 0)).map(r => r.t);
+  let L = invList().slice();
+  ok.forEach(r => { const v = found[r.sym], mx = MKT_MX.find(m => gbmSym(m[0]) === r.sym); const row = { ...r, n: String((mx && mx[1]) || (v && v.n) || r.t).slice(0, 60) }; const i = L.findIndex(x => x.k === 'accion' && x.sym === r.sym); if (i >= 0) L[i] = { ...row, id: L[i].id }; else L.push({ ...row, id: 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5) }); });
+  await invSet(L, `Listo: ${ok.length} ${ok.length === 1 ? 'acción' : 'acciones'} en tu portafolio${miss.length ? ` · sin precio: ${miss.join(', ')}` : ''}${bad.length ? ` · ${bad.length} renglón(es) no entendí` : ''}`);
+  pxFetch(true);
+}
 function invPinClose() { $('#invSh').hidden = true; }
 async function invSet(next, msg) {
   const prev = invList(); CFG.inv = next; invPinClose(); drawInv();
@@ -2207,11 +2293,12 @@ function invSave(f) {
     invSet(i >= 0 ? L.map((x, j) => (j === i ? row : x)) : [...L, row], i >= 0 ? `${row.n}: actualizado` : `${row.n} quedó fijo en tus inversiones`);
     return;
   }
-  const qty = +$('#iQty').value, cost = $('#iCost').value === '' ? 0 : +$('#iCost').value, er = $('#iErr');
-  if (!(qty > 0) || qty > 1e9) { er.textContent = 'Escribe cuántas tienes (un número mayor que 0).'; er.hidden = false; $('#iQty').focus(); return; }
-  if (!(cost >= 0) || cost > 1e9) { er.textContent = 'Revisa el monto invertido.'; er.hidden = false; return; }
-  const { k, sym, n } = f.dataset, L = invList(), i = L.findIndex(x => x.k === k && x.sym === sym);
-  const row = { id: i >= 0 ? L[i].id : 'i' + Date.now().toString(36), k, sym, n: String(n).slice(0, 60), qty, cost };
+  const qty = +$('#iQty').value, cost = invFormCost(), er = $('#iErr');
+  if (!(qty > 0) || qty > 1e9) { er.textContent = 'Escribe cuántos títulos tienes (un número mayor que 0).'; er.hidden = false; $('#iQty').focus(); return; }
+  if (!(cost >= 0) || cost > 1e9) { er.textContent = 'Revisa los montos: la pérdida no puede ser mayor que el valor más lo invertido.'; er.hidden = false; return; }
+  const { k, sym, n, t, cur } = f.dataset, L = invList(), i = L.findIndex(x => x.k === k && x.sym === sym);
+  const row = { id: i >= 0 ? L[i].id : 'i' + Date.now().toString(36), k, sym, n: String(n).slice(0, 60), qty, cost: Math.round(cost * 100) / 100, cur };
+  if (t) row.t = String(t).slice(0, 20);
   invSet(i >= 0 ? L.map((x, j) => (j === i ? row : x)) : [...L, row], i >= 0 ? `${row.n}: actualizada` : `${row.n} quedó fija en tus inversiones`);
   if (i < 0 && k === 'cripto' && !PX.top.includes(sym)) setTimeout(() => pxFetch(true), 300);
 }
@@ -2809,7 +2896,10 @@ document.addEventListener('click', e => {
   const act = a.dataset.act;
   if (act === 'back') { S.fund = null; render(); }
   else if (act === 'inv-tab') { S.invTab = a.dataset.k; drawInv(); }
-  else if (act === 'inv-pin') invPinOpen(a.dataset.k, a.dataset.sym, a.dataset.n);
+  else if (act === 'inv-pin') invPinOpen(a.dataset.k, a.dataset.sym, a.dataset.n, a.dataset.t);
+  else if (act === 'inv-mx') { S.invMx = a.dataset.v === '1'; drawInv(); }
+  else if (act === 'inv-bulk') invBulkOpen();
+  else if (act === 'inv-cur' || act === 'inv-mode') { const f = $('#invForm'); f.dataset[act === 'inv-cur' ? 'cur' : 'mode'] = a.dataset.v; a.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('is-on', b === a)); if (act === 'inv-mode') { $('#iGbm').hidden = a.dataset.v !== 'gbm'; $('#iCostW').hidden = a.dataset.v !== 'cost'; } invPrev(); }
   else if (act === 'inv-close') invPinClose();
   else if (act === 'inv-refresh') pxFetch(true);
   else if (act === 'inv-del') { const f = $('#invForm'); if (f) { const { k, sym, n } = f.dataset; invSet(invList().filter(x => !(x.k === k && x.sym === sym)), `${n} ya no está en tus inversiones`); } }
@@ -2839,7 +2929,8 @@ document.addEventListener('click', e => {
   else if (act === 'pay-up') { const u = CFG.upcoming.find(x => x.id === a.dataset.id); if (u) addMov({ id: uid(), kind: 'mov', type: 'gasto', amount: upLeft(u), date: TODAY, cat: u.cat, ref: u.id, note: u.n, created: Date.now() }); }
   else if (act === 'recv') { const id = a.dataset.id, i = CFG.incoming.find(x => x.id === id); addMov({ id: uid(), kind: 'mov', type: 'ingreso', amount: i ? inLeft(i) : perPay(), date: TODAY, cat: id, ref: i ? id : null, note: i ? i.n : 'Quincena', created: Date.now() }); }
 });
-document.addEventListener('input', e => { const el = e.target; if (el.closest && el.closest('#invForm')) { cetesPrev(); return; }
+document.addEventListener('input', e => { const el = e.target; if (el.closest && el.closest('#invForm')) { cetesPrev(); invPrev(); return; }
+  if (el.id === 'iBulk') { const r = invBulkParse(el.value), pv = $('#iBulkPrev'); if (pv) pv.textContent = el.value.trim() ? `${r.ok.length} ${r.ok.length === 1 ? 'acción lista' : 'acciones listas'}${r.bad.length ? ` · ${r.bad.length} renglón(es) no entiendo: ${r.bad.slice(0, 2).join(' / ')}` : ''}` : ''; return; }
   if (el.id === 'simVar') { S.sim.varEst = +el.value; const y = window.scrollY; renderPanel(); window.scrollTo(0, y); const r = $('#simVar'); if (r) r.focus(); return; }
   if (el.dataset && el.dataset.li && cfgDraft) { const r = cfgDraft[el.dataset.li][+el.dataset.i]; r[el.dataset.k] = el.type === 'number' ? (el.value === '' ? '' : +el.value) : el.value; if (el.type === 'color' && el.nextElementSibling) el.nextElementSibling.textContent = el.value; markDirty(); return; }
   if (el.dataset && el.dataset.pf && cfgDraft) { const k = el.dataset.pf; cfgDraft[k] = el.type === 'checkbox' ? el.checked : el.type === 'number' ? +el.value : el.value; markDirty(); if (k === 'showAlt') { if (cfgDraft.showAlt && !cfgDraft.altCur) cfgDraft.altCur = 'USD'; drawCfg(); } return; }
@@ -2849,6 +2940,7 @@ document.addEventListener('submit', e => {
   e.preventDefault();
   if (e.target.id === 'cfgForm') { saveCfg(); return; }
   if (e.target.id === 'invForm') { invSave(e.target); return; }
+  if (e.target.id === 'invBulk') { invBulkSave(); return; }
   if (e.target.id === 'invSearch') { invSearch($('#invQ').value); return; }
   if (e.target.id === 'onbForm') { finishOnboard(); return; }
   if (e.target.id === 'lockForm') { tryUnlock(); return; }

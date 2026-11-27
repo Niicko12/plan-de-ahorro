@@ -8,14 +8,14 @@ const ORIGINS = new Set([
   'https://mi-ahorro-j3s3f.firebaseapp.com',
   'https://plan-de-ahorro-gules.vercel.app',
 ]);
-const SYM = /^[A-Z][A-Z0-9.-]{0,9}$/;
+const SYM = /^[A-Z][A-Z0-9.&-]{0,15}$/;
 
 async function fromFinnhub(sym, key) {
   const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(sym)}&token=${encodeURIComponent(key)}`);
   if (!r.ok) return null;
   const j = await r.json();
   if (!(j && j.c > 0)) return null;
-  return { p: j.c, dp: Number.isFinite(j.dp) ? j.dp : 0, t: j.t ? j.t * 1000 : Date.now() };
+  return { p: j.c, dp: Number.isFinite(j.dp) ? j.dp : 0, t: j.t ? j.t * 1000 : Date.now(), cur: 'USD' };
 }
 
 async function fromYahoo(sym) {
@@ -32,6 +32,7 @@ async function fromYahoo(sym) {
     dp: prev > 0 ? ((m.regularMarketPrice - prev) / prev) * 100 : 0,
     t: m.regularMarketTime ? m.regularMarketTime * 1000 : Date.now(),
     n: m.longName || m.shortName || undefined,
+    cur: m.currency || 'USD',
   };
 }
 
@@ -49,7 +50,8 @@ export default async function handler(req, res) {
   const key = process.env.FINNHUB_KEY;
   const q = {};
   await Promise.all(list.map(async sym => {
-    try { q[sym] = (key ? await fromFinnhub(sym, key) : null) || await fromYahoo(sym); } catch { q[sym] = null; }
+    // Finnhub gratis solo cubre EE. UU.; las de la BMV (.MX) van directo a Yahoo.
+    try { q[sym] = (key && !sym.endsWith('.MX') ? await fromFinnhub(sym, key) : null) || await fromYahoo(sym); } catch { q[sym] = null; }
   }));
 
   const ok = Object.values(q).some(Boolean);
