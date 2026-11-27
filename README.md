@@ -13,14 +13,16 @@ Es una sola página HTML que funciona igual en el celular y en la computadora. E
 - **Fondos de tu meta.** Divides la meta en partes, por ejemplo enganche, seguro, trámites y emergencia. Cada fondo es un edificio de una maqueta 3D isométrica que se va construyendo conforme ahorras.
 - **Una maqueta viva.** El terreno tiene pasto, árboles, flores y un estanque con patos y fuente. Hay muñequitos que caminan con mochila, gorra o bolsa del súper, una persona que pasea a su perro, autos, pájaros, nubes y un globo aerostático. De noche se prenden los faroles y salen luciérnagas. Si tu teléfono pide reducir el movimiento, todo se queda quieto.
 - **La maqueta cambia según tu meta.** Si ahorras para un auto, aparece una agencia con un auto girando en la vitrina. Una casa trae una obra con grúa; un viaje, un aeropuerto con un avión que despega; los estudios, una escuela con reloj y bandera; un negocio, un local con toldo. Cualquier otra meta muestra un banco con una alcancía. Se detecta por el nombre de tu meta o lo eliges en Ajustes.
-- **Dónde estás hoy.** Patrimonio neto, ahorro, deudas, retiro, cuánto te sobra al mes y tu tasa de ahorro.
+- **Dónde estás hoy.** Patrimonio neto (incluye tus inversiones), ahorro, deudas, retiro, cuánto te sobra al mes y tu tasa de ahorro.
 - **Alertas.** Fechas límite de tus tarjetas, si vas a tiempo para tu fecha meta, categorías que pasaron su límite y fondos completos.
 - **Plan en 4 pasos.** Colchón de emergencia, liquidar deudas, pagos comprometidos y meta, cada paso con su avance.
 - **Quincena a quincena.** Proyección de cada pago hasta tu fecha límite, con controles para simular cuánto gastas y qué gastos fijos dejas de pagar.
 - **Tarjetas y deudas.** Saldo, tasa anual, día de corte, mejor día para comprar y fecha límite de pago.
 - **Calendario de pagos editable.** Se arma con los datos de cada persona: días de pago, fechas de tarjetas, gastos fijos con día y pagos con fecha. Al tocar un día ves lo que hay, lo cambias o agregas un pago, un gasto fijo, dinero por recibir o una tarjeta en esa fecha.
 - **Gastos fijos, pagos próximos, dinero por recibir y límites del mes** por categoría. Cada pago se captura una sola vez y puede repetirse cada mes (renta), repetirse solo unos meses (a meses sin intereses, se quita solo al terminar) o pagarse una sola vez en una fecha (un vuelo).
-- **Retiro e inversiones** a largo plazo, en pesos o en UDIs.
+- **Inversiones: acciones, cripto y CETES.** Pestaña con el mercado en general: acciones populares de EE. UU. (Apple, NVIDIA, Tesla, ETFs del S&P 500…) y las 20 cripto más grandes, con su precio y cuánto suben o bajan hoy. Buscas cualquier otra por su símbolo. Tocas **La tengo**, escribes cuántas tienes y cuánto invertiste, y se queda fija arriba. Ves cuánto vale hoy, cuánto ganas o pierdes y una gráfica día a día. No se conecta ninguna cuenta (ni GBM, Bitso ni otra): solo se lee información pública del mercado. Las acciones se pasan de dólares a tu moneda con el tipo de cambio del día.
+- **CETES.** Tasas por plazo (28, 91, 182 y 364 días) y un simulador: cuánto recibes al vencer y cuánto ganas ya descontada la retención de ISR. Si registras el tuyo, ves su valor de hoy y cuándo vence.
+- **Retiro y largo plazo**: seguros de retiro o PPR, en pesos o en UDIs.
 - **Consejos con tus números**, por ejemplo "págate primero", qué hacer con el aguinaldo o cuánto ganas si recortas un gasto.
 - **Nova, tu asistente.** Le preguntas con tus palabras cosas como "¿cómo voy?", "¿cuánto me queda?", "¿qué tengo que pagar?" o "¿cómo registro un gasto?" y te responde con tus números. También explica términos como día de corte o tasa de ahorro, y trae botones que te llevan directo a cada lugar. Es gratis: funciona en el navegador, sin IA externa, y tus preguntas no se mandan a ningún lado.
 - **Deshacer.** Al guardar, editar, borrar, marcar un pago o importar de Gmail aparece **Deshacer** por 7 segundos. Los chips **Pagado ✓**, **Listo ✓** y **Recibido ✓** se tocan para quitar la marca si te equivocaste.
@@ -52,6 +54,7 @@ Es una sola página HTML que funciona igual en el celular y en la computadora. E
 - `public/index.html`: toda la app (HTML, CSS y JavaScript sin framework). Las gráficas son SVG hechas a mano y la maqueta usa [three.js](https://threejs.org/).
 - Inicio de sesión con **Firebase Authentication**: Google, correo y contraseña (con confirmación de correo obligatoria y recuperación) o enlace al correo sin contraseña.
 - Datos en **Cloud Firestore**, en `data/users/{uid}/{documento}`. Hay un documento `config` con tu plan y un documento por movimiento.
+- `api/quotes.js`: función de Vercel que da el precio de las acciones de EE. UU. (Yahoo Finance, o Finnhub si pones la variable `FINNHUB_KEY`). Solo recibe símbolos, guarda la respuesta 60 s en la CDN y acepta peticiones solo de los dominios de la app. Las cripto vienen directo de CoinGecko y el tipo de cambio de open.er-api.com.
 - `firestore.rules`: solo el dueño de la cuenta, con correo confirmado, puede leer y escribir sus documentos. Además valida cada movimiento (monto, fecha y tamaño).
 
 ### Seguridad

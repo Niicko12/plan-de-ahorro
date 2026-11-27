@@ -55,7 +55,7 @@ button{cursor:pointer}
 .nav button{border:0;background:none;padding:8px 14px;border-radius:9px;font-weight:600;color:var(--muted)}
 .nav button.is-on{background:var(--ai);color:#fff}
 .tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-select,input[type=text],input[type=number],input[type=date]{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0;font-size:16px}
+select,input[type=text],input[type=search],input[type=number],input[type=date]{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0;font-size:16px}
 .pill{font-size:12px;font-weight:600;border-radius:999px;padding:4px 10px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line);white-space:nowrap}
 .pill.ok{background:var(--good-soft);color:var(--good);border-color:transparent}
 .pill.local{background:var(--warn-soft);color:var(--warn);border-color:transparent}
@@ -446,6 +446,37 @@ html{scroll-padding-top:70px}
 .cd[data-day]{cursor:pointer}.cd[data-day]:hover{border-color:var(--ai)}.cd[data-day]:focus-visible{outline:2px solid var(--ai);outline-offset:1px}
 .cday-list{display:flex;flex-direction:column;gap:6px;margin-top:6px}.cday-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:12px}.cday-row .ce{width:12px;height:12px;padding:0;border-radius:4px;flex:none;font-size:0}.cday-row span{flex:1;font-weight:600;font-size:14.5px}
 .cday-add{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.cday-add .btn,.cday-add .back{min-height:42px}
+.up{color:var(--good)!important}.down{color:var(--bad)!important}
+.seg button.is-on{background:var(--surface);color:var(--fg);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.inv-sum .card-h,.inv-empty .card-h{align-items:center}
+.inv-st{display:flex;align-items:center;gap:10px;margin-left:auto}
+.inv-err{color:var(--warn)!important;margin-top:4px}
+.inv-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.inv-tiles .kt{box-shadow:none;background:var(--surface-2)}
+.inv-chart{margin:14px 0 0}.inv-chart svg{width:100%;height:120px;display:block}
+.ic-val{fill:none;stroke-width:2.5;vector-effect:non-scaling-stroke}.ic-val.up{stroke:var(--good)}.ic-val.down{stroke:var(--bad)}
+.ic-cost{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5 4;vector-effect:non-scaling-stroke}
+.inv-chart figcaption{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-size:12px;margin-top:6px}.inv-chart figcaption span:last-child{margin-left:auto}
+.ic-k{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}.ic-k.up{background:var(--good)}.ic-k.down{background:var(--bad)}.ic-k.cost{background:var(--muted)}
+.inv-note{margin:10px 2px 0}
+.inv-mine{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:16px}
+.ih{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ih.up{border-left-color:var(--good)}.ih.down{border-left-color:var(--bad)}
+.ih-top{display:flex;align-items:center;gap:10px}.ih-n{flex:1;min-width:0;display:flex;flex-direction:column}.ih-n b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ih-n small{color:var(--muted);font-size:12px}
+.ih-v{display:flex;flex-direction:column}.ih-v small{color:var(--muted);font-size:12px;font-weight:600}.ih-v b{font-family:var(--display);font-size:24px;font-weight:900}.ih-v span{font-weight:700;font-size:14px}
+.ih-d{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0;padding-top:10px;border-top:1px solid var(--line)}.ih-d dt{color:var(--muted);font-size:11.5px;font-weight:600}.ih-d dd{margin:0;font-size:13px;font-weight:600;overflow-wrap:anywhere}.ih-d dd small{color:var(--muted);font-weight:500}
+.seg.three{grid-template-columns:repeat(3,1fr)}.inv-prev{background:var(--good-soft);border-radius:12px;padding:10px 12px}.inv-prev:empty{display:none}.inv-prev p{margin:0 0 4px}
+.inv-mkt .seg{min-width:300px}.inv-mkt .seg button{font-size:13px;padding:8px}
+.inv-search{display:flex;gap:8px;margin-bottom:6px}.inv-search[hidden]{display:none}.inv-search input{flex:1;min-width:0;font-size:16px;min-height:42px}.inv-search .btn{min-height:42px}
+.mrow{display:grid;grid-template-columns:36px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.mlogo{width:36px;height:36px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;font-weight:800;font-size:10.5px;overflow:hidden;flex:none;color:var(--fg)}.mlogo img{width:100%;height:100%;object-fit:cover}
+.mn{min-width:0;display:flex;flex-direction:column}.mn b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mn small{color:var(--muted);font-size:12px}
+.mp{display:flex;flex-direction:column;align-items:flex-end;gap:3px}.mp b{font-size:14px}
+.mrow .btn{min-height:38px;white-space:nowrap}
+#invSh{position:fixed;inset:0;z-index:71;display:flex;align-items:flex-end;justify-content:center}#invSh[hidden]{display:none!important}@media (min-width:700px){#invSh{align-items:center}}
+.inv-form{display:flex;flex-direction:column;gap:10px}.inv-form label{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:14px}.inv-form input{font-size:16px}
+@media (max-width:700px){.inv-tiles{grid-template-columns:1fr 1fr}.inv-mkt .seg{min-width:0;width:100%}}
+@media (max-width:600px){.nav{grid-template-columns:repeat(4,1fr)}.nav button{font-size:12px;padding:9px 2px}.mrow{grid-template-columns:30px minmax(0,1fr) auto auto;gap:8px}.mrow .mlogo{width:30px;height:30px;font-size:9.5px}.mrow .btn{padding:6px 9px;font-size:12px;min-height:36px}.mp b{font-size:13px}.mp .chip{font-size:11px;padding:2px 6px}.inv-st{margin-left:0;width:100%;justify-content:space-between}}
 </style>
 </head><body>
 
@@ -460,6 +491,7 @@ html{scroll-padding-top:70px}
     <nav class="nav" role="tablist" aria-label="Secciones">
       <button data-view="panel" role="tab">Panel</button>
       <button data-view="movs" role="tab">Movimientos</button>
+      <button data-view="inv" role="tab">Inversiones</button>
       <button data-view="cfg" role="tab">Ajustes</button>
     </nav>
     <div class="tools">
@@ -480,6 +512,7 @@ html{scroll-padding-top:70px}
 
   <main id="viewPanel"></main>
   <main id="viewMovs" hidden></main>
+  <main id="viewInv" hidden></main>
   <main id="viewCfg" hidden></main>
 </div>
 <div id="login" hidden><div class="login-card"><div class="mark" aria-hidden="true" style="width:54px;height:54px;border-radius:16px"><svg width="30" height="30" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" stroke="#fff" stroke-width="2.2" fill="none"/><circle cx="12" cy="12" r="4.2" stroke="#fff" stroke-width="2.2" fill="none"/><circle cx="12" cy="12" r="1.3" fill="#fff"/></svg></div><h1>Mi plan de ahorro</h1><p class="help">Tus datos son privados y solo tú puedes verlos.</p><button type="button" id="gLogin" class="gbtn"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Entrar con Google</button><div class="or"><span>o con tu correo</span></div><div class="ltabs" role="tablist"><button type="button" role="tab" data-lm="in" class="is-on">Entrar</button><button type="button" role="tab" data-lm="up">Crear cuenta</button><button type="button" role="tab" data-lm="link">Sin contraseña</button></div><form id="emForm" class="lform" novalidate autocomplete="on">  <label for="emEmail">Correo</label><input id="emEmail" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="254" required>  <div id="pwWrap"><label for="emPass">Contraseña</label><div class="pw"><input id="emPass" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="128" required><button type="button" class="pwEye" data-eye="emPass" aria-label="Mostrar contraseña">Ver</button></div></div>  <div id="pw2Wrap" hidden><label for="emPass2">Repite la contraseña</label><input id="emPass2" name="password2" type="password" autocomplete="new-password" maxlength="128"><ul id="pwRules" class="pwrules"><li data-r="len">Al menos 10 caracteres</li><li data-r="mix">Letras y números</li><li data-r="case">Una mayúscula y una minúscula</li><li data-r="same">Las dos contraseñas coinciden</li></ul></div>  <p id="linkHelp" class="help" hidden>Te mandamos un enlace a tu correo. Ábrelo en este mismo navegador y entras sin contraseña.</p>  <button type="submit" id="emSubmit" class="btn">Entrar</button>  <button type="button" id="emForgot" class="lnk">¿Olvidaste tu contraseña?</button></form><div id="verifyBox" class="lform" hidden><p class="help">Te mandamos un correo a <b id="vEmail"></b>. Abre el enlace para confirmar que es tuyo y luego toca <b>Ya lo confirmé</b>. Revisa también la carpeta de spam.</p><button type="button" id="vDone" class="btn">Ya lo confirmé</button><button type="button" id="vResend" class="lnk">Reenviar el correo</button><button type="button" id="vOut" class="lnk">Usar otra cuenta</button></div><p id="loginOk" class="help" style="color:var(--good)" hidden></p><p id="loginErr" role="alert" class="help" style="color:var(--bad)" hidden></p></div></div>
@@ -492,6 +525,7 @@ html{scroll-padding-top:70px}
 <section id="bot" hidden role="dialog" aria-label="Nova, tu asistente"><div class="bot-h"><span style="font-size:22px" aria-hidden="true">✨</span><b>Nova · tu asistente</b><button type="button" id="botX" aria-label="Cerrar asistente">×</button></div><div id="botLog" aria-live="polite"></div><div id="botChips"></div><form id="botForm" autocomplete="off"><input id="botIn" type="text" maxlength="200" placeholder="Escribe tu pregunta…" aria-label="Escribe tu pregunta" enterkeyhint="send"><button type="submit">Enviar</button></form></section>
 <button type="button" id="gmBtn" hidden title="Traer los gastos que te llegaron por correo">✉ Gmail</button>
 <div id="cday" hidden><div class="qa-back" data-act="cday-close"></div><div class="qa-sheet" role="dialog" aria-modal="true" aria-labelledby="cdayT"><div class="card-h"><h2 id="cdayT">Día</h2><button type="button" class="back" data-act="cday-close" aria-label="Cerrar">×</button></div><div id="cdayL" class="cday-list"></div><h3 class="sub" style="margin-top:14px">Agregar en este día</h3><div class="cday-add"><button type="button" class="btn small" data-act="cday-add" data-key="upcoming">Se paga una sola vez <small>(ej. un vuelo)</small></button><button type="button" class="btn small" data-act="cday-add" data-key="fixed">Se repite cada mes <small>(ej. renta, entrenador)</small></button><button type="button" class="btn small" data-act="cday-add" data-key="fixed" data-months="3">Por unos meses <small>(ej. a meses sin intereses)</small></button><button type="button" class="btn small" data-act="cday-add" data-key="incoming">Dinero por recibir</button><button type="button" class="btn small" data-act="cday-add" data-key="debts">Una tarjeta o deuda</button><button type="button" class="back" data-act="cday-edit" data-key="plan">Cambiar mis días de pago</button></div></div></div>
+<div id="invSh" hidden><div class="qa-back" data-act="inv-close"></div><div class="qa-sheet" role="dialog" aria-modal="true" aria-labelledby="invShT"><div id="invShB"></div></div></div>
 <div id="qa" hidden><div class="qa-back" data-act="qa-close"></div><div class="qa-sheet" role="dialog" aria-modal="true" aria-labelledby="qaT"><div class="card-h"><h2 id="qaT">Registrar</h2><button type="button" class="back" data-act="qa-close">Cerrar</button></div><div id="qaBody"></div></div></div>
 
 <script>try { if (localStorage.getItem('pa-pin-on') === '1' && sessionStorage.getItem('pa-unlocked') !== '1') document.getElementById('lock').hidden = false; } catch {}</script>
@@ -548,12 +582,12 @@ const inMonths = n => { const d = new Date(); d.setMonth(d.getMonth() + n); retu
 const DEFAULT_CFG = {
   kind: 'config', plan: 'vivir', plan2: 2, plan3: 3, plan4: 4, paydays: [15, 30], seeded: true, currency: 'MXN', rate: 9.1, income: 0, workDays: 20, alcoholCap: 0,
   title: 'Mi plan de ahorro', goalName: 'Mi meta', showAlt: false, tripDate: inMonths(6), quitDate: inMonths(6),
-  funds: clone(TEMPLATES.general.funds), debts: [], fixed: [], upcoming: [], incoming: [], budgets: []
+  funds: clone(TEMPLATES.general.funds), debts: [], fixed: [], upcoming: [], incoming: [], budgets: [], inv: []
 };
 function migrate(cfg) {
   const c = { ...clone(DEFAULT_CFG), ...cfg };
   if (!Array.isArray(c.funds) || !c.funds.length) c.funds = clone(DEFAULT_CFG.funds);
-  ['debts', 'fixed', 'upcoming', 'incoming', 'budgets'].forEach(k => { if (!Array.isArray(c[k])) c[k] = []; });
+  ['debts', 'fixed', 'upcoming', 'incoming', 'budgets', 'inv'].forEach(k => { if (!Array.isArray(c[k])) c[k] = []; });
   if (cfg.plan3 !== 3) {
     if (!c.budgets.length && +c.alcoholCap) c.budgets = [{ id: 'b-alcohol', cat: 'alcohol', a: +c.alcoholCap }];
     c.plan3 = 3;
@@ -1601,11 +1635,11 @@ const secH = (n, id, t, d) => `<div class="sec-h" id="${id}"><span class="sec-n"
 
 function kpiStrip(M, P) {
   const debt = totalDebt(), inc = CFG.incoming.filter(i => i.k !== 'amigo').reduce((t, i) => t + inLeft(i), 0);
-  const net = M.saved + inc + ltTotal() - debt, libre = (+CFG.income || 0) - fixedMonthlyTotal() - P.ve;
+  const iv = invValue(), net = M.saved + inc + iv + ltTotal() - debt, libre = (+CFG.income || 0) - fixedMonthlyTotal() - P.ve;
   const rate = CFG.income ? libre / CFG.income : 0;
   const t = (l, v, s, c) => `<div class="kt"><small>${l}</small><b class="num" style="${c ? `color:${c}` : ''}">${v}</b><span>${s}</span></div>`;
   return `<div class="kstrip">
-    ${t('Patrimonio neto', money(net), 'ahorro + retiro + por recibir − deudas', net < 0 ? 'var(--bad)' : '')}
+    ${t('Patrimonio neto', money(net), iv ? 'ahorro + inversiones + retiro + por recibir − deudas' : 'ahorro + retiro + por recibir − deudas', net < 0 ? 'var(--bad)' : '')}
     ${t('Ahorrado hoy', money(M.saved), altAmt(M.saved))}
     ${t('Deudas', money(debt), debt ? `≈ ${money(CFG.debts.reduce((s, d) => s + debtLeft(d) * (+d.r || 60) / 1200, 0))}/mes de intereses` : 'sin deudas', debt ? 'var(--bad)' : 'var(--good)')}
     ${ltList().length ? t('Para tu retiro', money(ltTotal()), 'largo plazo, no se usa', 'var(--good)') : t('Por recibir', money(inc), 'sin contar lo que te deben', 'var(--good)')}
@@ -1717,7 +1751,7 @@ const ltBal = l => (l.u === 'udi' ? (+l.bal || 0) * udiVal() : (+l.bal || 0)) + 
 const ltTotal = () => ltList().reduce((t, l) => t + ltBal(l), 0);
 function retireHtml() {
   const L = ltList();
-  if (!L.length) return `<div class="card-h"><h2>Ahorro para tu retiro</h2>${editBtn('longterm')}</div><p class="help">Si tienes un seguro de retiro, PPR o inversión a largo plazo, agrégalo en Ajustes → Retiro e inversiones.</p>`;
+  if (!L.length) return `<div class="card-h"><h2>Ahorro para tu retiro</h2>${editBtn('longterm')}</div><p class="help">Si tienes un seguro de retiro, PPR o inversión a largo plazo, agrégalo en Ajustes → Retiro y largo plazo.</p>`;
   const y = +CUR_YM.slice(0, 4);
   const rows = L.map(l => { const b = ltBal(l), yrs = Math.max(0, (+l.hasta || y) - y), por = (+l.a || 0) * 12 * yrs, tot = b + por, fr = tot ? b / tot : 0;
     return `<div class="lt"><div class="lt-h"><span class="dot" style="background:${esc(l.c || '#5b6bd6')}"></span><b>${esc(l.n)}</b><span class="chip">${l.u === 'udi' ? 'En UDIs' : 'En pesos'}</span></div>
@@ -1897,12 +1931,12 @@ const LISTS = {
   debts: { t: 'Tarjetas y deudas', h: 'Saldo de hoy, tasa anual y los días de tu tarjeta (vienen en tu estado de cuenta).', f: [['n', 'text', 'Nombre o banco'], ['t', 'number', 'Debes hoy'], ['r', 'number', 'Tasa anual %'], ['corte', 'day', 'Día de corte'], ['compra', 'day', 'Mejor día para comprar'], ['pagar', 'day', 'Tu día para pagar (opcional)'], ['limite', 'day', 'Fecha límite de pago']], add: () => ({ n: 'Nueva tarjeta', t: 1000, r: 60, c: '#d23f4b' }), amt: r => money(r.t), sub: r => [`${+r.r || 60} % anual`, +r.corte ? `corte día ${r.corte}` : '', +r.limite ? `vence día ${r.limite}` : 'sin fechas'].filter(Boolean).join(' · '), tot: r => +r.t || 0, dot: r => r.c || '#d23f4b' },
   fixed: { t: 'Gastos fijos', h: 'Lo que pagas siempre. «Por día» usa tus días trabajados.', f: [['n', 'text', 'Nombre'], ['a', 'number', 'Monto'], ['u', 'select', 'Frecuencia', [['mes', 'al mes'], ['2meses', 'cada 2 meses'], ['dia', 'por día trabajado']]], ['cat', 'select', 'Categoría', () => cats().map(c => [c.id, c.n])], ['dia', 'day', 'Día en que lo pagas (opcional, sale en el calendario)'], ['fin', 'month', 'Último mes que se paga (solo si es por unos meses, ej. a meses sin intereses)']], add: () => ({ n: 'Nuevo gasto fijo', a: 100, u: 'mes', cat: 'otros' }), amt: r => money(r.a), sub: r => `${UNIT[r.u] || 'al mes'} · ${catName(r.cat)}${+r.dia ? ` · día ${r.dia}` : ''}${r.fin ? (fixActive(r) ? ` · hasta ${ymLabel(r.fin, true)}` : ' · ya terminó') : ''}`, tot: r => fixMonthly(r), totL: 'al mes', dot: r => (CAT[r.cat] || CAT.otros).c },
   upcoming: { t: 'Pagos próximos', h: 'Pagos de una sola vez. La fecha es opcional.', f: [['n', 'text', 'Nombre'], ['a', 'number', 'Monto'], ['d', 'date', 'Fecha'], ['cat', 'select', 'Categoría', () => cats().map(c => [c.id, c.n])]], add: () => ({ n: 'Nuevo pago', a: 1000, cat: 'otros' }), amt: r => money(r.a), sub: r => `${r.d ? dateLong(r.d) : 'Sin fecha'} · ${catName(r.cat)}`, tot: r => +r.a || 0, dot: r => (CAT[r.cat] || CAT.otros).c },
-  longterm: { t: 'Retiro e inversiones', h: 'Seguros de retiro, PPR o inversiones a largo plazo. No cuentan para tu meta.', f: [['n', 'text', 'Nombre'], ['bal', 'number', 'Saldo hoy'], ['u', 'select', 'El saldo está en', [['mxn', 'Pesos'], ['udi', 'UDIs']]], ['a', 'number', 'Aportación mensual'], ['hasta', 'number', 'Pagas hasta el año'], ['ref', 'select', 'Gasto fijo que la paga', () => [['', 'Ninguno'], ...(cfgDraft || CFG).fixed.map(f => [f.id, f.n])]], ['c', 'color', 'Color']], add: () => ({ n: 'Nuevo ahorro a largo plazo', bal: 0, u: 'mxn', a: 0, hasta: +CUR_YM.slice(0, 4) + 10, c: '#5b6bd6', bd: TODAY }), amt: r => r.u === 'udi' ? `${(+r.bal || 0).toLocaleString('es-MX')} UDIs` : money(r.bal), sub: r => `${money(r.a)} al mes · hasta ${r.hasta || '—'}`, tot: r => ltBal(r), dot: r => r.c },
+  longterm: { t: 'Retiro y largo plazo', h: 'Seguros de retiro, PPR o inversiones a largo plazo. No cuentan para tu meta.', f: [['n', 'text', 'Nombre'], ['bal', 'number', 'Saldo hoy'], ['u', 'select', 'El saldo está en', [['mxn', 'Pesos'], ['udi', 'UDIs']]], ['a', 'number', 'Aportación mensual'], ['hasta', 'number', 'Pagas hasta el año'], ['ref', 'select', 'Gasto fijo que la paga', () => [['', 'Ninguno'], ...(cfgDraft || CFG).fixed.map(f => [f.id, f.n])]], ['c', 'color', 'Color']], add: () => ({ n: 'Nuevo ahorro a largo plazo', bal: 0, u: 'mxn', a: 0, hasta: +CUR_YM.slice(0, 4) + 10, c: '#5b6bd6', bd: TODAY }), amt: r => r.u === 'udi' ? `${(+r.bal || 0).toLocaleString('es-MX')} UDIs` : money(r.bal), sub: r => `${money(r.a)} al mes · hasta ${r.hasta || '—'}`, tot: r => ltBal(r), dot: r => r.c },
   incoming: { t: 'Dinero por recibir', h: 'Aguinaldo, bonos o dinero que te deben.', f: [['n', 'text', 'Nombre'], ['a', 'number', 'Monto'], ['d', 'date', 'Fecha'], ['k', 'select', 'Tipo', [['banco', 'Seguro (aguinaldo, bono)'], ['amigo', 'Me lo deben']]]], add: () => ({ n: 'Nuevo ingreso', a: 1000, k: 'banco' }), amt: r => `+${money(r.a)}`, sub: r => `${r.d ? dateLong(r.d) : 'Sin fecha'} · ${r.k === 'amigo' ? 'me lo deben' : 'seguro'}`, tot: r => +r.a || 0, dot: () => '#11946f' },
   budgets: { t: 'Límites del mes', h: 'Lo máximo que quieres gastar al mes en cada categoría.', f: [['cat', 'select', 'Categoría', () => cats().map(c => [c.id, c.n])], ['a', 'number', 'Límite mensual']], add: () => ({ cat: 'salidas', a: 1500 }), name: r => catName(r.cat), amt: r => money(r.a), sub: () => 'límite mensual', tot: r => +r.a || 0, totL: 'al mes', dot: r => (CAT[r.cat] || CAT.otros).c },
   cats: { t: 'Categorías de gasto', h: 'Renómbralas, cambia el color y di si son necesidad, deseo o ahorro (para la regla 50/30/20).', f: [['n', 'text', 'Nombre'], ['t', 'select', 'Tipo', [['nec', 'Necesidad'], ['des', 'Deseo'], ['aho', 'Ahorro']]], ['c', 'color', 'Color']], add: () => ({ n: 'Nueva categoría', c: '#8a93a8', t: 'des' }), amt: () => '', sub: r => TIPO[r.t || DEF_T[r.id] || 'des'], dot: r => r.c }
 };
-const CFG_NAV = [['plan', 'Tu plan', '◎'], ['funds', 'Fondos de tu meta', '▦'], ['debts', 'Tarjetas y deudas', '▭'], ['fixed', 'Gastos fijos', '↻'], ['upcoming', 'Pagos próximos', '◷'], ['incoming', 'Dinero por recibir', '↓'], ['budgets', 'Límites del mes', '◔'], ['longterm', 'Retiro e inversiones', '◆'], ['cats', 'Categorías', '●'], ['security', 'Seguridad', '🔒︎']];
+const CFG_NAV = [['plan', 'Tu plan', '◎'], ['funds', 'Fondos de tu meta', '▦'], ['debts', 'Tarjetas y deudas', '▭'], ['fixed', 'Gastos fijos', '↻'], ['upcoming', 'Pagos próximos', '◷'], ['incoming', 'Dinero por recibir', '↓'], ['budgets', 'Límites del mes', '◔'], ['longterm', 'Retiro y largo plazo', '◆'], ['cats', 'Categorías', '●'], ['security', 'Seguridad', '🔒︎']];
 
 function fieldHtml(key, i, r, [k, type, lab, opts], wide) {
   const id = `l-${key}-${i}-${k}`, a = `data-li="${key}" data-i="${i}" data-k="${k}" id="${id}"`;
@@ -1961,13 +1995,234 @@ const _drawCfg = drawCfg;
 drawCfg = function () { _drawCfg(); const on = document.querySelector('.cfg-nav .is-on'), nav = document.querySelector('.cfg-nav'); if (on && nav && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = on.offsetLeft - 12; };
 const markDirty = () => { if (!S.cfgDirty) { S.cfgDirty = true; const b = $('.savebar'); if (b) b.hidden = false; } };
 
+/* ---------- inversiones: acciones y cripto ---------- */
+// Información general del mercado. No se conecta ninguna cuenta: tú marcas qué tienes y cuánto invertiste,
+// y la app sigue el precio público para decirte si sube o baja.
+const QUOTES_URL = /\.vercel\.app$/.test(location.hostname) ? '/api/quotes' : 'https://plan-de-ahorro-gules.vercel.app/api/quotes';
+const MKT_STOCKS = [['AAPL', 'Apple'], ['MSFT', 'Microsoft'], ['NVDA', 'NVIDIA'], ['AMZN', 'Amazon'], ['GOOGL', 'Alphabet (Google)'], ['META', 'Meta (Facebook)'], ['TSLA', 'Tesla'], ['NFLX', 'Netflix'], ['AMD', 'AMD'], ['PLTR', 'Palantir'], ['KO', 'Coca-Cola'], ['MCD', "McDonald's"], ['DIS', 'Disney'], ['NKE', 'Nike'], ['WMT', 'Walmart'], ['JPM', 'JPMorgan'], ['V', 'Visa'], ['BABA', 'Alibaba'], ['VOO', 'S&P 500 (ETF Vanguard)'], ['SPY', 'S&P 500 (ETF SPDR)'], ['QQQ', 'Nasdaq 100 (ETF)']];
+// CETES: tasa anual de la última subasta (Banxico). Se puede cambiar al registrar el tuyo.
+const CETES = [[28, 6.20], [91, 6.49], [182, 6.66], [364, 6.88]], CETES_AL = '2026-11-24', ISR_CAP = 0.009;
+// Rendimiento de CETES: interés simple base 360; el ISR se retiene sobre el capital (0.90 % anual, base 365).
+const cetesNet = (cap, rate, days) => cap * (rate / 100) * days / 360 - cap * ISR_CAP * days / 365;
+const PX = (() => { try { const o = JSON.parse(localStorage.getItem('pa-px') || 'null'); if (o && o.s && o.c) return o; } catch {} return { s: {}, c: {}, top: [], fx: 0, at: 0, cur: '' }; })();
+let pxBusy = false, pxErr = '';
+const invList = () => (Array.isArray(CFG.inv) ? CFG.inv : []);
+const invCur = () => String(CFG.currency || 'MXN').toUpperCase();
+// Precio en tu moneda: las acciones vienen en dólares y se convierten con el tipo de cambio del día.
+function pxOf(k, sym) {
+  if (k === 'cripto') { const c = PX.c[sym]; return c && c.p > 0 && PX.cur === invCur() ? c : null; }
+  const s = PX.s[sym], fx = invCur() === 'USD' ? 1 : +PX.fx;
+  return s && s.p > 0 && fx > 0 ? { ...s, p: s.p * fx, usd: s.p } : null;
+}
+function invRow(h) {
+  if (h.k === 'cetes') {
+    const cap = +h.cost || 0, days = +h.days || 28, start = h.d || TODAY, el = Math.max(0, Math.min(days, diffDays(start, TODAY))), end = addDays(start, days);
+    const v = cap + cetesNet(cap, +h.rate || 0, el), done = el >= days;
+    return { h, q: { cetes: true, p: 0, dp: 0 }, qty: 0, v, cost: cap, gain: v - cap, gp: cap ? (v - cap) / cap : null, day: done ? 0 : cetesNet(cap, +h.rate || 0, 1), end, done, fin: cap + cetesNet(cap, +h.rate || 0, days) };
+  }
+  const q = pxOf(h.k, h.sym), qty = +h.qty || 0, cost = +h.cost || 0;
+  const v = q ? qty * q.p : cost, day = q && q.dp ? v - v / (1 + q.dp / 100) : 0;
+  return { h, q, qty, v, cost, gain: q && cost ? v - cost : null, gp: q && cost ? (v - cost) / cost : null, day };
+}
+function invTotals() {
+  const R = invList().map(invRow), add = f => R.reduce((t, r) => t + (f(r) || 0), 0);
+  const withCost = R.filter(r => r.gain != null), cost = withCost.reduce((t, r) => t + r.cost, 0), gain = withCost.reduce((t, r) => t + r.gain, 0);
+  return { R, v: add(r => r.v), cost: add(r => r.cost), gain: withCost.length ? gain : null, gp: cost ? gain / cost : null, day: add(r => r.day) };
+}
+const invValue = () => invList().length ? invTotals().v : 0;
+const pxFmt = v => { const a = Math.abs(v), d = a >= 1000 ? 0 : a >= 1 ? 2 : a >= 0.01 ? 4 : 8; try { return new Intl.NumberFormat('es-MX', { style: 'currency', currency: invCur(), minimumFractionDigits: d ? Math.min(d, 2) : 0, maximumFractionDigits: d }).format(v); } catch { return '$' + v.toFixed(d); } };
+const usdFmt = v => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: v >= 1000 ? 0 : 2 }).format(v);
+const sgn = v => (v > 0 ? '+' : v < 0 ? '−' : '');
+const pctS = v => `${sgn(v)}${Math.abs(v).toFixed(2)} %`;
+const updn = v => (v > 0 ? 'up' : v < 0 ? 'down' : '');
+const moneyS = v => (S.hideAmt ? money(v) : `${sgn(v)}${money(Math.abs(v))}`);
+const getJson = async url => { const r = await fetch(url); if (!r.ok) throw new Error(String(r.status)); return r.json(); };
+
+async function pxFetch(force) {
+  if (pxBusy || (!force && Date.now() - PX.at < 55e3)) return;
+  pxBusy = true; pxErr = ''; const st = $('#pxSt'); if (st) st.textContent = 'Actualizando…';
+  const first = !PX.at, cur = invCur(), lc = cur.toLowerCase();
+  if (PX.cur !== cur) { PX.c = {}; PX.top = []; }
+  const stocks = [...new Set([...MKT_STOCKS.map(s => s[0]), ...invList().filter(h => h.k !== 'cripto').map(h => h.sym)])];
+  let bad = 0;
+  await Promise.all([
+    getJson(`${QUOTES_URL}?s=${encodeURIComponent(stocks.join(','))}`).then(j => { Object.entries(j.q || {}).forEach(([k, v]) => { if (v && v.p > 0) PX.s[k] = { ...(PX.s[k] || {}), ...v }; }); }).catch(() => { bad |= 1; }),
+    cur === 'USD' ? (PX.fx = 1) : getJson('https://open.er-api.com/v6/latest/USD').then(j => { const f = j && j.rates && +j.rates[cur]; if (f > 0) PX.fx = f; }).catch(() => {}),
+    getJson(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${lc}&order=market_cap_desc&per_page=20&page=1`).then(a => { PX.top = a.map(c => c.id); a.forEach(c => { PX.c[c.id] = { p: +c.current_price, dp: +c.price_change_percentage_24h || 0, n: c.name, sym: String(c.symbol).toUpperCase(), img: c.image }; }); PX.cur = cur; }).catch(() => { bad |= 2; })
+  ]);
+  const miss = invList().filter(h => h.k === 'cripto' && !PX.top.includes(h.sym)).map(h => h.sym);
+  if (miss.length) await getJson(`https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(miss.join(','))}&vs_currencies=${lc}&include_24hr_change=true`).then(o => { miss.forEach(id => { const x = o[id]; if (x && x[lc] > 0) PX.c[id] = { ...(PX.c[id] || {}), p: +x[lc], dp: +x[`${lc}_24h_change`] || 0 }; }); PX.cur = cur; }).catch(() => { bad |= 2; });
+  pxErr = bad === 3 ? 'No pude actualizar los precios. Revisa tu internet.' : bad === 1 ? 'No pude actualizar las acciones; muestro el último precio que tenía.' : bad === 2 ? 'No pude actualizar las cripto; muestro el último precio que tenía.' : '';
+  if (bad !== 3) PX.at = Date.now();
+  pxBusy = false;
+  try { localStorage.setItem('pa-px', JSON.stringify(PX)); } catch {}
+  invSnap();
+  if (S.view === 'inv') drawInv(); else if (first && S.view === 'panel' && invList().length && !S.onboard) render();
+}
+// Una foto al día del valor de tu portafolio, para la gráfica de cómo ha cambiado.
+function invSnap() {
+  if (MODE !== 'db' && MODE !== 'local') return;
+  const T = invTotals(); if (!T.R.length || !T.R.every(r => r.q)) return;
+  const H = Array.isArray(CFG.invHist) ? CFG.invHist : [];
+  if (H.length && H[H.length - 1].d === TODAY) return;
+  CFG.invHist = [...H, { d: TODAY, v: Math.round(T.v), c: Math.round(T.cost) }].slice(-400);
+  writeDoc('config', CFG).catch(() => {});
+}
+setInterval(() => { if (document.visibilityState === 'visible' && S.view === 'inv') pxFetch(); }, 60e3);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S.view === 'inv') pxFetch(); });
+
+function invChart() {
+  const H = (Array.isArray(CFG.invHist) ? CFG.invHist : []).slice(-90);
+  if (H.length < 2) return '<p class="help inv-note">Cada día que abras este apartado guardo cuánto vale tu portafolio. Con dos días o más aquí verás la gráfica de cómo ha cambiado.</p>';
+  const W = 600, Hh = 120, vals = H.flatMap(p => [p.v, p.c || p.v]), lo = Math.min(...vals), hi = Math.max(...vals), sp = hi - lo || 1;
+  const x = i => (i / (H.length - 1)) * W, y = v => Hh - 6 - ((v - lo) / sp) * (Hh - 12);
+  const line = k => H.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p[k] || p.v).toFixed(1)}`).join('');
+  const up = H[H.length - 1].v >= (H[H.length - 1].c || H[0].v);
+  return `<figure class="inv-chart"><svg viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none" role="img" aria-label="Valor de tu portafolio en los últimos ${H.length} días"><path d="${line('c')}" class="ic-cost"/><path d="${line('v')}" class="ic-val ${up ? 'up' : 'down'}"/></svg><figcaption><span><i class="ic-k ${up ? 'up' : 'down'}"></i>Lo que vale</span><span><i class="ic-k cost"></i>Lo que invertiste</span><span>${esc(dateShort(H[0].d))} – hoy</span></figcaption></figure>`;
+}
+function logo(k, sym, n) {
+  const c = k === 'cripto' && PX.c[sym];
+  return c && c.img ? `<span class="mlogo"><img src="${esc(c.img)}" alt="" loading="lazy" referrerpolicy="no-referrer"></span>` : `<span class="mlogo">${esc((k === 'cripto' && c ? c.sym : sym).slice(0, 4))}</span>`;
+}
+function mineCard(r) {
+  if (r.h.k === 'cetes') {
+    const h = r.h, dl = diffDays(TODAY, r.end);
+    return `<article class="ih up"><div class="ih-top"><span class="mlogo">MX</span><div class="ih-n"><b>${esc(h.n)}</b><small>${(+h.rate || 0).toFixed(2)} % anual · desde el ${esc(dateShort(h.d))}</small></div><button type="button" class="sr-btn" data-act="inv-pin" data-k="cetes" data-sym="${esc(h.sym)}" data-n="${esc(h.n)}">Editar</button></div>
+      <div class="ih-v"><small>Vale hoy</small><b class="num">${money(r.v)}</b><span class="up">${moneyS(r.gain)} (${pctS(r.gp * 100)}) ya sin ISR</span></div>
+      <dl class="ih-d"><div><dt>${r.done ? 'Venció' : 'Vence'}</dt><dd class="${r.done ? 'down' : ''}">${esc(dateShort(r.end))}${r.done ? '' : ` <small>(en ${dl} ${dl === 1 ? 'día' : 'días'})</small>`}</dd></div><div><dt>Al vencer recibes</dt><dd>${money(r.fin)}</dd></div><div><dt>Invertiste</dt><dd>${money(r.cost)}</dd></div></dl>
+      ${r.done ? '<p class="help inv-err">Ya venció: reinviértelo o retíralo en tu app de CETES y luego actualiza la fecha aquí.</p>' : ''}</article>`;
+  }
+  const { h, q } = r, sym = h.k === 'cripto' ? ((PX.c[h.sym] && PX.c[h.sym].sym) || h.sym.toUpperCase()) : h.sym;
+  const qtyTxt = `${(+h.qty || 0).toLocaleString('es-MX', { maximumFractionDigits: 8 })} ${h.k === 'cripto' ? sym : (+h.qty === 1 ? 'acción' : 'acciones')}`;
+  return `<article class="ih ${updn(r.gain ?? (q ? q.dp : 0))}">
+    <div class="ih-top">${logo(h.k, h.sym, h.n)}<div class="ih-n"><b>${esc(h.n || sym)}</b><small>${esc(sym)} · ${qtyTxt}</small></div><button type="button" class="sr-btn" data-act="inv-pin" data-k="${h.k}" data-sym="${esc(h.sym)}" data-n="${esc(h.n || '')}">Editar</button></div>
+    <div class="ih-v"><small>Vale hoy</small><b class="num">${q ? money(r.v) : '—'}</b>${r.gain != null ? `<span class="${updn(r.gain)}">${moneyS(r.gain)} (${pctS(r.gp * 100)})</span>` : q ? '<span class="help">Pon cuánto invertiste para ver tu ganancia</span>' : ''}</div>
+    <dl class="ih-d"><div><dt>Hoy</dt><dd class="${updn(q && q.dp)}">${q ? `${pctS(q.dp)} · ${moneyS(r.day)}` : '—'}</dd></div><div><dt>Precio</dt><dd>${q ? pxFmt(q.p) + (q.usd ? ` <small>(${usdFmt(q.usd)})</small>` : '') : 'sin precio'}</dd></div><div><dt>Invertiste</dt><dd>${r.cost ? money(r.cost) : '—'}</dd></div></dl>
+  </article>`;
+}
+function cetesRow([days, rate]) {
+  const sym = 'C' + days, own = invList().some(h => h.k === 'cetes' && h.sym === sym), n = `CETES ${days} días`;
+  return `<div class="mrow"><span class="mlogo">${days}d</span><div class="mn"><b>${n}</b><small>Con $10,000 ganas ≈ ${pxFmt(cetesNet(10000, rate, days))} en ${days} días (ya sin ISR)</small></div><div class="mp"><b class="num">${rate.toFixed(2)} %</b><span class="chip good">anual</span></div><button type="button" class="btn small ${own ? 'ghost' : ''}" data-act="inv-pin" data-k="cetes" data-sym="${sym}" data-n="${n}">${own ? '✓ Lo tengo' : 'Simular'}</button></div>`;
+}
+function mktRow(k, sym, n) {
+  const q = pxOf(k, sym), own = invList().some(h => h.k === k && h.sym === sym), c = k === 'cripto' && PX.c[sym];
+  return `<div class="mrow">${logo(k, sym, n)}<div class="mn"><b>${esc(n)}</b><small>${esc(c ? c.sym : sym)}</small></div><div class="mp"><b class="num">${q ? pxFmt(q.p) : '—'}</b>${q ? `<span class="chip ${q.dp > 0 ? 'good' : q.dp < 0 ? 'bad' : ''}">${q.dp > 0 ? '▲' : q.dp < 0 ? '▼' : '•'} ${Math.abs(q.dp).toFixed(2)} %</span>` : ''}</div><button type="button" class="btn small ${own ? 'ghost' : ''}" data-act="inv-pin" data-k="${k}" data-sym="${esc(sym)}" data-n="${esc(n)}">${own ? '✓ La tengo' : 'La tengo'}</button></div>`;
+}
+function renderInv() {
+  const root = $('#viewInv');
+  if (!$('#invBody')) root.innerHTML = `<div class="sec-h"><span class="sec-n">◈</span><div><h2>Tus inversiones</h2><p>Precios del mercado en general. Marca las acciones, cripto o CETES que tienes (en GBM, Bitso, Cetesdirecto o donde sea) y aquí ves si suben o bajan. No se conecta ninguna cuenta.</p></div></div><div id="invBody"></div>
+    <section class="card inv-mkt"><div class="card-h"><h2>Mercado</h2><div class="seg three" role="tablist"><button type="button" role="tab" data-act="inv-tab" data-k="accion">Acciones</button><button type="button" role="tab" data-act="inv-tab" data-k="cripto">Cripto</button><button type="button" role="tab" data-act="inv-tab" data-k="cetes">CETES</button></div></div>
+    <form id="invSearch" class="inv-search" autocomplete="off"><input id="invQ" type="search" maxlength="40" enterkeyhint="search" aria-label="Buscar"><button type="submit" class="btn small">Buscar</button></form><div id="invMkt"></div></section>
+    <p class="help inv-note">Las acciones vienen en dólares y se pasan a ${esc(invCur())} con el tipo de cambio del día. Los precios pueden tener unos minutos de retraso y es información general, no una recomendación de compra o venta.</p>`;
+  drawInv(); pxFetch();
+}
+function drawInv() {
+  if (!$('#invBody')) return;
+  const T = invTotals(), tab = S.invTab || 'accion', when = PX.at ? new Date(PX.at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '';
+  const tile = (l, v, s, cls) => `<div class="kt"><small>${l}</small><b class="num ${cls || ''}">${v}</b><span class="${cls || ''}">${s || ''}</span></div>`;
+  const status = `<div class="inv-st"><span id="pxSt" class="help">${pxBusy ? 'Actualizando…' : when ? `Precios de las ${when}` : ''}</span><button type="button" class="btn small ghost" data-act="inv-refresh">Actualizar</button></div>${pxErr ? `<p class="help inv-err">${esc(pxErr)}</p>` : ''}`;
+  $('#invBody').innerHTML = T.R.length ? `<section class="card inv-sum"><div class="card-h"><h2>Mi portafolio</h2>${status}</div>
+      <div class="inv-tiles">${tile('Vale hoy', money(T.v), altAmt(T.v))}${tile('Invertiste', T.cost ? money(T.cost) : '—', T.cost ? '' : 'pon cuánto invertiste')}${tile('Ganas o pierdes', T.gain == null ? '—' : moneyS(T.gain), T.gain == null ? '' : pctS(T.gp * 100), updn(T.gain))}${tile('Hoy', moneyS(T.day), T.v ? pctS(T.day / (T.v - T.day || 1) * 100) : '', updn(T.day))}</div>
+      ${invChart()}</section>
+      <h3 class="sub">Las que tengo</h3><div class="inv-mine">${T.R.slice().sort((a, b) => b.v - a.v).map(mineCard).join('')}</div>`
+    : `<section class="card inv-empty"><div class="card-h"><h2>Mi portafolio</h2>${status}</div><p>Todavía no marcas ninguna inversión. Busca abajo la acción o cripto que tienes, toca <b>La tengo</b> y escribe cuántas tienes y cuánto invertiste. Se queda fija aquí arriba.</p></section>`;
+  document.querySelectorAll('.inv-mkt [data-act="inv-tab"]').forEach(b => { const on = b.dataset.k === tab; b.classList.toggle('is-on', on); b.setAttribute('aria-selected', on); });
+  $('#invSearch').hidden = tab === 'cetes';
+  if (tab === 'cetes') { $('#invMkt').innerHTML = CETES.map(cetesRow).join('') + `<p class="help inv-note">Tasas de la subasta del ${esc(dateShort(CETES_AL))} (Banxico). Cambian cada semana: al registrar el tuyo puedes poner la tasa que te tocó. El ISR que se descuenta es la retención de 2026: 0.90 % anual sobre lo invertido.</p>`; return; }
+  const q = $('#invQ'); if (q) q.placeholder = tab === 'cripto' ? 'Buscar cripto (ej. PEPE, Cardano)' : 'Buscar símbolo (ej. INTC, BRK.B)';
+  const extra = invList().filter(h => h.k === tab && (tab === 'cripto' ? !PX.top.includes(h.sym) : !MKT_STOCKS.some(s => s[0] === h.sym))).map(h => [h.sym, h.n || h.sym]);
+  const list = tab === 'cripto' ? [...PX.top.map(id => [id, PX.c[id].n]), ...extra] : [...MKT_STOCKS, ...extra];
+  $('#invMkt').innerHTML = list.length ? list.map(([s, n]) => mktRow(tab, s, n)).join('') : `<p class="help">${pxBusy ? 'Cargando precios…' : 'No hay precios por ahora. Toca Actualizar.'}</p>`;
+}
+async function invSearch(raw) {
+  const tab = S.invTab || 'accion', qv = String(raw || '').trim(); if (!qv) return;
+  if (tab === 'accion') {
+    const sym = qv.toUpperCase().replace(/\s*\*$/, '').replace(/[^A-Z0-9.-]/g, '');
+    if (!/^[A-Z][A-Z0-9.-]{0,9}$/.test(sym)) { toast('Escribe el símbolo de la acción, por ejemplo INTC.'); return; }
+    const known = MKT_STOCKS.find(s => s[0] === sym); if (known && PX.s[sym]) { invPinOpen('accion', sym, known[1]); return; }
+    toast('Buscando…');
+    try { const j = await getJson(`${QUOTES_URL}?s=${encodeURIComponent(sym)}`), v = j.q && j.q[sym]; if (!(v && v.p > 0)) throw 0; PX.s[sym] = v; invPinOpen('accion', sym, (known && known[1]) || v.n || sym); }
+    catch { toast(`No encontré «${sym}». Revisa el símbolo (en GBM sale junto al nombre).`); }
+    return;
+  }
+  const lc = invCur().toLowerCase(), nq = nrm(qv);
+  const hit = PX.top.find(id => nrm(PX.c[id].sym) === nq || nrm(PX.c[id].n) === nq); if (hit) { invPinOpen('cripto', hit, PX.c[hit].n); return; }
+  toast('Buscando…');
+  try {
+    const j = await getJson(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(qv)}`), coins = (j.coins || []);
+    const c = coins.find(x => nrm(x.symbol) === nq) || coins[0]; if (!c) throw 0;
+    const o = await getJson(`https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(c.id)}&vs_currencies=${lc}&include_24hr_change=true`), x = o[c.id];
+    PX.c[c.id] = { p: x && +x[lc] || 0, dp: x && +x[`${lc}_24h_change`] || 0, n: c.name, sym: String(c.symbol).toUpperCase(), img: c.thumb || c.large }; PX.cur = invCur();
+    invPinOpen('cripto', c.id, c.name);
+  } catch { toast(`No encontré «${qv}».`); }
+}
+// Hoja para decir cuántas tienes y cuánto invertiste. Se guarda en tu cuenta y se puede deshacer.
+function invPinOpen(k, sym, n) {
+  if (k === 'cetes') { cetesOpen(sym, n); return; }
+  const h = invList().find(x => x.k === k && x.sym === sym), q = pxOf(k, sym), tk = k === 'cripto' ? ((PX.c[sym] && PX.c[sym].sym) || sym.toUpperCase()) : sym;
+  $('#invShB').innerHTML = `<div class="card-h"><h2 id="invShT">${esc(n || tk)} <small class="help">${esc(tk)}</small></h2><button type="button" class="back" data-act="inv-close">Cerrar</button></div>
+    ${q ? `<p class="help">Precio ahora: <b>${pxFmt(q.p)}</b>${q.usd ? ` (${usdFmt(q.usd)})` : ''} · hoy <span class="${updn(q.dp)}">${pctS(q.dp)}</span></p>` : ''}
+    <form id="invForm" class="inv-form" novalidate data-k="${k}" data-sym="${esc(sym)}" data-n="${esc(n || tk)}">
+      <label for="iQty">¿Cuántas tienes? <span class="h">${k === 'cripto' ? `cantidad de ${esc(tk)}, ej. 0.0025` : 'en GBM sale como «Títulos»; puede tener decimales'}</span><input id="iQty" type="number" inputmode="decimal" min="0" step="any" value="${h ? esc(h.qty) : ''}" required></label>
+      <label for="iCost">¿Cuánto invertiste en total? <span class="h">opcional, en ${esc(invCur())}</span><input id="iCost" type="number" inputmode="decimal" min="0" step="any" value="${h && h.cost ? esc(h.cost) : ''}"></label>
+      <p class="help">${k === 'cripto' ? 'Es lo que pagaste por todas juntas.' : 'En GBM: costo promedio × títulos. Con esto calculo cuánto ganas o pierdes.'}</p>
+      <p id="iErr" class="help inv-err" hidden></p>
+      <div class="sr-actions"><button type="submit" class="btn">${h ? 'Guardar cambios' : 'Guardar'}</button>${h ? '<button type="button" class="btn ghost-danger" data-act="inv-del">Ya no la tengo</button>' : ''}</div>
+    </form>`;
+  $('#invSh').hidden = false; setTimeout(() => { const i = $('#iQty'); if (i) i.focus(); }, 30);
+}
+function cetesOpen(sym, n) {
+  const h = invList().find(x => x.k === 'cetes' && x.sym === sym), days = +sym.slice(1), def = (CETES.find(c => c[0] === days) || [0, 6])[1];
+  $('#invShB').innerHTML = `<div class="card-h"><h2 id="invShT">${esc(n)}</h2><button type="button" class="back" data-act="inv-close">Cerrar</button></div>
+    <form id="invForm" class="inv-form" novalidate data-k="cetes" data-sym="${esc(sym)}" data-n="${esc(n)}" data-days="${days}">
+      <label for="iCost">¿Cuánto inviertes? <span class="h">en pesos</span><input id="iCost" type="number" inputmode="decimal" min="0" step="any" value="${h ? esc(h.cost) : '10000'}" required></label>
+      <label for="iRate">Tasa anual % <span class="h">la de la subasta: ${def.toFixed(2)} %</span><input id="iRate" type="number" inputmode="decimal" min="0" max="30" step="0.01" value="${esc(h ? h.rate : def)}"></label>
+      <label for="iDate">¿Cuándo lo compraste? <span class="h">si aún no, deja la de hoy</span><input id="iDate" type="date" max="${TODAY}" value="${esc(h ? h.d : TODAY)}"></label>
+      <div id="iPrev" class="inv-prev"></div>
+      <p id="iErr" class="help inv-err" hidden></p>
+      <div class="sr-actions"><button type="submit" class="btn">${h ? 'Guardar cambios' : 'Lo tengo, guardar'}</button>${h ? '<button type="button" class="btn ghost-danger" data-act="inv-del">Ya no lo tengo</button>' : ''}</div>
+    </form>`;
+  $('#invSh').hidden = false; cetesPrev(); setTimeout(() => { const i = $('#iCost'); if (i) i.focus(); }, 30);
+}
+function cetesPrev() {
+  const f = $('#invForm'), box = $('#iPrev'); if (!f || f.dataset.k !== 'cetes' || !box) return;
+  const cap = +$('#iCost').value || 0, rate = +$('#iRate').value || 0, days = +f.dataset.days, d = $('#iDate').value || TODAY;
+  const gross = cap * rate / 100 * days / 360, isr = cap * ISR_CAP * days / 365, net = gross - isr;
+  box.innerHTML = cap > 0 ? `<p>Al vencer, el <b>${esc(dateLong(addDays(d, days)))}</b>, recibes <b>${pxFmt(cap + net)}</b>.</p><p class="help">Intereses ${pxFmt(gross)} − ISR ${pxFmt(isr)} = ganas <b class="up">${pxFmt(net)}</b> (${pctS(net / cap * 100)} en ${days} días). Si lo reinviertes un año a esta tasa: ≈ ${pxFmt(cetesNet(cap, rate, 364))}.</p>` : '';
+}
+function invPinClose() { $('#invSh').hidden = true; }
+async function invSet(next, msg) {
+  const prev = invList(); CFG.inv = next; invPinClose(); drawInv();
+  try { await writeDoc('config', CFG); toast(msg, async () => { CFG.inv = prev; try { await writeDoc('config', CFG); } catch {} drawInv(); }); }
+  catch { CFG.inv = prev; drawInv(); toast('No se pudo guardar. Inténtalo otra vez.'); }
+}
+function invSave(f) {
+  if (f.dataset.k === 'cetes') {
+    const cost = +$('#iCost').value, rate = +$('#iRate').value, d = $('#iDate').value || TODAY, er = $('#iErr');
+    if (!(cost > 0) || cost > 1e9) { er.textContent = 'Escribe cuánto inviertes (mayor que 0).'; er.hidden = false; $('#iCost').focus(); return; }
+    if (!(rate > 0) || rate > 30) { er.textContent = 'Revisa la tasa (por ejemplo 6.20).'; er.hidden = false; return; }
+    if (d > TODAY) { er.textContent = 'La fecha no puede ser futura.'; er.hidden = false; return; }
+    const L = invList(), i = L.findIndex(x => x.k === 'cetes' && x.sym === f.dataset.sym);
+    const row = { id: i >= 0 ? L[i].id : 'i' + Date.now().toString(36), k: 'cetes', sym: f.dataset.sym, n: f.dataset.n, cost, rate, d, days: +f.dataset.days };
+    invSet(i >= 0 ? L.map((x, j) => (j === i ? row : x)) : [...L, row], i >= 0 ? `${row.n}: actualizado` : `${row.n} quedó fijo en tus inversiones`);
+    return;
+  }
+  const qty = +$('#iQty').value, cost = $('#iCost').value === '' ? 0 : +$('#iCost').value, er = $('#iErr');
+  if (!(qty > 0) || qty > 1e9) { er.textContent = 'Escribe cuántas tienes (un número mayor que 0).'; er.hidden = false; $('#iQty').focus(); return; }
+  if (!(cost >= 0) || cost > 1e9) { er.textContent = 'Revisa el monto invertido.'; er.hidden = false; return; }
+  const { k, sym, n } = f.dataset, L = invList(), i = L.findIndex(x => x.k === k && x.sym === sym);
+  const row = { id: i >= 0 ? L[i].id : 'i' + Date.now().toString(36), k, sym, n: String(n).slice(0, 60), qty, cost };
+  invSet(i >= 0 ? L.map((x, j) => (j === i ? row : x)) : [...L, row], i >= 0 ? `${row.n}: actualizada` : `${row.n} quedó fija en tus inversiones`);
+  if (i < 0 && k === 'cripto' && !PX.top.includes(sym)) setTimeout(() => pxFetch(true), 300);
+}
+
 /* ---------- render ---------- */
 function render(rebuild) {
-  $('#fab').hidden = S.view === 'cfg' || S.onboard;
+  $('#fab').hidden = S.view === 'cfg' || S.view === 'inv' || S.onboard;
   $('#gmBtn').hidden = $('#fab').hidden || MODE !== 'db';
   $('#brandT').textContent = CFG.title || 'Mi plan de ahorro'; $('#brandS').textContent = `Meta: ${GN()} · gastos del día a día`; document.title = CFG.title || 'Mi plan de ahorro'; Dio.label(GN());
   document.querySelectorAll('.nav button').forEach(b => { const on = b.dataset.view === S.view; b.classList.toggle('is-on', on); b.setAttribute('aria-selected', on); });
-  $('#viewPanel').hidden = S.view !== 'panel'; $('#viewMovs').hidden = S.view !== 'movs'; $('#viewCfg').hidden = S.view !== 'cfg';
+  $('#viewPanel').hidden = S.view !== 'panel'; $('#viewMovs').hidden = S.view !== 'movs'; $('#viewInv').hidden = S.view !== 'inv'; $('#viewCfg').hidden = S.view !== 'cfg';
   $('#banner').hidden = !EXAMPLE || MODE === 'loading';
   const mode = $('#mode');
   mode.className = 'pill' + (MODE === 'db' ? ' ok' : MODE === 'local' ? ' local' : '');
@@ -1976,6 +2231,7 @@ function render(rebuild) {
   if (S.view === 'panel') renderPanel();
   else if (S.view === 'movs') { if (rebuild || !$('#movForm')) buildMovForm(); else renderTable(); }
   else if (S.view === 'cfg') { if (!cfgDraft || !S.cfgDirty) buildCfg(); else drawCfg(); }
+  else if (S.view === 'inv') renderInv();
 }
 
 let toastT;
@@ -2017,6 +2273,7 @@ async function saveCfg() {
   Object.keys(LISTS).forEach(k => { d[k] = (d[k] || []).filter(r => k === 'budgets' || String(r.n || '').trim()).map(r => { const o = { ...r }; if ('n' in o) o.n = String(o.n).trim(); ['a', 't', 'r', 'bal', 'hasta'].forEach(x => { if (x in o) o[x] = Math.max(0, +o[x] || 0); }); ['corte', 'compra', 'pagar', 'limite'].forEach(x => { if (x in o) { const v = Math.round(+o[x]); if (v >= 1 && v <= 31) o[x] = v; else delete o[x]; } }); if (k === 'cats' && !o.id) o.id = 'c' + Math.random().toString(36).slice(2, 7); if (!o.d) delete o.d; return o; }); });
   d.funds = d.funds.filter(f => f.n.trim()).map(f => ({ ...f, n: f.n.trim(), t: Math.max(0, +f.t || 0) }));
   if (!d.funds.length) { toast('Deja al menos un fondo.'); S.cfgSec = 'funds'; drawCfg(); return; }
+  d.inv = clone(invList()); if (CFG.invHist) d.invHist = clone(CFG.invHist);
   const prev = CFG; CFG = clone(d); CFG.kind = 'config'; CFG.plan = 'vivir'; CFG.plan2 = 2; CFG.plan3 = 3; CFG.plan4 = 4;
   try { await writeDoc('config', CFG); toast('Ajustes guardados', async () => { CFG = prev; try { await writeDoc('config', prev); toast('Ajustes como estaban antes'); } catch { toast('No se pudo deshacer.'); } S.cfgDirty = false; cfgDraft = null; buildCfg(); render(); }); S.cfgDirty = false; S.edRow = null; buildCfg(); render(); }
   catch { CFG = prev; toast('No se pudieron guardar los ajustes.'); }
@@ -2318,6 +2575,7 @@ const A = {
   budgets: ['Poner límites del mes', () => goView('cfg', 'budgets')],
   cats: ['Editar categorías', () => goView('cfg', 'cats')],
   security: ['Seguridad y PIN', () => goView('cfg', 'security')],
+  inv: ['Ver mis inversiones', () => goView('inv')],
   gmail: ['Traer gastos de Gmail', () => { botClose(); gmSync(true); }]
 };
 const monthGastos = (ym = CUR_YM) => movs().filter(m => m.type === 'gasto' && m.date.slice(0, 7) === ym);
@@ -2333,7 +2591,7 @@ function pendingList() {
 }
 const GLOS = [
   [/tasa de ahorro/, 'La <b>tasa de ahorro</b> es qué parte de tu dinero se fue a ahorro en lugar de gasto. Si de cada $100 guardas $20, tu tasa es 20%. Arriba de 20% es muy bueno.'],
-  [/patrimonio/, 'El <b>patrimonio neto</b> es lo que tienes menos lo que debes: tus ahorros, tu retiro y el dinero por recibir, menos tus deudas. Si sube con el tiempo, vas bien.'],
+  [/patrimonio/, 'El <b>patrimonio neto</b> es lo que tienes menos lo que debes: tus ahorros, tus inversiones, tu retiro y el dinero por recibir, menos tus deudas. Si sube con el tiempo, vas bien.'],
   [/(te )?sobra|libre/, '<b>Te sobra al mes</b> es tu sueldo menos tus gastos fijos y tu gasto variable promedio. Es lo que podrías mandar a tu meta o a tus deudas.'],
   [/corte/, 'El <b>día de corte</b> es cuando tu tarjeta cierra el mes y calcula lo que debes. Lo que compres después del corte se cobra hasta el siguiente estado de cuenta.'],
   [/fecha limite|limite de pago|vence/, 'La <b>fecha límite de pago</b> es el último día para pagar tu tarjeta sin intereses ni recargos. La app te avisa unos días antes.'],
@@ -2348,6 +2606,12 @@ const GLOS = [
   [/quincena/, 'Una <b>quincena</b> es cada pago de tu sueldo, normalmente el 15 y el último día del mes. En Ajustes puedes poner tus días de pago.']
 ];
 const INTENTS = [
+  { id: 'd_inv', re: [/(mis |las |mi )?(inversion|inversiones|acciones|portafolio|cripto|criptomonedas?|bitcoin|btc|ethereum|gbm|bolsa de valores|bolsa|cetes)\b/, /(suben|bajan|subio|bajo) (mis )?(acciones|cripto)/], a: () => {
+    const T = invTotals();
+    if (!T.R.length) return '<p>En la pestaña <b>Inversiones</b> ves acciones de EE. UU., cripto y CETES con su precio o tasa del día. En CETES puedes simular cuánto ganarías antes de invertir. Toca <b>La tengo</b> en las que tienes, escribe cuántas tienes y cuánto invertiste, y se quedan fijas arriba. No se conecta ninguna cuenta (ni GBM ni otra).</p>';
+    const best = T.R.filter(r => r.q && !r.q.cetes).sort((a, b) => (b.q.dp || 0) - (a.q.dp || 0));
+    return `<p>Tu portafolio vale ${B(money(T.v))}.</p>${li([T.gain != null ? `${T.gain >= 0 ? 'Vas ganando' : 'Vas perdiendo'} ${B(money(Math.abs(T.gain)))} (${pctS(T.gp * 100)}) sobre lo que invertiste.` : 'Pon cuánto invertiste en cada una para ver tu ganancia.', `Hoy: ${moneyS(T.day)}.`, best.length ? `La que más sube hoy: ${B(best[0].h.n)} (${pctS(best[0].q.dp)}).` : '', best.length > 1 ? `La que más baja hoy: ${B(best[best.length - 1].h.n)} (${pctS(best[best.length - 1].q.dp)}).` : ''].filter(Boolean))}<p class="bot-note">Precios generales del mercado, con unos minutos de retraso.</p>`;
+  }, acts: ['inv'], next: ['¿Cómo voy?', '¿Qué es el patrimonio neto?'] },
   { id: 'saludo', w: 0.6, re: [/^(hola|buenas|buen dia|buenos dias|buenas tardes|buenas noches|hey|que onda|que tal)\b/, /^nova\b/], a: () => `<p>¡Hola${USER && USER.displayName ? ', ' + esc(USER.displayName.split(' ')[0]) : ''}! Soy Nova. Pregúntame lo que quieras de tu dinero o de cómo usar la app.</p>`, next: ['¿Cómo voy?', '¿Qué tengo que pagar?', '¿Cómo registro un gasto?'] },
   { id: 'gracias', re: [/^(gracias|muchas gracias|grax|ok|okay|va|perfecto|genial|listo|vale)\b/], a: () => '<p>¡Con gusto! Aquí estoy cuando me necesites.</p>', next: ['¿Cómo voy?', '¿Cuánto me sobra?'] },
   { id: 'resumen', w: 0.6, re: [/como (voy|estoy|ando|va)/, /que tal voy/, /resumen/, /estado de mi/, /mis finanzas/], a: () => {
@@ -2544,6 +2808,11 @@ document.addEventListener('click', e => {
   const a = t.closest('[data-act]'); if (!a) return;
   const act = a.dataset.act;
   if (act === 'back') { S.fund = null; render(); }
+  else if (act === 'inv-tab') { S.invTab = a.dataset.k; drawInv(); }
+  else if (act === 'inv-pin') invPinOpen(a.dataset.k, a.dataset.sym, a.dataset.n);
+  else if (act === 'inv-close') invPinClose();
+  else if (act === 'inv-refresh') pxFetch(true);
+  else if (act === 'inv-del') { const f = $('#invForm'); if (f) { const { k, sym, n } = f.dataset; invSet(invList().filter(x => !(x.k === k && x.sym === sym)), `${n} ya no está en tus inversiones`); } }
   else if (act === 'add-fund') { S.view = 'movs'; S.formType = 'ahorro'; S.formCat = a.dataset.id; render(true); setTimeout(() => $('#fAmt') && $('#fAmt').focus(), 0); }
   else if (act === 'rm-fund') { cfgDraft.funds.splice(+a.dataset.i, 1); drawCfg(); }
   else if (act === 'add-fund-row') { const used = cfgDraft.funds.map(f => f.c); cfgDraft.funds.push({ id: 'f' + Date.now().toString(36), n: 'Nuevo fondo', t: 5000, c: FUND_COLORS.find(c => !used.includes(c)) || FUND_COLORS[cfgDraft.funds.length % FUND_COLORS.length] }); drawCfg(); }
@@ -2570,7 +2839,7 @@ document.addEventListener('click', e => {
   else if (act === 'pay-up') { const u = CFG.upcoming.find(x => x.id === a.dataset.id); if (u) addMov({ id: uid(), kind: 'mov', type: 'gasto', amount: upLeft(u), date: TODAY, cat: u.cat, ref: u.id, note: u.n, created: Date.now() }); }
   else if (act === 'recv') { const id = a.dataset.id, i = CFG.incoming.find(x => x.id === id); addMov({ id: uid(), kind: 'mov', type: 'ingreso', amount: i ? inLeft(i) : perPay(), date: TODAY, cat: id, ref: i ? id : null, note: i ? i.n : 'Quincena', created: Date.now() }); }
 });
-document.addEventListener('input', e => { const el = e.target;
+document.addEventListener('input', e => { const el = e.target; if (el.closest && el.closest('#invForm')) { cetesPrev(); return; }
   if (el.id === 'simVar') { S.sim.varEst = +el.value; const y = window.scrollY; renderPanel(); window.scrollTo(0, y); const r = $('#simVar'); if (r) r.focus(); return; }
   if (el.dataset && el.dataset.li && cfgDraft) { const r = cfgDraft[el.dataset.li][+el.dataset.i]; r[el.dataset.k] = el.type === 'number' ? (el.value === '' ? '' : +el.value) : el.value; if (el.type === 'color' && el.nextElementSibling) el.nextElementSibling.textContent = el.value; markDirty(); return; }
   if (el.dataset && el.dataset.pf && cfgDraft) { const k = el.dataset.pf; cfgDraft[k] = el.type === 'checkbox' ? el.checked : el.type === 'number' ? +el.value : el.value; markDirty(); if (k === 'showAlt') { if (cfgDraft.showAlt && !cfgDraft.altCur) cfgDraft.altCur = 'USD'; drawCfg(); } return; }
@@ -2579,6 +2848,8 @@ document.addEventListener('change', e => { const el = e.target; if (el.id === 'l
 document.addEventListener('submit', e => {
   e.preventDefault();
   if (e.target.id === 'cfgForm') { saveCfg(); return; }
+  if (e.target.id === 'invForm') { invSave(e.target); return; }
+  if (e.target.id === 'invSearch') { invSearch($('#invQ').value); return; }
   if (e.target.id === 'onbForm') { finishOnboard(); return; }
   if (e.target.id === 'lockForm') { tryUnlock(); return; }
   if (e.target.id === 'pinForm') { const a = $('#pinNew').value.trim(), b = $('#pinNew2').value.trim(), er = $('#pinErr'); if (!/^\d{4,8}$/.test(a)) { er.textContent = 'El PIN debe tener de 4 a 8 números.'; er.hidden = false; return; } if (a !== b) { er.textContent = 'Los PIN no coinciden.'; er.hidden = false; return; } er.hidden = true; setPin(a).then(() => drawCfg()); return; }
@@ -2598,7 +2869,7 @@ document.addEventListener('submit', e => {
   $('#fAmt').value = ''; $('#fNote').value = ''; $('#fAmt').focus();
 });
 $('#selPeriod').addEventListener('change', e => { S.period = e.target.value; render(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#qa').hidden) { qaClose(); return; } if (e.key === 'Escape' && S.fund) { S.fund = null; render(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#invSh').hidden) { invPinClose(); return; } if (e.key === 'Escape' && !$('#qa').hidden) { qaClose(); return; } if (e.key === 'Escape' && S.fund) { S.fund = null; render(); } });
 const tip = $('#tip');
 document.addEventListener('pointermove', e => {
   const el = e.target.closest && e.target.closest('[data-tip]');
