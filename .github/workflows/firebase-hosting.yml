@@ -25,7 +25,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Falta configurar el secreto
         if: env.HAS_SA != 'true'
-        run: echo "::notice::Agrega el secreto FIREBASE_SERVICE_ACCOUNT para publicar automáticamente."
+        run: |
+          echo "::warning::No encuentro el secreto FIREBASE_SERVICE_ACCOUNT en Settings → Secrets and variables → Actions → pestaña Secrets."
+          # Si lo lanzaste a mano, marca error para que no parezca publicado.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then exit 1; fi
       - name: Vista previa del pull request
         if: env.HAS_SA == 'true' && github.event_name == 'pull_request'
         uses: FirebaseExtended/action-hosting-deploy@v0
