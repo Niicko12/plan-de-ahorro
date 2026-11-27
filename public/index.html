@@ -127,6 +127,7 @@ select,input[type=text],input[type=search],input[type=number],input[type=date]{b
 /* alcohol */
 .alc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr);gap:22px;align-items:center}
 @media (max-width:900px){.alc{grid-template-columns:minmax(0,1fr)}}
+.bank{padding:12px 14px;border:1px solid var(--line);border-radius:14px;margin:4px 0 6px}.bank-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.kv2{font-family:var(--display);font-weight:800;font-size:20px}.bankf{display:grid;gap:8px;margin:4px 0 10px}.bankf input[type=number]{flex:1;min-width:0;font-size:16px}.chk{display:flex;gap:8px;align-items:center;font-size:14px}
 .alc-big{font-family:var(--display);font-weight:900;font-size:clamp(28px,3.4vw,38px);line-height:1.05;white-space:nowrap}
 .meter{height:10px;background:var(--surface-2);border-radius:6px;overflow:hidden;margin:10px 0 5px}
 .meter i{display:block;height:100%;border-radius:6px}
@@ -861,6 +862,45 @@ function debtRow(d) {
   return `<div class="debt"><div class="debt-h"><span class="dot" style="background:${d.c}"></span><b>${esc(d.n)}</b><span class="num">${left ? money(left) : 'Pagada'}</span></div><div class="bar"><i style="width:${(fr * 100).toFixed(1)}%;background:var(--good)"></i></div>${cardLine(d)}<div class="debt-f"><small>Pagado ${money(d.t - left)} de ${money(d.t)}${+d.r ? ` · ${d.r} % anual` : ''}</small>${left ? `<form class="abono" data-debt="${esc(d.id)}" novalidate><label class="sr-only" for="ab-${esc(d.id)}">Monto a abonar a ${esc(d.n)}</label><input id="ab-${esc(d.id)}" type="number" inputmode="decimal" min="0" step="any" placeholder="$ Monto"><button class="btn small" type="submit">Abonar</button></form>` : ''}</div></div>`;
 }
 
+/* Saldo real de la cuenta: lo escribe la persona y la app lo ajusta con lo que registra después
+   (ingresos, abonos a tarjetas y pagos fijos o únicos marcados). Las compras con tarjeta de crédito no bajan el saldo. */
+function bankInfo() {
+  const b = CFG.bank; if (!b || b.a === '' || b.a == null || !(+b.a >= 0)) return null;
+  const refs = new Set([...CFG.fixed.map(f => f.id), ...CFG.upcoming.map(u => u.id)]);
+  const after = movs().filter(m => (m.created || 0) > (b.t || 0) && m.date >= b.d);
+  const inc = sum(after.filter(m => m.type === 'ingreso')), out = sum(after.filter(m => m.type === 'pago' || (m.type === 'gasto' && refs.has(m.ref))));
+  const now = (+b.a) + inc - out;
+  const np = nextPayday() || addDays(TODAY, 15), days = Math.max(1, diffDays(TODAY, np));
+  const res = [];
+  fixedNow().filter(f => !fixPaid(f)).forEach(f => {
+    if (f.u === 'dia') { res.push([f.n, Math.round(f.a * workDays() * days / 30)]); return; }
+    const d = +f.dia; if (d) { const t = new Date(`${TODAY}T00:00:00`); const due = iso(new Date(t.getFullYear(), t.getMonth(), Math.min(d, lastDay(t.getFullYear(), t.getMonth())))); if (due >= np) return; }
+    res.push([f.n, fixCharge(f)]);
+  });
+  CFG.upcoming.filter(u => u.d && u.d < np && upLeft(u)).forEach(u => res.push([u.n, upLeft(u)]));
+  const reserve = res.reduce((t, r) => t + r[1], 0);
+  const saved = b.inc === false ? 0 : Math.min(Math.max(0, now), sum(movs().filter(m => m.type === 'ahorro')));
+  const libre = now - saved - reserve;
+  return { b, now, inc, out, np, days, res, reserve, saved, libre, perDay: libre / days };
+}
+function bankHtml() {
+  const B = bankInfo();
+  if (!B || S.bankEd) { const b = CFG.bank || {};
+    return `<form class="bankf" novalidate><label for="bankAmt" class="ks">¿Cuánto tienes hoy en tu cuenta de banco?</label>
+      <div class="sur-row"><input id="bankAmt" type="number" inputmode="decimal" min="0" step="any" placeholder="$ Saldo de hoy" value="${b.a != null && b.a !== '' ? esc(String(b.a)) : ''}"><button class="btn small" type="submit">Guardar</button>${B ? '<button type="button" class="back" data-act="bank-cancel">Cancelar</button>' : ''}</div>
+      <label class="chk"><input type="checkbox" id="bankInc" ${b.inc === false ? '' : 'checked'}> Mi ahorro está en esta misma cuenta</label>
+      <small class="help">Es el número que ves en la app de tu banco. Con él te digo cuánto puedes gastar hasta tu próxima quincena.</small></form>`; }
+  const col = B.libre < 0 ? 'var(--bad)' : 'var(--fg)';
+  const lines = [B.saved ? `tu ahorro ${money(B.saved)}` : '', ...B.res.map(([n, v]) => `${esc(n)} ${money(v)}`)].filter(Boolean);
+  return `<div class="bank">
+    <div class="bank-top"><div><div class="ks">En tu cuenta</div><div class="kv2 num">${money(B.now)}</div><small class="ks">al ${dateShort(B.b.d)}${B.inc || B.out ? ` · con lo que registraste después` : ''}</small></div>
+      <button type="button" class="back" data-act="bank-edit">Actualizar</button></div>
+    <div class="ks" style="margin-top:10px">${B.libre < 0 ? `Te faltan para llegar al ${dateShort(B.np)}` : `Puedes gastar hasta el ${dateShort(B.np)}`}</div>
+    <div class="alc-big num" style="color:${col}">${money(Math.abs(B.libre))}</div>
+    <div class="ks">${B.libre > 0 ? `≈ ${money(B.perDay)} al día por ${B.days} días` : B.libre < 0 ? 'Para cubrir lo apartado tendrías que tomar de tu ahorro o esperar la quincena' : 'Justo, sin margen'}</div>
+    ${lines.length ? `<small class="help">Ya aparté: ${lines.join(' · ')}</small>` : ''}
+  </div>`;
+}
 function monthHtml() {
   const s = monthStats();
   const parts = [['Fijos', s.fixedM, 'var(--ai)'], ['Variables', s.variable, 'var(--shu)'], ['Pagos únicos', s.oneoff, 'var(--warn)'], ['Deudas', s.pagos, '#d23f4b'], ['Ahorro', s.ahorro, 'var(--good)']];
@@ -869,9 +909,9 @@ function monthHtml() {
   const fx = fixedNow().map(fixedRow).join('');
   const pending = fixedNow().filter(f => !fixPaid(f)).length;
   return `<div class="card-h"><h2>Tu mes</h2><span style="display:flex;gap:6px;align-items:center"><span class="chip">${esc(ymLabel(CUR_YM, true))}</span>${editBtn('fixed')}</span></div>
-    <div class="ks">Te quedan este mes</div>
-    <div class="alc-big num" style="color:${s.libre < 0 ? 'var(--bad)' : 'var(--fg)'}">${money(s.libre)}</div>
-    <div class="ks">de un sueldo de ${money(s.income)} · te pagan de nuevo el ${nextPayday() ? dateShort(nextPayday()) : '—'}</div>
+    ${bankHtml()}
+    <h3 class="sub">Plan del mes <span class="ks">· si cobras tu sueldo completo de ${money(s.income)}</span></h3>
+    <div class="ks">Al final del mes te sobrarían <b class="num" style="color:${s.libre < 0 ? 'var(--bad)' : 'var(--fg)'}">${money(s.libre)}</b></div>
     <div class="stack-bar">${bar}</div>
     <div class="legend">${parts.map(([n, v, c]) => `<span><span class="dot" style="background:${c}"></span>${n} ${money(v)}</span>`).join('')}</div>
     <h3 class="sub">Gastos fijos <span class="ks">· ${pending ? `${pending} por pagar` : 'todo pagado'} · ≈ ${money(s.fixedM)}/mes</span></h3>${fx || '<p class="help">Agrega tus gastos fijos en Ajustes.</p>'}`;
@@ -1543,7 +1583,7 @@ function heroHtml(M) {
   if (dinero) {
     const ms = monthStats(), td = totalDebt();
     top = `<div><div class="eyebrow">Tu dinero hoy</div><div class="big num" style="color:${td ? 'var(--bad)' : 'var(--good)'}">${td ? money(td) : 'Sin deudas'}</div><div class="hero-sub">${td ? `Debes en ${CFG.debts.filter(d => debtLeft(d)).length} tarjetas o préstamos` : 'Todo pagado'}</div></div>
-      <div style="text-align:right"><div class="eyebrow">Te quedan este mes</div><div class="big num">${money(ms.libre)}</div><div class="hero-sub">Sueldo ${money(ms.income)} · fijos ≈ ${money(ms.fixedM)}</div></div>`;
+      ${(() => { const B = bankInfo(); return B ? `<div style="text-align:right"><div class="eyebrow">${B.libre < 0 ? 'Te faltan para el' : 'Puedes gastar hasta el'} ${dateShort(B.np)}</div><div class="big num" style="color:${B.libre < 0 ? 'var(--bad)' : ''}">${money(Math.abs(B.libre))}</div><div class="hero-sub">En tu cuenta ${money(B.now)}</div></div>` : `<div style="text-align:right"><div class="eyebrow">Plan del mes: te sobrarían</div><div class="big num">${money(ms.libre)}</div><div class="hero-sub">Sueldo ${money(ms.income)} · fijos ≈ ${money(ms.fixedM)}</div></div>`; })()}`;
     chips = moneyLots().map(L => `<button class="fund${S.fund === L.id ? ' is-on' : ''}" data-fund="${esc(L.id)}"><span class="fund-n"><span class="dot" style="background:${L.c}"></span><span>${esc(L.n)}</span></span><span class="fund-v"><b style="color:${L.vc || 'var(--fg)'}">${esc(L.val)}</b></span>${L.kind === 'debt' ? `<span class="bar"><i style="width:${((1 - L.f) * 100).toFixed(1)}%;background:var(--good)"></i></span>` : ''}</button>`).join('');
   } else {
     top = `<div><div class="eyebrow">${esc(GN())}</div><div class="big num">${M.daysLeft} días</div><div class="hero-sub">Fecha meta: ${dateLong(CFG.tripDate)}</div></div>
@@ -2466,6 +2506,11 @@ async function delMov(id, isUndo) {
   const prev = REAL, item = REAL.find(m => m.id === id); REAL = REAL.filter(m => m.id !== id); EXAMPLE = REAL.length === 0; S.confirmDel = null; render();
   try { await removeDoc(id); toast(isUndo ? 'Listo, se quitó' : item && item.ref ? `${item.note || 'Pago'}: ya no está marcado` : 'Movimiento borrado', !isUndo && item ? () => addMov(item) : null); } catch { REAL = prev; EXAMPLE = REAL.length === 0; render(); toast('No se pudo borrar. Inténtalo otra vez.'); }
 }
+async function saveBank(bank) {
+  const prev = CFG.bank; CFG.bank = bank; S.bankEd = false; render();
+  try { await writeDoc('config', CFG); toast('Saldo actualizado', async () => { CFG.bank = prev; render(); try { await writeDoc('config', CFG); } catch {} }); }
+  catch { CFG.bank = prev; render(); toast('No se pudo guardar el saldo.'); }
+}
 async function saveCfg() {
   const d = cfgDraft;
   { const pd = String(Array.isArray(d.paydays) ? d.paydays.join(',') : d.paydays || '').split(/[^0-9]+/).map(Number).filter(x => x >= 1 && x <= 31); d.paydays = pd.length ? pd : [15, 30]; }
@@ -2476,7 +2521,7 @@ async function saveCfg() {
   Object.keys(LISTS).forEach(k => { d[k] = (d[k] || []).filter(r => k === 'budgets' || String(r.n || '').trim()).map(r => { const o = { ...r }; if ('n' in o) o.n = String(o.n).trim(); ['a', 't', 'r', 'bal', 'hasta'].forEach(x => { if (x in o) o[x] = Math.max(0, +o[x] || 0); }); ['corte', 'compra', 'pagar', 'limite'].forEach(x => { if (x in o) { const v = Math.round(+o[x]); if (v >= 1 && v <= 31) o[x] = v; else delete o[x]; } }); if (k === 'cats' && !o.id) o.id = 'c' + Math.random().toString(36).slice(2, 7); if (!o.d) delete o.d; return o; }); });
   d.funds = d.funds.filter(f => f.n.trim()).map(f => ({ ...f, n: f.n.trim(), t: Math.max(0, +f.t || 0) }));
   if (!d.funds.length) { toast('Deja al menos un fondo.'); S.cfgSec = 'funds'; drawCfg(); return; }
-  d.inv = clone(invList()); if (CFG.invHist) d.invHist = clone(CFG.invHist);
+  d.inv = clone(invList()); if (CFG.bank) d.bank = clone(CFG.bank); else delete d.bank; if (CFG.invHist) d.invHist = clone(CFG.invHist);
   const prev = CFG; CFG = clone(d); CFG.kind = 'config'; CFG.plan = 'vivir'; CFG.plan2 = 2; CFG.plan3 = 3; CFG.plan4 = 4;
   try { await writeDoc('config', CFG); toast('Ajustes guardados', async () => { CFG = prev; try { await writeDoc('config', prev); toast('Ajustes como estaban antes'); } catch { toast('No se pudo deshacer.'); } S.cfgDirty = false; cfgDraft = null; buildCfg(); render(); }); S.cfgDirty = false; S.edRow = null; buildCfg(); render(); }
   catch { CFG = prev; toast('No se pudieron guardar los ajustes.'); }
@@ -2833,7 +2878,7 @@ const INTENTS = [
   { id: 'sobra', re: [/(me )?(queda|sobra|resta)\b/, /cuanto (puedo|me alcanza) gastar/, /disponible/, /me alcanza/], a: () => {
     const s = monthStats(); if (!s.income) return '<p>Para decirte cuánto te queda necesito tu sueldo. Ponlo en Ajustes → Tu plan.</p>';
     const dl = daysToMonthEnd(), per = s.libre / dl;
-    return `<p>Te quedan ${B(money(s.libre))} este mes.</p>${li([`Sueldo: ${money(s.income)}`, s.fixedM ? `Gastos fijos: −${money(s.fixedM)}` : '', s.variable ? `Gastos variables: −${money(s.variable)}` : '', s.oneoff ? `Pagos únicos: −${money(s.oneoff)}` : '', s.pagos ? `Abonos a deudas: −${money(s.pagos)}` : '', s.ahorro ? `Ahorro: −${money(s.ahorro)}` : ''].filter(Boolean))}${s.libre > 0 ? `<p>Para que te alcance, gasta máximo ${B(money(per))} al día los ${dl} días que faltan.</p>` : '<p>⚠️ Vas en negativo: este mes salió más de lo que entra. Revisa tus gastos variables.</p>'}`;
+    const BK = bankInfo(); return `${BK ? `<p>En tu cuenta tienes ${B(money(BK.now))} y puedes gastar ${B(money(BK.libre))} hasta el ${dateShort(BK.np)}${BK.libre > 0 ? ` (≈ ${money(BK.perDay)} al día)` : ''}.</p><p>Si cobras todo el mes, este es tu plan:</p>` : ''}<p>Plan del mes: te sobrarían ${B(money(s.libre))}.</p>${li([`Sueldo: ${money(s.income)}`, s.fixedM ? `Gastos fijos: −${money(s.fixedM)}` : '', s.variable ? `Gastos variables: −${money(s.variable)}` : '', s.oneoff ? `Pagos únicos: −${money(s.oneoff)}` : '', s.pagos ? `Abonos a deudas: −${money(s.pagos)}` : '', s.ahorro ? `Ahorro: −${money(s.ahorro)}` : ''].filter(Boolean))}${s.libre > 0 ? `<p>Para que te alcance, gasta máximo ${B(money(per))} al día los ${dl} días que faltan.</p>` : '<p>⚠️ Vas en negativo: este mes salió más de lo que entra. Revisa tus gastos variables.</p>'}`;
   }, acts: ['plan'], next: ['¿En qué gasto más?', 'Dame un consejo'] },
   { id: 'meta', re: [/meta/, /voy bien/, /cuando (llego|termino|lo logro)/, /cuanto me falta/, /llegare/, /a tiempo/], a: () => {
     const M = metrics(); if (!M.g) return '<p>Aún no defines cuánto necesitas. Ve a Ajustes → Fondos de tu meta.</p>';
@@ -3023,6 +3068,8 @@ document.addEventListener('click', e => {
   else if (act === 'inv-close') invPinClose();
   else if (act === 'inv-refresh') pxFetch(true);
   else if (act === 'inv-del') { const f = $('#invForm'); if (f) { const { k, sym, n } = f.dataset; invSet(invList().filter(x => !(x.k === k && x.sym === sym)), `${n} ya no está en tus inversiones`); } }
+  else if (act === 'bank-edit') { S.bankEd = true; render(); setTimeout(() => $('#bankAmt') && $('#bankAmt').focus(), 0); }
+  else if (act === 'bank-cancel') { S.bankEd = false; render(); }
   else if (act === 'move-surplus') { const f = fundOf(a.dataset.id), sel = $('#surTo'), to = sel && fundOf(sel.value); if (!f || !to) return; const amt = Math.round(fundExtra(f) * 100) / 100; if (!(amt > 0)) return; addMov({ id: uid(), kind: 'mov', type: 'traspaso', amount: amt, date: TODAY, cat: f.id, to: to.id, note: `Sobrante de ${f.n} a ${to.n}`, created: Date.now() }); }
   else if (act === 'add-fund') { S.view = 'movs'; S.formType = 'ahorro'; S.formCat = a.dataset.id; render(true); setTimeout(() => $('#fAmt') && $('#fAmt').focus(), 0); }
   else if (act === 'rm-fund') { cfgDraft.funds.splice(+a.dataset.i, 1); drawCfg(); }
@@ -3066,6 +3113,7 @@ document.addEventListener('submit', e => {
   if (e.target.id === 'onbForm') { finishOnboard(); return; }
   if (e.target.id === 'lockForm') { tryUnlock(); return; }
   if (e.target.id === 'pinForm') { const a = $('#pinNew').value.trim(), b = $('#pinNew2').value.trim(), er = $('#pinErr'); if (!/^\d{4,8}$/.test(a)) { er.textContent = 'El PIN debe tener de 4 a 8 números.'; er.hidden = false; return; } if (a !== b) { er.textContent = 'Los PIN no coinciden.'; er.hidden = false; return; } er.hidden = true; setPin(a).then(() => drawCfg()); return; }
+  if (e.target.classList && e.target.classList.contains('bankf')) { const v = $('#bankAmt').value; if (v === '' || !(+v >= 0)) { $('#bankAmt').focus(); toast('Escribe tu saldo de hoy'); return; } saveBank({ a: Math.round(+v * 100) / 100, d: TODAY, t: Date.now(), inc: $('#bankInc').checked }); return; }
   if (e.target.classList && e.target.classList.contains('abono')) { const f = e.target, amt = +f.querySelector('input').value || 0, d = CFG.debts.find(x => x.id === f.dataset.debt); if (!(amt > 0) || !d) { f.querySelector('input').focus(); toast('Escribe cuánto abonaste'); return; } addMov({ id: uid(), kind: 'mov', type: 'pago', amount: Math.round(amt * 100) / 100, date: TODAY, cat: d.id, note: `Abono a ${d.n}`, created: Date.now() }); return; }
   if (e.target.id === 'qaForm') { const amt = +$('#qaAmt').value || 0, err = $('#qaErr'); if (!(amt > 0)) { err.textContent = 'Escribe un monto mayor que cero.'; err.hidden = false; $('#qaAmt').focus(); return; } const t = S.qaType, cat = $('#qaCat').value; addMov({ id: uid(), kind: 'mov', type: t, amount: Math.round(amt * 100) / 100, date: $('#qaDate').value || TODAY, cat, ref: t === 'ingreso' && CFG.incoming.some(i => i.id === cat) ? cat : null, note: $('#qaNote').value.trim().slice(0, 80), created: Date.now() }); qaClose(); return; }
   if (e.target.id !== 'movForm') return;
