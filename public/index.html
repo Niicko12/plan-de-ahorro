@@ -14,6 +14,7 @@
   color-scheme:light;
   --bg:#edf0f7; --surface:#ffffff; --surface-2:#f4f6fb; --line:#e1e6f0; --fg:#18213a; --muted:#646e88;
   --ai:#3355d6; --ai-soft:#e7ecff; --shu:#e5533d; --shu-soft:#fde9e5;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
   --good:#11946f; --good-soft:#ddf4ec; --warn:#b97f07; --warn-soft:#fbf0d6; --bad:#d23f4b; --bad-soft:#fbe3e5;
   --sky1:#dbe4fb; --sky2:#f5f7fd; --mount:#9fb0d8; --snow:#ffffff;
   --shadow:0 1px 2px rgba(24,33,58,.05),0 10px 28px rgba(24,33,58,.07);
@@ -24,12 +25,14 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0e1322; --surface:#161d31; --surface-2:#1c243d; --line:#29324f; --fg:#e8ecf6; --muted:#98a2bc;
   --ai:#7e97ff; --ai-soft:#232f58; --shu:#ff7a63; --shu-soft:#41241f;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
   --good:#3dd3a7; --good-soft:#15372f; --warn:#f1bf4b; --warn-soft:#3a3119; --bad:#ff6b76; --bad-soft:#3f2029;
   --sky1:#18213e; --sky2:#111829; --mount:#3a4772; --snow:#c9d3ee;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.28); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0e1322; --surface:#161d31; --surface-2:#1c243d; --line:#29324f; --fg:#e8ecf6; --muted:#98a2bc;
   --ai:#7e97ff; --ai-soft:#232f58; --shu:#ff7a63; --shu-soft:#41241f;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
   --good:#3dd3a7; --good-soft:#15372f; --warn:#f1bf4b; --warn-soft:#3a3119; --bad:#ff6b76; --bad-soft:#3f2029;
   --sky1:#18213e; --sky2:#111829; --mount:#3a4772; --snow:#c9d3ee;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.28); color-scheme:dark}
@@ -459,15 +462,9 @@ html{scroll-padding-top:70px}
 .inv-chart figcaption{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-size:12px;margin-top:6px}.inv-chart figcaption span:last-child{margin-left:auto}
 .ic-k{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}.ic-k.up{background:var(--good)}.ic-k.down{background:var(--bad)}.ic-k.cost{background:var(--muted)}
 .inv-note{margin:10px 2px 0}
-.inv-mine{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:16px}
-.ih{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
-.ih.up{border-left-color:var(--good)}.ih.down{border-left-color:var(--bad)}
-.ih-top{display:flex;align-items:center;gap:10px}.ih-n{flex:1;min-width:0;display:flex;flex-direction:column}.ih-n b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ih-n small{color:var(--muted);font-size:12px}
-.ih-v{display:flex;flex-direction:column}.ih-v small{color:var(--muted);font-size:12px;font-weight:600}.ih-v b{font-family:var(--display);font-size:24px;font-weight:900}.ih-v span{font-weight:700;font-size:14px}
-.ih-d{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0;padding-top:10px;border-top:1px solid var(--line)}.ih-d dt{color:var(--muted);font-size:11.5px;font-weight:600}.ih-d dd{margin:0;font-size:13px;font-weight:600;overflow-wrap:anywhere}.ih-d dd small{color:var(--muted);font-weight:500}
 .seg.three{grid-template-columns:repeat(3,1fr)}.mkt2{margin:8px 0 4px}.flab{display:block;font-weight:600;font-size:14px;margin-bottom:4px}.gainrow{display:flex;gap:8px}.gainrow select{flex:none;width:auto}.gainrow input{flex:1;min-width:0}.inv-ex{background:var(--surface-2);border-radius:10px;padding:8px 10px;font-size:12.5px;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}#iBulk{width:100%;font:14px/1.5 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--surface);color:var(--fg);resize:vertical}.qa-sheet{max-height:92dvh;overflow-y:auto}.inv-prev{background:var(--good-soft);border-radius:12px;padding:10px 12px}.inv-prev:empty{display:none}.inv-prev p{margin:0 0 4px}
 .inv-mkt .seg{min-width:300px}.inv-mkt .seg button{font-size:13px;padding:8px}
-.inv-search{display:flex;gap:8px;margin-bottom:6px}.inv-search[hidden]{display:none}.inv-search input{flex:1;min-width:0;font-size:16px;min-height:42px}.inv-search .btn{min-height:42px}
+.mkt-w[hidden]{display:none}.mkt-w .seg.three{margin-bottom:10px}.inv-search{display:flex!important;flex-direction:row!important;gap:8px;margin-bottom:6px}.inv-search .btn{width:auto!important;flex:none;margin:0!important}.inv-search input{width:auto!important;margin:0!important}.inv-search[hidden]{display:none}.inv-search input{flex:1;min-width:0;font-size:16px;min-height:42px}.inv-search .btn{min-height:42px}
 .mrow{display:grid;grid-template-columns:36px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
 .mlogo{width:36px;height:36px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;font-weight:800;font-size:10.5px;overflow:hidden;flex:none;color:var(--fg)}.mlogo img{width:100%;height:100%;object-fit:cover}
 .mn{min-width:0;display:flex;flex-direction:column}.mn b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mn small{color:var(--muted);font-size:12px}
@@ -477,6 +474,28 @@ html{scroll-padding-top:70px}
 .inv-form{display:flex;flex-direction:column;gap:10px}.inv-form label{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:14px}.inv-form input{font-size:16px}
 @media (max-width:700px){.inv-tiles{grid-template-columns:1fr 1fr}.inv-mkt .seg{min-width:0;width:100%}}
 @media (max-width:600px){.nav{grid-template-columns:repeat(4,1fr)}.nav button{font-size:12px;padding:9px 2px}.mrow{grid-template-columns:30px minmax(0,1fr) auto auto;gap:8px}.mrow .mlogo{width:30px;height:30px;font-size:9.5px}.mrow .btn{padding:6px 9px;font-size:12px;min-height:36px}.mp b{font-size:13px}.mp .chip{font-size:11px;padding:2px 6px}.inv-st{margin-left:0;width:100%;justify-content:space-between}}
+.alloc{margin-top:14px}.al-h small{color:var(--muted);font-weight:600;font-size:12.5px}
+.al-bar{display:flex;gap:2px;height:14px;margin:6px 0 8px}.al-bar i{display:block;min-width:4px;border-radius:4px}
+.al-leg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:2px 16px}
+.al-i{display:grid;grid-template-columns:10px minmax(0,1fr) auto 38px 64px;gap:8px;align-items:center;border:0;background:none;padding:7px 4px;border-radius:8px;text-align:left;color:var(--fg);font:inherit}.al-i:hover{background:var(--surface-2)}
+.al-d{width:10px;height:10px;border-radius:3px;flex:none;display:inline-block}.al-n{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.al-p{color:var(--muted);font-size:12.5px;text-align:right}.al-g{font-size:12.5px;font-weight:700;text-align:right}
+.grps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:14px;align-items:start}
+.grp{padding:14px 14px 6px}.grp-h{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}.grp-h .al-d{width:12px;height:12px}
+.grp-t{flex:1;min-width:0}.grp-t h2{font-size:16px;font-weight:800;margin:0}.grp-t small{color:var(--muted);font-size:12.5px}
+.grp-v{display:flex;flex-direction:column;align-items:flex-end}.grp-v b{font-family:var(--display);font-size:20px;font-weight:900}.grp-v span{font-size:12.5px;font-weight:700}
+.gb-leg{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;padding:6px 2px 0}
+.hr{border-bottom:1px solid var(--line)}.hr:last-child{border-bottom:0}
+.hr-m{display:grid;grid-template-columns:34px minmax(0,1fr) auto;grid-template-areas:"l n v" "l b b";gap:2px 10px;align-items:center;width:100%;border:0;background:none;padding:9px 2px;text-align:left;color:var(--fg);font:inherit;border-radius:10px}
+.hr-m:hover{background:var(--surface-2)}.hr-m .mlogo{grid-area:l;width:34px;height:34px}
+.hr-n{grid-area:n;min-width:0;display:flex;flex-direction:column}.hr-n b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}.hr-n small{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hr-v{grid-area:v;display:flex;flex-direction:column;align-items:flex-end}.hr-v b{font-size:14.5px}.hr-v span{font-size:12px;font-weight:700;white-space:nowrap}
+.gb{grid-area:b;position:relative;height:6px;margin-top:5px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.gb-axis{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--muted);opacity:.55}
+.gb-f{position:absolute;top:0;bottom:0}.gb-f.up{background:var(--good);border-radius:0 4px 4px 0}.gb-f.down{background:var(--bad);border-radius:4px 0 0 4px}
+.gb-none{opacity:.4}.gb-prog i{display:block;height:100%;background:var(--s4);border-radius:4px}
+.hd{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:8px 12px;align-items:end;padding:4px 4px 12px 46px}.hd dt{color:var(--muted);font-size:11.5px;font-weight:600}.hd dd{margin:0;font-size:13px;font-weight:600}.hd dd small{color:var(--muted);font-weight:500}
+.hr.open .hr-m{background:var(--surface-2)}
+@media (max-width:600px){#viewInv .card{margin-inline:-10px;padding-inline:12px;border-radius:16px}.al-leg{grid-template-columns:1fr}.al-i{grid-template-columns:10px minmax(0,1fr) auto 34px 58px;gap:6px}.hd{grid-template-columns:1fr 1fr;padding-left:4px}.hd .btn{grid-column:1/-1}.grp-v b{font-size:18px}}
 </style>
 </head><body>
 
@@ -2094,21 +2113,44 @@ function logo(k, sym, n) {
   const c = k === 'cripto' && PX.c[sym];
   return c && c.img ? `<span class="mlogo"><img src="${esc(c.img)}" alt="" loading="lazy" referrerpolicy="no-referrer"></span>` : `<span class="mlogo">${esc((k === 'cripto' && c ? c.sym : sym).slice(0, 4))}</span>`;
 }
-function mineCard(r) {
-  if (r.h.k === 'cetes') {
-    const h = r.h, dl = diffDays(TODAY, r.end);
-    return `<article class="ih up"><div class="ih-top"><span class="mlogo">MX</span><div class="ih-n"><b>${esc(h.n)}</b><small>${(+h.rate || 0).toFixed(2)} % anual · desde el ${esc(dateShort(h.d))}</small></div><button type="button" class="sr-btn" data-act="inv-pin" data-k="cetes" data-sym="${esc(h.sym)}" data-n="${esc(h.n)}">Editar</button></div>
-      <div class="ih-v"><small>Vale hoy</small><b class="num">${money(r.v)}</b><span class="up">${moneyS(r.gain)} (${pctS(r.gp * 100)}) ya sin ISR</span></div>
-      <dl class="ih-d"><div><dt>${r.done ? 'Venció' : 'Vence'}</dt><dd class="${r.done ? 'down' : ''}">${esc(dateShort(r.end))}${r.done ? '' : ` <small>(en ${dl} ${dl === 1 ? 'día' : 'días'})</small>`}</dd></div><div><dt>Al vencer recibes</dt><dd>${money(r.fin)}</dd></div><div><dt>Invertiste</dt><dd>${money(r.cost)}</dd></div></dl>
-      ${r.done ? '<p class="help inv-err">Ya venció: reinviértelo o retíralo en tu app de CETES y luego actualiza la fecha aquí.</p>' : ''}</article>`;
+// Grupos del portafolio. Colores categóricos en orden fijo (validados en claro y oscuro): siempre el mismo color por mercado.
+const GRPS = [['mx', 'Bolsa Mexicana', 'MXN', 'var(--s1)'], ['us', 'Acciones EE. UU.', 'USD', 'var(--s2)'], ['cripto', 'Cripto', '', 'var(--s3)'], ['cetes', 'CETES', 'gobierno de México', 'var(--s4)']];
+const grpOf = h => (h.k === 'cetes' ? 'cetes' : h.k === 'cripto' ? 'cripto' : isMx(h.sym) ? 'mx' : 'us');
+const holdLab = h => (h.k === 'cripto' ? ((PX.c[h.sym] && PX.c[h.sym].sym) || h.sym.toUpperCase()) : h.k === 'cetes' ? `${h.days || 28} días` : (h.t || h.sym.replace(/\.MX$/, '')));
+const pctFix = v => `${sgn(v)}${Math.abs(v) >= 100 ? Math.abs(v).toFixed(0) : Math.abs(v).toFixed(1)} %`;
+function allocBar(T) {
+  const tot = T.v || 1, G = GRPS.map(([id, n, , c]) => { const R = T.R.filter(r => grpOf(r.h) === id), v = R.reduce((t, r) => t + r.v, 0), cost = R.filter(r => r.gain != null).reduce((t, r) => t + r.cost, 0), gain = R.filter(r => r.gain != null).reduce((t, r) => t + r.gain, 0); return { id, n, c, v, gp: cost ? gain / cost : null, k: R.length }; }).filter(g => g.k);
+  const segs = G.map(g => `<i style="flex:${Math.max(g.v / tot, 0.004)};background:${g.c}" title="${esc(g.n)}: ${esc(m2(g.v))} (${(g.v / tot * 100).toFixed(1)} %)"></i>`).join('');
+  const leg = G.map(g => `<button type="button" class="al-i" data-goto="grp-${g.id}"><span class="al-d" style="background:${g.c}"></span><span class="al-n">${esc(g.n)}</span><b class="num">${m2(g.v)}</b><span class="al-p">${(g.v / tot * 100).toFixed(0)} %</span>${g.gp != null ? `<span class="al-g ${updn(g.gp)}">${g.gp >= 0 ? '▲' : '▼'} ${pctFix(g.gp * 100).replace(/^[+−]/, '')}</span>` : '<span></span>'}</button>`).join('');
+  return `<div class="alloc"><div class="al-h"><small>¿Dónde está tu dinero?</small></div><div class="al-bar" role="img" aria-label="Reparto por mercado: ${esc(G.map(g => `${g.n} ${(g.v / tot * 100).toFixed(0)} %`).join(', '))}">${segs}</div><div class="al-leg">${leg}</div></div>`;
+}
+// Barra divergente: hacia la derecha gana (verde), hacia la izquierda pierde (rojo). Escala común dentro del grupo.
+function gbar(gp, max) {
+  if (gp == null) return '<div class="gb gb-none"></div>';
+  const w = Math.min(1, Math.abs(gp) / (max || 1)) * 50;
+  return `<div class="gb" aria-hidden="true"><i class="gb-axis"></i><i class="gb-f ${gp >= 0 ? 'up' : 'down'}" style="${gp >= 0 ? 'left:50%' : `right:50%`};width:${w.toFixed(1)}%"></i></div>`;
+}
+function holdRow(r, max) {
+  const h = r.h, q = r.q, open = S.invOpen === h.id, lab = holdLab(h), cet = h.k === 'cetes';
+  const qty = cet ? `${(+h.rate || 0).toFixed(2)} % anual` : `${(+h.qty || 0).toLocaleString('es-MX', { maximumFractionDigits: 6 })} ${h.k === 'cripto' ? lab : (+h.qty === 1 ? 'título' : 'títulos')}`;
+  const right = q ? `<b class="num">${m2(r.v)}</b>${r.gain != null ? `<span class="${updn(r.gain)}">${moneyS(r.gain)} · ${pctFix(r.gp * 100)}</span>` : '<span class="help">sin costo</span>'}` : '<b class="num">—</b><span class="help">sin precio</span>';
+  const bar = cet ? `<div class="gb gb-prog" title="Avance al vencimiento"><i style="width:${(Math.min(1, diffDays(h.d, TODAY) / (+h.days || 28)) * 100).toFixed(0)}%"></i></div>` : gbar(r.gp, max);
+  let det = '';
+  if (open) {
+    const dl = cet ? diffDays(TODAY, r.end) : 0;
+    const cells = cet
+      ? [[r.done ? 'Venció' : 'Vence', `${esc(dateShort(r.end))}${r.done ? '' : ` · en ${dl} días`}`], ['Al vencer recibes', m2(r.fin)], ['Invertiste', m2(r.cost)], ['Ganancia', `${moneyS(r.gain)} ya sin ISR`]]
+      : [['Precio', q ? pxFmt(q.p) + (q.orig ? ` <small>(${q.qc === 'USD' ? usdFmt(q.orig) : esc(q.qc + ' ' + q.orig)})</small>` : '') : '—'], ['Hoy', q ? `<span class="${updn(q.dp)}">${pctS(q.dp)} · ${moneyS(r.day)}</span>` : '—'], ['Invertiste', r.cost ? m2(r.cost) + (h.cur && h.cur !== invCur() ? ` <small>(${h.cur === 'USD' ? usdFmt(+h.cost) : esc(h.cur + ' ' + h.cost)})</small>` : '') : '—'], ['Tienes', esc(qty)]];
+    det = `<div class="hd">${cells.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}<button type="button" class="btn small ghost" data-act="inv-pin" data-k="${h.k}" data-sym="${esc(h.sym)}" data-n="${esc(h.n || '')}" data-t="${esc(h.t || '')}">Editar</button></div>${cet && r.done ? '<p class="help inv-err">Ya venció: reinviértelo o retíralo y actualiza la fecha.</p>' : ''}`;
   }
-  const { h, q } = r, sym = h.k === 'cripto' ? ((PX.c[h.sym] && PX.c[h.sym].sym) || h.sym.toUpperCase()) : (h.t || h.sym.replace(/\.MX$/, ''));
-  const qtyTxt = `${(+h.qty || 0).toLocaleString('es-MX', { maximumFractionDigits: 8 })} ${h.k === 'cripto' ? sym : (+h.qty === 1 ? 'acción' : 'acciones')}`;
-  return `<article class="ih ${updn(r.gain ?? (q ? q.dp : 0))}">
-    <div class="ih-top">${logo(h.k, h.k === 'cripto' ? h.sym : sym, h.n)}<div class="ih-n"><b>${esc(h.n || sym)}</b><small>${esc(sym)}${isMx(h.sym) ? ' · BMV' : ''} · ${qtyTxt}</small></div><button type="button" class="sr-btn" data-act="inv-pin" data-k="${h.k}" data-sym="${esc(h.sym)}" data-n="${esc(h.n || '')}" data-t="${esc(h.t || '')}">Editar</button></div>
-    <div class="ih-v"><small>Vale hoy</small><b class="num">${q ? m2(r.v) : '—'}</b>${r.gain != null ? `<span class="${updn(r.gain)}">${moneyS(r.gain)} (${pctS(r.gp * 100)})</span>` : q ? '<span class="help">Pon cuánto invertiste para ver tu ganancia</span>' : ''}</div>
-    <dl class="ih-d"><div><dt>Hoy</dt><dd class="${updn(q && q.dp)}">${q ? `${pctS(q.dp)} · ${moneyS(r.day)}` : '—'}</dd></div><div><dt>Precio</dt><dd>${q ? pxFmt(q.p) + (q.orig ? ` <small>(${q.qc === 'USD' ? usdFmt(q.orig) : esc(q.qc + ' ' + q.orig)})</small>` : '') : 'sin precio'}</dd></div><div><dt>Invertiste</dt><dd>${r.cost ? m2(r.cost) : '—'}</dd></div></dl>
-  </article>`;
+  return `<div class="hr${open ? ' open' : ''}"><button type="button" class="hr-m" data-act="inv-open" data-id="${esc(h.id)}" aria-expanded="${open}">${cet ? '<span class="mlogo">MX</span>' : logo(h.k, h.k === 'cripto' ? h.sym : lab, h.n)}<span class="hr-n"><b>${esc(h.n || lab)}</b><small>${esc(cet ? qty : `${lab} · ${qty}`)}</small></span><span class="hr-v">${right}</span>${bar}</button>${det}</div>`;
+}
+function groupSection([id, n, sub, c], T) {
+  const R = T.R.filter(r => grpOf(r.h) === id).sort((a, b) => b.v - a.v); if (!R.length) return '';
+  const v = R.reduce((t, r) => t + r.v, 0), wc = R.filter(r => r.gain != null), cost = wc.reduce((t, r) => t + r.cost, 0), gain = wc.reduce((t, r) => t + r.gain, 0);
+  const max = Math.max(0.05, ...R.map(r => Math.abs(r.gp || 0))), up = R.filter(r => (r.gain || 0) > 0).length, dn = R.filter(r => (r.gain || 0) < 0).length;
+  return `<section class="card grp" id="grp-${id}"><div class="grp-h"><span class="al-d" style="background:${c}"></span><div class="grp-t"><h2>${esc(n)}</h2><small>${R.length} ${R.length === 1 ? 'inversión' : 'inversiones'}${sub ? ` · ${esc(sub)}` : ''}${id !== 'cetes' && (up || dn) ? ` · <span class="up">▲ ${up}</span> <span class="down">▼ ${dn}</span>` : ''}</small></div><div class="grp-v"><b class="num">${m2(v)}</b>${cost ? `<span class="${updn(gain)}">${moneyS(gain)} · ${pctFix(gain / cost * 100)}</span>` : ''}</div></div>
+    ${id !== 'cetes' ? '<div class="gb-leg"><span>▼ pierdes</span><span>ganas ▲</span></div>' : ''}<div class="hrs">${R.map(r => holdRow(r, max)).join('')}</div></section>`;
 }
 function cetesRow([days, rate]) {
   const sym = 'C' + days, own = invList().some(h => h.k === 'cetes' && h.sym === sym), n = `CETES ${days} días`;
@@ -2121,8 +2163,8 @@ function mktRow(k, sym, n, t) {
 function renderInv() {
   const root = $('#viewInv');
   if (!$('#invBody')) root.innerHTML = `<div class="sec-h"><span class="sec-n">◈</span><div><h2>Tus inversiones</h2><p>Precios del mercado en general. Marca las acciones, cripto o CETES que tienes (en GBM, Bitso, Cetesdirecto o donde sea) y aquí ves si suben o bajan. No se conecta ninguna cuenta.</p></div></div><div id="invBody"></div>
-    <section class="card inv-mkt"><div class="card-h"><h2>Mercado</h2><div class="seg three" role="tablist"><button type="button" role="tab" data-act="inv-tab" data-k="accion">Acciones</button><button type="button" role="tab" data-act="inv-tab" data-k="cripto">Cripto</button><button type="button" role="tab" data-act="inv-tab" data-k="cetes">CETES</button></div></div>
-    <form id="invSearch" class="inv-search" autocomplete="off"><input id="invQ" type="search" maxlength="40" enterkeyhint="search" aria-label="Buscar"><button type="submit" class="btn small">Buscar</button></form><div id="invMkt"></div></section>
+    <section class="card inv-mkt"><div class="card-h"><h2>Mercado <small class="help">ver precios y agregar</small></h2><button type="button" class="btn small ghost" id="mktT" data-act="inv-mkt-t" aria-expanded="true">Ocultar</button></div><div id="invMktW" class="mkt-w"><div class="seg three" role="tablist"><button type="button" role="tab" data-act="inv-tab" data-k="accion">Acciones</button><button type="button" role="tab" data-act="inv-tab" data-k="cripto">Cripto</button><button type="button" role="tab" data-act="inv-tab" data-k="cetes">CETES</button></div>
+    <form id="invSearch" class="inv-search" autocomplete="off"><input id="invQ" type="search" maxlength="40" enterkeyhint="search" aria-label="Buscar"><button type="submit" class="btn small">Buscar</button></form><div id="invMkt"></div></div></section>
     <p class="help inv-note">Las acciones vienen en dólares y se pasan a ${esc(invCur())} con el tipo de cambio del día. Los precios pueden tener unos minutos de retraso y es información general, no una recomendación de compra o venta.</p>`;
   drawInv(); pxFetch();
 }
@@ -2130,13 +2172,14 @@ function drawInv() {
   if (!$('#invBody')) return;
   const T = invTotals(), tab = S.invTab || 'accion', when = PX.at ? new Date(PX.at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '';
   const tile = (l, v, s, cls) => `<div class="kt"><small>${l}</small><b class="num ${cls || ''}">${v}</b><span class="${cls || ''}">${s || ''}</span></div>`;
-  const status = `<div class="inv-st"><span id="pxSt" class="help">${pxBusy ? 'Actualizando…' : when ? `Precios de las ${when}` : ''}</span><button type="button" class="btn small ghost" data-act="inv-bulk">Pegar lista</button><button type="button" class="btn small ghost" data-act="inv-refresh">Actualizar</button></div>${pxErr ? `<p class="help inv-err">${esc(pxErr)}</p>` : ''}`;
+  const status = `<div class="inv-st"><span id="pxSt" class="help">${pxBusy ? 'Actualizando…' : when ? `Precios de las ${when}` : ''}</span><button type="button" class="btn small" data-act="inv-add">+ Agregar</button><button type="button" class="btn small ghost" data-act="inv-bulk">Pegar lista</button><button type="button" class="btn small ghost" data-act="inv-refresh">Actualizar</button></div>${pxErr ? `<p class="help inv-err">${esc(pxErr)}</p>` : ''}`;
   $('#invBody').innerHTML = T.R.length ? `<section class="card inv-sum"><div class="card-h"><h2>Mi portafolio</h2>${status}</div>
       <div class="inv-tiles">${tile('Vale hoy', money(T.v), altAmt(T.v))}${tile('Invertiste', T.cost ? money(T.cost) : '—', T.cost ? '' : 'pon cuánto invertiste')}${tile('Ganas o pierdes', T.gain == null ? '—' : moneyS(T.gain), T.gain == null ? '' : pctS(T.gp * 100), updn(T.gain))}${tile('Hoy', moneyS(T.day), T.v ? pctS(T.day / (T.v - T.day || 1) * 100) : '', updn(T.day))}</div>
-      ${invChart()}</section>
-      <h3 class="sub">Las que tengo</h3><div class="inv-mine">${T.R.slice().sort((a, b) => b.v - a.v).map(mineCard).join('')}</div>`
+      ${allocBar(T)}${invChart()}</section>
+      <div class="grps">${GRPS.map(g => groupSection(g, T)).join('')}</div>`
     : `<section class="card inv-empty"><div class="card-h"><h2>Mi portafolio</h2>${status}</div><p>Todavía no marcas ninguna inversión. Busca abajo la acción o cripto que tienes, toca <b>La tengo</b> y escribe cuántas tienes y cuánto invertiste. Se queda fija aquí arriba.</p></section>`;
   document.querySelectorAll('.inv-mkt [data-act="inv-tab"]').forEach(b => { const on = b.dataset.k === tab; b.classList.toggle('is-on', on); b.setAttribute('aria-selected', on); });
+  { const open = !T.R.length || S.mktOpen, w = $('#invMktW'), bt = $('#mktT'); w.hidden = !open; bt.hidden = !T.R.length; bt.textContent = open ? 'Ocultar' : 'Mostrar'; bt.setAttribute('aria-expanded', open); }
   $('#invSearch').hidden = tab === 'cetes';
   if (tab === 'cetes') { $('#invMkt').innerHTML = CETES.map(cetesRow).join('') + `<p class="help inv-note">Tasas de la subasta del ${esc(dateShort(CETES_AL))} (Banxico). Cambian cada semana: al registrar el tuyo puedes poner la tasa que te tocó. El ISR que se descuenta es la retención de 2026: 0.90 % anual sobre lo invertido.</p>`; return; }
   const q = $('#invQ'); if (q) q.placeholder = tab === 'cripto' ? 'Buscar cripto (ej. PEPE, Cardano)' : S.invMx ? 'Buscar como en GBM (ej. ALPEK A)' : 'Buscar símbolo (ej. INTC, BRK.B)';
@@ -2912,6 +2955,9 @@ document.addEventListener('click', e => {
   if (act === 'back') { S.fund = null; render(); }
   else if (act === 'inv-tab') { S.invTab = a.dataset.k; drawInv(); }
   else if (act === 'inv-pin') invPinOpen(a.dataset.k, a.dataset.sym, a.dataset.n, a.dataset.t);
+  else if (act === 'inv-add') { S.mktOpen = true; drawInv(); const m = $('.inv-mkt'); if (m) m.scrollIntoView({ block: 'start' }); }
+  else if (act === 'inv-mkt-t') { S.mktOpen = !S.mktOpen; drawInv(); }
+  else if (act === 'inv-open') { S.invOpen = S.invOpen === a.dataset.id ? null : a.dataset.id; drawInv(); }
   else if (act === 'inv-mx') { S.invMx = a.dataset.v === '1'; drawInv(); }
   else if (act === 'inv-bulk') invBulkOpen();
   else if (act === 'inv-cur' || act === 'inv-mode') { const f = $('#invForm'); f.dataset[act === 'inv-cur' ? 'cur' : 'mode'] = a.dataset.v; a.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('is-on', b === a)); if (act === 'inv-mode') { $('#iGbm').hidden = a.dataset.v !== 'gbm'; $('#iCostW').hidden = a.dataset.v !== 'cost'; } invPrev(); }
