@@ -945,10 +945,11 @@ function paydaySince(d) { for (let s = addDays(d, 1); s <= TODAY; s = addDays(s,
 function sumHtml(M) {
   const B = bankInfo(), iv = invValue(), lt = ltTotal(), debt = totalDebt();
   const recv = CFG.incoming.filter(i => i.k !== 'amigo').reduce((t, i) => t + inLeft(i), 0);
-  const cash = B ? B.now : 0, savedIn = B && B.b.inc !== false ? Math.min(Math.max(0, cash), M.saved) : 0, savedOut = M.saved - savedIn;
+  // Si el ahorro vive en la cuenta, todo el ahorro está dentro del saldo: si registró más de lo que hay, la diferencia no existe aparte.
+  const inAcc = !!B && B.b.inc !== false, cash = B ? B.now : 0, savedIn = inAcc ? Math.min(Math.max(0, cash), M.saved) : 0, savedOut = inAcc ? 0 : M.saved, missing = inAcc ? Math.max(0, M.saved - Math.max(0, cash)) : 0;
   const usable = cash + savedOut + iv, all = usable + lt - debt;
   const row = (c, n, sub, v, extra = '') => `<div class="sum-row"><span class="dot" style="background:${c}"></span><div class="n">${n}${sub ? `<small>${sub}</small>` : ''}</div><b style="${v < 0 ? 'color:var(--bad)' : ''}">${v < 0 ? '− ' : ''}${money(Math.abs(v))}</b>${extra}</div>`;
-  const parts = [[cash - savedIn, '#5b6bd6'], [M.saved, '#11946f'], [iv, '#e8590c'], [lt, '#8a5cd6']].filter(p => p[0] > 0), pt = parts.reduce((t, p) => t + p[0], 0) || 1;
+  const parts = [[cash - savedIn, '#5b6bd6'], [savedIn + savedOut, '#11946f'], [iv, '#e8590c'], [lt, '#8a5cd6']].filter(p => p[0] > 0), pt = parts.reduce((t, p) => t + p[0], 0) || 1;
   const accs = B ? bankAccs(B.b) : [];
   return `<div class="card-h"><h2>Todo tu dinero</h2>${B ? '' : '<button type="button" class="back" data-act="bank-edit">Poner mis saldos</button>'}</div>
     <div class="sum-h"><div><div class="ks">Puedes contar con</div><div class="sum-big">${money(usable)}</div><div class="ks">cuentas + ahorro + inversiones${lt ? ' · sin contar tu retiro' : ''}</div></div>
@@ -957,7 +958,7 @@ function sumHtml(M) {
     <div class="sum-grid"><div>
       <div class="sum-sub">Lo puedes usar</div>
       ${row('#5b6bd6', accs.length > 1 ? 'Tus cuentas de débito' : 'Tu cuenta de débito', B ? `${accs.map(a => `${esc(a.n)} ${money(a.a)}`).join(' · ')}${B.inc || B.out ? ' · con lo que anotaste después' : ''}${savedIn ? ` · de aquí, ${money(savedIn)} es tu ahorro` : ''}` : 'Aún no pones tus saldos', cash)}
-      ${row('#11946f', 'Ahorro en tus fondos', savedIn >= M.saved && M.saved ? 'está dentro de tus cuentas, no se suma otra vez' : savedIn ? `${money(savedIn)} dentro de tus cuentas, ${money(savedOut)} aparte` : `${CFG.funds.length} ${CFG.funds.length === 1 ? 'fondo' : 'fondos'} para tu meta`, M.saved)}
+      ${row('#11946f', inAcc ? `Ahorro (dentro de ${accs.length > 1 ? 'tus cuentas' : 'tu cuenta'})` : 'Ahorro en tus fondos', missing >= 1 ? `Registraste ${money(M.saved)} de ahorro, pero en ${accs.length > 1 ? 'tus cuentas' : 'tu cuenta'} hay ${money(cash)}. Si usaste ${money(missing)} de tu ahorro, ajústalo para que cuadre.` : inAcc ? 'ya está contado en el saldo de arriba, no se suma otra vez' : `${CFG.funds.length} ${CFG.funds.length === 1 ? 'fondo' : 'fondos'} para tu meta`, inAcc ? savedIn : M.saved, missing >= 1 ? `<button type="button" class="btn small" data-act="sav-fix" data-a="${Math.round(missing * 100) / 100}">Ajustar a ${money(Math.max(0, cash))}</button>` : '')}
       ${iv ? row('#e8590c', 'Inversiones', 'acciones, cripto y CETES al precio de hoy', iv, '<button type="button" class="back" data-view="inv" style="padding:0 6px">Ver</button>') : ''}
     </div><div>
       <div class="sum-sub">Largo plazo y pendientes</div>
@@ -3230,6 +3231,13 @@ document.addEventListener('click', e => {
   else if (act === 'inv-refresh') pxFetch(true);
   else if (act === 'inv-del') { const f = $('#invForm'); if (f) { const { k, sym, n } = f.dataset; invSet(invList().filter(x => !(x.k === k && x.sym === sym)), `${n} ya no está en tus inversiones`); } }
   else if (act === 'bank-edit') { S.bankEd = true; S.bankGap = null; render(); setTimeout(() => { const f = $('.acc-a'); if (f) { f.scrollIntoView({ block: 'center' }); f.focus({ preventScroll: true }); } }, 0); }
+  else if (act === 'sav-fix') {
+    // Baja el ahorro registrado para que cuadre con la cuenta: resta la diferencia del aporte más reciente que alcance.
+    const amt = +a.dataset.a || 0, m = movs().filter(x => x.type === 'ahorro' && x.amount >= amt).sort((x, y) => (x.date < y.date ? 1 : x.date > y.date ? -1 : (y.created || 0) - (x.created || 0)))[0];
+    if (!(amt > 0)) return;
+    if (!m) { S.view = 'movs'; render(true); toast('Edita tus ahorros en Movimientos para que cuadren con tu cuenta.'); return; }
+    updMov({ ...m, amount: Math.round((m.amount - amt) * 100) / 100, note: `${m.note ? m.note + ' · ' : ''}ajustado −${money(amt)} para cuadrar con la cuenta`.slice(0, 80) });
+  }
   else if (act === 'explain') xplOpen(a.dataset.k);
   else if (act === 'xpl-close') xplClose();
   else if (act === 'gap-add') { const G = S.bankGap; S.bankGap = null; if (G) addMov({ id: uid(), kind: 'mov', type: 'gasto', amount: G.a, date: TODAY, cat: 'otros', note: 'Gastos sin anotar (cuadre de saldo)', created: (+(CFG.bank || {}).t || Date.now()) - 1 }); }
