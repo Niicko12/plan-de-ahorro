@@ -128,6 +128,23 @@ select,input[type=text],input[type=search],input[type=number],input[type=date]{b
 .alc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr);gap:22px;align-items:center}
 @media (max-width:900px){.alc{grid-template-columns:minmax(0,1fr)}}
 form.bankf label.chk{flex-direction:row;justify-content:flex-start;text-align:left;font-weight:500}.bankf .chk input{width:auto;flex:none;margin:0}
+.hoy-card{display:grid;gap:14px}@media (min-width:860px){.hoy-card{grid-template-columns:1.1fr 1fr;align-items:start}}
+.td-date{color:var(--muted);font-size:13px;font-weight:600}
+.td-big{font-family:var(--display);font-weight:900;font-size:clamp(38px,7vw,56px);line-height:1;margin:4px 0;font-variant-numeric:tabular-nums}
+.td-bar{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin:8px 0 4px}.td-bar i{display:block;height:100%;border-radius:99px}
+.td-goal{display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--surface-2);font-size:13.5px}
+.td-side h3{font-size:14px;margin:0 0 4px}
+.td-row{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:14px}.td-row:first-of-type{border-top:0}.td-row small{display:block;color:var(--muted);font-size:12px}
+.qi{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);color:var(--muted);font:700 12px/1 var(--body,inherit);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin-left:5px;padding:0;flex:none}.qi:hover,.qi:focus-visible{color:var(--fg);border-color:var(--fg)}
+#xpl{position:fixed;inset:0;z-index:73;display:flex;align-items:flex-end;justify-content:center}#xpl[hidden]{display:none!important}@media (min-width:601px){#xpl{align-items:center}}
+.xpl-math{display:grid;gap:6px;margin:12px 0;font-size:14.5px}.xpl-math div{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}.xpl-math div span:last-child{white-space:nowrap;font-weight:600}.xpl-math .tot{border-top:2px solid var(--line);padding-top:8px;font-weight:800;font-size:16px}.xpl-math .neg span:last-child{color:var(--bad)}
+.sum-h{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.sum-r{text-align:left}@media (min-width:600px){.sum-r{text-align:right}}
+.sum-big{font-family:var(--display);font-weight:900;font-size:clamp(30px,5vw,44px);line-height:1;font-variant-numeric:tabular-nums}
+.sum-bar{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--surface-2);margin:12px 0 4px;gap:2px}.sum-bar i{display:block;height:100%}
+.sum-grid{display:grid;gap:0 24px}@media (min-width:860px){.sum-grid{grid-template-columns:1fr 1fr}}
+.sum-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.sum-row .n{flex:1;min-width:0}.sum-row small{display:block;color:var(--muted);font-size:12px}.sum-row b{font-family:var(--display);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sum-sub{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 2px}
 .acc-r{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:6px;align-items:center}.acc-r input{min-width:0;font-size:16px}.acc-x{border:0;background:none;color:var(--muted);font-size:20px;line-height:1;padding:4px 6px;cursor:pointer}.acc-list{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}.acc-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:3px 10px;font-size:12.5px;max-width:100%}.acc-pill .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.acc-pill b{font-variant-numeric:tabular-nums}
 .bank{padding:12px 14px;border:1px solid var(--line);border-radius:14px;margin:4px 0 6px}.bank-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.kv2{font-family:var(--display);font-weight:800;font-size:20px}.bankf{display:grid;gap:8px;margin:4px 0 10px}.bankf input[type=number]{flex:1;min-width:0;font-size:16px}.chk{display:flex;gap:8px;align-items:center;font-size:14px}
 .alc-big{font-family:var(--display);font-weight:900;font-size:clamp(28px,3.4vw,38px);line-height:1.05;white-space:nowrap}
@@ -557,6 +574,7 @@ html{scroll-padding-top:70px}
 <button type="button" id="botBtn" aria-label="Abrir a Nova, tu asistente" title="Pregúntale a Nova"><span aria-hidden="true">💬</span><em style="font-style:normal">Pregúntale a Nova</em></button>
 <section id="bot" hidden role="dialog" aria-label="Nova, tu asistente"><div class="bot-h"><span style="font-size:22px" aria-hidden="true">✨</span><b>Nova · tu asistente</b><button type="button" id="botX" aria-label="Cerrar asistente">×</button></div><div id="botLog" aria-live="polite"></div><div id="botChips"></div><form id="botForm" autocomplete="off"><input id="botIn" type="text" maxlength="200" placeholder="Escribe tu pregunta…" aria-label="Escribe tu pregunta" enterkeyhint="send"><button type="submit">Enviar</button></form></section>
 <button type="button" id="gmBtn" hidden title="Traer los gastos que te llegaron por correo">✉ Gmail</button>
+<div id="xpl" hidden><div class="qa-back" data-act="xpl-close"></div><div class="qa-sheet" role="dialog" aria-modal="true" aria-labelledby="xplT"><div class="card-h"><h2 id="xplT">¿De dónde sale?</h2><button type="button" class="back" data-act="xpl-close" aria-label="Cerrar">×</button></div><div id="xplB"></div></div></div>
 <div id="cday" hidden><div class="qa-back" data-act="cday-close"></div><div class="qa-sheet" role="dialog" aria-modal="true" aria-labelledby="cdayT"><div class="card-h"><h2 id="cdayT">Día</h2><button type="button" class="back" data-act="cday-close" aria-label="Cerrar">×</button></div><div id="cdayL" class="cday-list"></div><h3 class="sub" style="margin-top:14px">Agregar en este día</h3><div class="cday-add"><button type="button" class="btn small" data-act="cday-add" data-key="upcoming">Se paga una sola vez <small>(ej. un vuelo)</small></button><button type="button" class="btn small" data-act="cday-add" data-key="fixed">Se repite cada mes <small>(ej. renta, entrenador)</small></button><button type="button" class="btn small" data-act="cday-add" data-key="fixed" data-months="3">Por unos meses <small>(ej. a meses sin intereses)</small></button><button type="button" class="btn small" data-act="cday-add" data-key="incoming">Dinero por recibir</button><button type="button" class="btn small" data-act="cday-add" data-key="debts">Una tarjeta o deuda</button><button type="button" class="back" data-act="cday-edit" data-key="plan">Cambiar mis días de pago</button></div></div></div>
 <div id="invSh" hidden><div class="qa-back" data-act="inv-close"></div><div class="qa-sheet" role="dialog" aria-modal="true" aria-labelledby="invShT"><div id="invShB"></div></div></div>
 <div id="qa" hidden><div class="qa-back" data-act="qa-close"></div><div class="qa-sheet" role="dialog" aria-modal="true" aria-labelledby="qaT"><div class="card-h"><h2 id="qaT">Registrar</h2><button type="button" class="back" data-act="qa-close">Cerrar</button></div><div id="qaBody"></div></div></div>
@@ -866,6 +884,117 @@ function debtRow(d) {
 
 /* Saldo real de la cuenta: lo escribe la persona y la app lo ajusta con lo que registra después
    (ingresos, abonos a tarjetas y pagos fijos o únicos marcados). Las compras con tarjeta de crédito no bajan el saldo. */
+const qi = (k, label) => `<button type="button" class="qi" data-act="explain" data-k="${k}" aria-label="¿De dónde sale ${esc(label)}?" title="¿De dónde sale?">?</button>`;
+// Explicaciones: cada número importante muestra su cuenta con los datos de la persona.
+function explainData(k) {
+  const neg = (n, v) => [n, -Math.abs(v)], pos = (n, v) => [n, +v];
+  if (k === 'hoy') {
+    const B = bankInfo();
+    if (!B) return { t: 'Cuánto puedes gastar', note: 'Escribe cuánto tienes hoy en tus cuentas (en «Tu mes») y aquí verás la cuenta completa.' };
+    const rows = bankAccs(B.b).map(a => pos(`${a.n} (al ${dateShort(B.b.d)})`, a.a));
+    if (B.inc) rows.push(pos('Ingresos que anotaste después', B.inc));
+    if (B.out) rows.push(neg('Gastos y pagos que anotaste después', B.out));
+    if (B.saved) rows.push(neg('Tu ahorro (no se toca)', B.saved));
+    B.res.forEach(([n, v]) => rows.push(neg(`${n} (falta pagar)`, v)));
+    return { t: 'Cuánto puedes gastar', rows, tot: [`Para gastar hasta el ${dateShort(B.np)}`, B.libre],
+      after: B.libre > 0 ? `Entre ${B.days} ${B.days === 1 ? 'día' : 'días'} son <b>${money(B.budget)} por día</b>.${B.spent ? ` Hoy ya gastaste ${money(B.spent)}, así que hoy te quedan <b>${money(Math.max(0, B.left))}</b>.` : ''}` : '',
+      note: B.b.cc === true ? 'Marcaste que tus compras las pagas con tarjeta de crédito: no bajan tu saldo hasta que abonas a la tarjeta.' : 'Cada gasto que anotas baja tu saldo. Si algo no cuadra, actualiza tus saldos y te digo cuánto falta por anotar.' };
+  }
+  if (k === 'plan') {
+    const s = monthStats();
+    return { t: 'Plan del mes', rows: [pos('Tu sueldo del mes', s.income), neg('Gastos fijos (todos, pagados o no)', s.fixedM), neg('Gastos variables que anotaste', s.variable), neg('Pagos únicos', s.oneoff), neg('Abonos a deudas', s.pagos), neg('Lo que mandaste a ahorro', s.ahorro)].filter(r => r[1]), tot: ['Te sobrarían al final del mes', s.libre],
+      note: 'Es un <b>plan</b>: supone que cobras todo tu sueldo y pagas todos tus fijos. <b>No es lo que tienes en el banco.</b> Para eso mira «Puedes gastar».' };
+  }
+  if (k === 'neto') {
+    const M = metrics(), inc = CFG.incoming.filter(i => i.k !== 'amigo').reduce((t, i) => t + inLeft(i), 0), iv = invValue();
+    return { t: 'Patrimonio neto', rows: [pos('Tu ahorro', M.saved), pos('Inversiones', iv), pos('Retiro y largo plazo', ltTotal()), pos('Dinero por recibir', inc), neg('Deudas', totalDebt())].filter(r => r[1]), tot: ['Patrimonio neto', M.saved + iv + ltTotal() + inc - totalDebt()],
+      note: 'Es lo que tendrías si juntaras todo y pagaras todas tus deudas hoy.' };
+  }
+  if (k === 'ahorrado') {
+    const M = metrics();
+    return { t: 'Ahorrado hoy', rows: CFG.funds.map(f => pos(f.n, fundSaved(f.id))).filter(r => r[1]), tot: ['Total ahorrado', M.saved], note: 'Es la suma de todo lo que registraste como «Ahorro» en tus fondos. No incluye inversiones ni retiro.' };
+  }
+  if (k === 'deudas') {
+    const ds = CFG.debts.filter(d => debtLeft(d));
+    return { t: 'Deudas', rows: ds.map(d => pos(`${d.n}${+d.r ? ` (${d.r} % anual)` : ''}`, debtLeft(d))), tot: ['Debes en total', totalDebt()],
+      note: ds.length ? `Te cobran cerca de ${money(ds.reduce((s, d) => s + debtLeft(d) * (+d.r || 60) / 1200, 0))} de intereses al mes. Paga primero la de tasa más alta.` : 'No tienes deudas registradas.' };
+  }
+  if (k === 'rate') {
+    const P = buildPlan(), inc = +CFG.income || 0, fx = fixedMonthlyTotal(), lib = inc - fx - P.ve;
+    return { t: 'Ahorro planeado', rows: [pos('Tu sueldo', inc), neg('Gastos fijos al mes', fx), neg('Gasto variable promedio', P.ve)], tot: ['Te podría sobrar al mes', lib],
+      after: inc ? `${money(lib)} ÷ ${money(inc)} = <b>${pctTxt(Math.max(0, lib / inc))}</b> de tu sueldo.` : '', note: 'Lo sano es ahorrar 20 % o más de tu sueldo.' };
+  }
+  if (k === 'meta') {
+    const M = metrics();
+    return { t: GN(), rows: [pos('Tu meta', M.g), neg('Ya tienes', M.saved)], tot: ['Te falta', M.remaining],
+      after: M.avg > 0 ? `En los últimos 3 meses ahorraste unos <b>${money(M.avg)} al mes</b>. Para llegar a tiempo necesitas <b>${money(M.need)} al mes</b>.` : `Para llegar a tiempo necesitas <b>${money(M.need)} al mes</b>.`, note: '' };
+  }
+  return { t: '¿De dónde sale?', note: '' };
+}
+function xplOpen(k) {
+  const X = explainData(k), line = ([n, v]) => `<div class="${v < 0 ? 'neg' : ''}"><span>${esc(n)}</span><span>${v < 0 ? '− ' : '+ '}${money(Math.abs(v))}</span></div>`;
+  $('#xplT').textContent = X.t;
+  $('#xplB').innerHTML = `${X.rows && X.rows.length ? `<div class="xpl-math">${X.rows.map(line).join('')}${X.tot ? `<div class="tot"><span>${esc(X.tot[0])}</span><span>${X.tot[1] < 0 ? '− ' : ''}${money(Math.abs(X.tot[1]))}</span></div>` : ''}</div>` : ''}${X.after ? `<p>${X.after}</p>` : ''}${X.note ? `<p class="help">${X.note}</p>` : ''}`;
+  $('#xpl').hidden = false; const c = $('#xpl .back'); if (c) c.focus();
+}
+const xplClose = () => { $('#xpl').hidden = true; };
+// ¿Ya pasó un día de pago desde la fecha d? Sirve para pedir que actualice sus saldos.
+function paydaySince(d) { for (let s = addDays(d, 1); s <= TODAY; s = addDays(s, 1)) { const t = new Date(`${s}T00:00:00`), last = lastDay(t.getFullYear(), t.getMonth()); if (payDays().some(p => Math.min(p, last) === t.getDate())) return s; } return null; }
+// Resumen de todo tu dinero: lo que puedes usar (cuentas, ahorro, inversiones), lo de largo plazo y lo que debes.
+// Si el ahorro vive en la misma cuenta de débito, no se suma dos veces.
+function sumHtml(M) {
+  const B = bankInfo(), iv = invValue(), lt = ltTotal(), debt = totalDebt();
+  const recv = CFG.incoming.filter(i => i.k !== 'amigo').reduce((t, i) => t + inLeft(i), 0);
+  const cash = B ? B.now : 0, savedIn = B && B.b.inc !== false ? Math.min(Math.max(0, cash), M.saved) : 0, savedOut = M.saved - savedIn;
+  const usable = cash + savedOut + iv, all = usable + lt - debt;
+  const row = (c, n, sub, v, extra = '') => `<div class="sum-row"><span class="dot" style="background:${c}"></span><div class="n">${n}${sub ? `<small>${sub}</small>` : ''}</div><b style="${v < 0 ? 'color:var(--bad)' : ''}">${v < 0 ? '− ' : ''}${money(Math.abs(v))}</b>${extra}</div>`;
+  const parts = [[cash - savedIn, '#5b6bd6'], [M.saved, '#11946f'], [iv, '#e8590c'], [lt, '#8a5cd6']].filter(p => p[0] > 0), pt = parts.reduce((t, p) => t + p[0], 0) || 1;
+  const accs = B ? bankAccs(B.b) : [];
+  return `<div class="card-h"><h2>Todo tu dinero</h2>${B ? '' : '<button type="button" class="back" data-act="bank-edit">Poner mis saldos</button>'}</div>
+    <div class="sum-h"><div><div class="ks">Puedes contar con</div><div class="sum-big">${money(usable)}</div><div class="ks">cuentas + ahorro + inversiones${lt ? ' · sin contar tu retiro' : ''}</div></div>
+      <div class="sum-r"><div class="ks">Todo junto, menos deudas</div><div class="sum-big" style="font-size:clamp(22px,3.4vw,30px);color:${all < 0 ? 'var(--bad)' : 'var(--fg)'}">${all < 0 ? '− ' : ''}${money(Math.abs(all))}</div></div></div>
+    <div class="sum-bar" aria-hidden="true">${parts.map(([v, c]) => `<i style="width:${(v / pt * 100).toFixed(2)}%;background:${c}"></i>`).join('')}</div>
+    <div class="sum-grid"><div>
+      <div class="sum-sub">Lo puedes usar</div>
+      ${row('#5b6bd6', accs.length > 1 ? 'Tus cuentas de débito' : 'Tu cuenta de débito', B ? `${accs.map(a => `${esc(a.n)} ${money(a.a)}`).join(' · ')}${B.inc || B.out ? ' · con lo que anotaste después' : ''}${savedIn ? ` · de aquí, ${money(savedIn)} es tu ahorro` : ''}` : 'Aún no pones tus saldos', cash)}
+      ${row('#11946f', 'Ahorro en tus fondos', savedIn >= M.saved && M.saved ? 'está dentro de tus cuentas, no se suma otra vez' : savedIn ? `${money(savedIn)} dentro de tus cuentas, ${money(savedOut)} aparte` : `${CFG.funds.length} ${CFG.funds.length === 1 ? 'fondo' : 'fondos'} para tu meta`, M.saved)}
+      ${iv ? row('#e8590c', 'Inversiones', 'acciones, cripto y CETES al precio de hoy', iv, '<button type="button" class="back" data-view="inv" style="padding:0 6px">Ver</button>') : ''}
+    </div><div>
+      <div class="sum-sub">Largo plazo y pendientes</div>
+      ${lt ? row('#8a5cd6', 'Retiro y largo plazo', 'no se usa hasta tu retiro', lt) : ''}
+      ${recv ? row('#9aa3b5', 'Dinero por recibir', 'aguinaldo, bonos… aún no lo tienes', recv) : ''}
+      ${row('#d23f4b', 'Deudas', debt ? 'tarjetas y préstamos' : 'sin deudas 🎉', -debt)}
+    </div></div>`;
+}
+function todayHtml(M) {
+  const B = bankInfo(), d = new Date(`${TODAY}T00:00:00`);
+  let main;
+  if (B) {
+    const over = B.left < 0, col = B.libre < 0 || over ? 'var(--bad)' : B.left < B.budget * 0.25 ? 'var(--warn)' : 'var(--good)';
+    const fr = B.budget ? Math.min(1, B.spent / B.budget) : 1;
+    main = `<div class="ks">Hoy puedes gastar${qi('hoy', 'lo que puedes gastar hoy')}</div>
+      <div class="td-big" style="color:${col}">${B.libre < 0 ? money(0) : money(Math.max(0, B.left))}</div>
+      ${B.libre >= 0 ? `<div class="td-bar" aria-hidden="true"><i style="width:${(fr * 100).toFixed(1)}%;background:${over ? 'var(--bad)' : 'var(--ai)'}"></i></div>` : ''}
+      <div class="ks">${B.libre < 0 ? `No te alcanza hasta el ${dateShort(B.np)}: te faltan <b>${money(-B.libre)}</b>. Evita gastos que no sean necesarios.` : over ? `Hoy te pasaste ${money(-B.left)}. Mañana te toca un poco menos.` : B.spent ? `Ya gastaste ${money(B.spent)} de ${money(B.budget)} de hoy.` : `Te tocan ${money(B.budget)} por día.`} Te quedan ${money(Math.max(0, B.libre))} hasta el ${dateShort(B.np)}.</div>`;
+  } else {
+    main = `<div class="ks">¿Cuánto puedes gastar hoy?</div>
+      <p style="margin:6px 0 10px">Escribe cuánto tienes en tus cuentas de débito y te digo cuánto puedes gastar cada día hasta tu próxima quincena.</p>
+      <button type="button" class="btn small" data-act="bank-edit">Poner mis saldos</button>`;
+  }
+  const st = { done: ['✓', 'good', 'Meta cumplida. ¡Lo lograste!'], good: ['✓', 'good', `Vas a tiempo con tu meta: lista en ${M.eta ? ymLabel(M.eta.slice(0, 7), true) : '—'}.`], warn: ['!', 'warn', `Vas un poco atrasado: sube a ${money(M.need)} al mes para llegar a tiempo.`], bad: ['!', 'bad', `Así no llegas a tiempo: necesitas ${money(M.need)} al mes.`], none: ['i', 'info', 'Aún no hay ritmo de ahorro: registra tu primer ahorro con el botón +.'] }[M.status] || ['i', 'info', ''];
+  const goal = `<div class="td-goal"><div class="ai ${st[1]}">${st[0]}</div><div style="flex:1">${esc(st[2])}${qi('meta', 'tu meta')}</div></div>`;
+  // Lo que hay que pagar hoy o en los próximos 3 días.
+  const soon = addDays(TODAY, 3), rows = [], y = d.getFullYear(), mo = d.getMonth();
+  const when = s => s < TODAY ? `venció el ${dateShort(s)}` : s === TODAY ? 'vence hoy' : `vence el ${dateShort(s)}`;
+  fixedNow().filter(f => +f.dia && !fixPaid(f) && f.u !== 'dia').forEach(f => { const s = iso(new Date(y, mo, Math.min(+f.dia, lastDay(y, mo)))); if (s <= soon) rows.push([s, `<div class="td-row"><div>${esc(f.n)} · ${money(fixCharge(f))}<small>${when(s)}</small></div>${act('Pagar', 'pay-fixed', f.id)}</div>`]); });
+  CFG.upcoming.filter(u => u.d && upLeft(u) && u.d <= soon).forEach(u => rows.push([u.d, `<div class="td-row"><div>${esc(u.n)} · ${money(upLeft(u))}<small>${when(u.d)}</small></div>${act('Ya lo pagué', 'pay-up', u.id)}</div>`]));
+  CFG.debts.forEach(db => { const c = cardInfo(db); if (c && debtLeft(db) && c.dLim != null && c.dLim <= 3) rows.push([c.lim, `<div class="td-row"><div>Pagar ${esc(db.n)}<small>${c.dLim === 0 ? 'hoy es la fecha límite de pago' : `fecha límite: ${dateShort(c.lim)}`}</small></div><button type="button" class="back" data-goto="s-mes">Ver</button></div>`]); });
+  rows.sort((a, b) => (a[0] < b[0] ? -1 : 1));
+  let check = '';
+  if (B) { const pd = paydaySince(B.b.d), ago = diffDays(B.b.d, TODAY); if (pd || ago >= 7) check = `<p class="note-box" style="margin-top:10px">${pd ? `Ya pasó tu día de pago (${dateShort(pd)}).` : `Hace ${ago} días que no revisas tus cuentas.`} ¿Cuánto tienes hoy? Así los números siguen siendo reales. <button type="button" class="back" data-act="bank-edit" style="padding:0 4px">Actualizar saldos</button></p>`; }
+  return `<div><div class="td-date">${esc(DOW[d.getDay()].replace(/^./, c => c.toUpperCase()))} ${d.getDate()} de ${esc(MONL[d.getMonth()])}</div>${main}${goal}</div>
+    <div class="td-side"><h3>Por pagar pronto</h3>${rows.length ? rows.slice(0, 4).map(r => r[1]).join('') : '<p class="help" style="margin:4px 0">Nada que pagar en los próximos 3 días ✓</p>'}${check}</div>`;
+}
 // Varias cuentas: CFG.bank.acc = [{ n, a }]; CFG.bank.a es la suma. Las versiones viejas solo tienen a.
 const bankAccs = b => (b && Array.isArray(b.acc) ? b.acc : b && b.a != null && b.a !== '' ? [{ n: 'Mi cuenta', a: +b.a }] : []);
 let accSeq = 0;
@@ -874,7 +1003,8 @@ function bankInfo() {
   const b = CFG.bank; if (!b || b.a === '' || b.a == null || !(+b.a >= 0)) return null;
   const refs = new Set([...CFG.fixed.map(f => f.id), ...CFG.upcoming.map(u => u.id)]);
   const after = movs().filter(m => (m.created || 0) > (b.t || 0) && m.date >= b.d);
-  const inc = sum(after.filter(m => m.type === 'ingreso')), out = sum(after.filter(m => m.type === 'pago' || (m.type === 'gasto' && refs.has(m.ref))));
+  // Compras del día a día: si pagas con débito (lo normal) bajan el saldo; si marcaste que pagas con tarjeta de crédito, no.
+  const inc = sum(after.filter(m => m.type === 'ingreso')), out = sum(after.filter(m => m.type === 'pago' || (m.type === 'gasto' && (refs.has(m.ref) || b.cc !== true))));
   const now = (+b.a) + inc - out;
   const np = nextPayday() || addDays(TODAY, 15), days = Math.max(1, diffDays(TODAY, np));
   const res = [];
@@ -887,7 +1017,12 @@ function bankInfo() {
   const reserve = res.reduce((t, r) => t + r[1], 0);
   const saved = b.inc === false ? 0 : Math.min(Math.max(0, now), sum(movs().filter(m => m.type === 'ahorro')));
   const libre = now - saved - reserve;
-  return { b, now, inc, out, np, days, res, reserve, saved, libre, perDay: libre / days };
+  // Hoy: lo que tocaba al empezar el día, menos lo que ya gastaste hoy.
+  const todayVar = movs().filter(m => m.type === 'gasto' && m.date === TODAY && !refs.has(m.ref));
+  // Lo anotado antes de poner el saldo ya está dentro del saldo: no se vuelve a restar hoy.
+  const spent = b.cc === true ? sum(todayVar) : sum(todayVar.filter(m => (m.created || 0) > (b.t || 0))), counted = b.cc === true ? 0 : spent;
+  const budget = Math.max(0, (libre + counted) / days), left = budget - spent;
+  return { b, now, inc, out, np, days, res, reserve, saved, libre, perDay: libre / days, spent, budget, left };
 }
 function bankHtml() {
   const B = bankInfo();
@@ -897,6 +1032,7 @@ function bankHtml() {
       <div id="accRows" style="display:grid;gap:6px">${(accs.length ? accs : [{ n: '', a: '' }]).map(accRowHtml).join('')}</div>
       <div class="sur-row"><button type="button" class="back" data-act="bank-add">+ Otra cuenta</button><span style="flex:1"></span><button class="btn small" type="submit">Guardar</button>${B ? '<button type="button" class="back" data-act="bank-cancel">Cancelar</button>' : ''}</div>
       <label class="chk"><input type="checkbox" id="bankInc" ${b.inc === false ? '' : 'checked'}> Mi ahorro está en esta misma cuenta</label>
+      <label class="chk"><input type="checkbox" id="bankCc" ${b.cc === true ? 'checked' : ''}> Mis compras del día las pago con tarjeta de crédito</label>
       <small class="help">Es el número que ves en la app de tu banco. Ponle a cada cuenta el nombre o apodo que quieras. Con esto te digo cuánto puedes gastar hasta tu próxima quincena.</small></form>`; }
   const col = B.libre < 0 ? 'var(--bad)' : 'var(--fg)';
   const lines = [B.saved ? `tu ahorro ${money(B.saved)}` : '', ...B.res.map(([n, v]) => `${esc(n)} ${money(v)}`)].filter(Boolean);
@@ -904,7 +1040,7 @@ function bankHtml() {
     <div class="bank-top"><div><div class="ks">${bankAccs(B.b).length > 1 ? 'En tus cuentas' : 'En tu cuenta'}</div><div class="kv2 num">${money(B.now)}</div><small class="ks">al ${dateShort(B.b.d)}${B.inc || B.out ? ` · con lo que registraste después` : ''}</small></div>
       <button type="button" class="back" data-act="bank-edit">Actualizar</button></div>
     ${bankAccs(B.b).length > 1 || (bankAccs(B.b)[0] && bankAccs(B.b)[0].n !== 'Mi cuenta') ? `<div class="acc-list">${bankAccs(B.b).map(a => `<span class="acc-pill"><span class="n">${esc(a.n)}</span><b>${money(a.a)}</b></span>`).join('')}</div>` : ''}
-    <div class="ks" style="margin-top:10px">${B.libre < 0 ? `Te faltan para llegar al ${dateShort(B.np)}` : `Puedes gastar hasta el ${dateShort(B.np)}`}</div>
+    ${gapHtml()}<div class="ks" style="margin-top:10px">${B.libre < 0 ? `Te faltan para llegar al ${dateShort(B.np)}` : `Puedes gastar hasta el ${dateShort(B.np)}`}${qi('hoy', 'lo que puedes gastar')}</div>
     <div class="alc-big num" style="color:${col}">${money(Math.abs(B.libre))}</div>
     <div class="ks">${B.libre > 0 ? `≈ ${money(B.perDay)} al día por ${B.days} días` : B.libre < 0 ? 'Para cubrir lo apartado tendrías que tomar de tu ahorro o esperar la quincena' : 'Justo, sin margen'}</div>
     ${lines.length ? `<small class="help">Ya aparté: ${lines.join(' · ')}</small>` : ''}
@@ -919,7 +1055,7 @@ function monthHtml() {
   const pending = fixedNow().filter(f => !fixPaid(f)).length;
   return `<div class="card-h"><h2>Tu mes</h2><span style="display:flex;gap:6px;align-items:center"><span class="chip">${esc(ymLabel(CUR_YM, true))}</span>${editBtn('fixed')}</span></div>
     ${bankHtml()}
-    <h3 class="sub">Plan del mes <span class="ks">· si cobras tu sueldo completo de ${money(s.income)}</span></h3>
+    <h3 class="sub">Plan del mes${qi('plan', 'el plan del mes')} <span class="ks">· si cobras tu sueldo completo de ${money(s.income)}</span></h3>
     <div class="ks">Al final del mes te sobrarían <b class="num" style="color:${s.libre < 0 ? 'var(--bad)' : 'var(--fg)'}">${money(s.libre)}</b></div>
     <div class="stack-bar">${bar}</div>
     <div class="legend">${parts.map(([n, v, c]) => `<span><span class="dot" style="background:${c}"></span>${n} ${money(v)}</span>`).join('')}</div>
@@ -1724,16 +1860,16 @@ function kpiStrip(M, P) {
   const debt = totalDebt(), inc = CFG.incoming.filter(i => i.k !== 'amigo').reduce((t, i) => t + inLeft(i), 0);
   const iv = invValue(), net = M.saved + inc + iv + ltTotal() - debt, libre = (+CFG.income || 0) - fixedMonthlyTotal() - P.ve;
   const rate = CFG.income ? libre / CFG.income : 0;
-  const t = (l, v, s, c) => `<div class="kt"><small>${l}</small><b class="num" style="${c ? `color:${c}` : ''}">${v}</b><span>${s}</span></div>`;
+  const t = (l, v, s, c, k) => `<div class="kt"><small>${l}${k ? qi(k, l) : ''}</small><b class="num" style="${c ? `color:${c}` : ''}">${v}</b><span>${s}</span></div>`;
   if (iv) setTimeout(pxFetch, 0);
   return `<div class="kstrip${iv ? ' k7' : ''}">
-    ${t('Patrimonio neto', money(net), iv ? 'ahorro + inversiones + retiro + por recibir − deudas' : 'ahorro + retiro + por recibir − deudas', net < 0 ? 'var(--bad)' : '')}
-    ${t('Ahorrado hoy', money(M.saved), altAmt(M.saved))}
+    ${t('Patrimonio neto', money(net), iv ? 'ahorro + inversiones + retiro + por recibir − deudas' : 'ahorro + retiro + por recibir − deudas', net < 0 ? 'var(--bad)' : '', 'neto')}
+    ${t('Ahorrado hoy', money(M.saved), altAmt(M.saved), '', 'ahorrado')}
     ${invTile()}
-    ${t('Deudas', money(debt), debt ? `≈ ${money(CFG.debts.reduce((s, d) => s + debtLeft(d) * (+d.r || 60) / 1200, 0))}/mes de intereses` : 'sin deudas', debt ? 'var(--bad)' : 'var(--good)')}
+    ${t('Deudas', money(debt), debt ? `≈ ${money(CFG.debts.reduce((s, d) => s + debtLeft(d) * (+d.r || 60) / 1200, 0))}/mes de intereses` : 'sin deudas', debt ? 'var(--bad)' : 'var(--good)', 'deudas')}
     ${ltList().length ? t('Para tu retiro', money(ltTotal()), 'largo plazo, no se usa', 'var(--good)') : t('Por recibir', money(inc), 'sin contar lo que te deben', 'var(--good)')}
-    ${(() => { const BK = bankInfo(); return BK ? t(`Puedes gastar hasta el ${dateShort(BK.np)}`, money(BK.libre), `tienes ${money(BK.now)} en ${bankAccs(BK.b).length > 1 ? 'tus cuentas' : 'tu cuenta'}`) : t('Te sobra al mes (plan)', money(libre), 'sueldo − fijos − variable'); })()}
-    ${t('Ahorro planeado', pctTxt(Math.max(0, rate)), `de tu sueldo · ${rate >= .3 ? 'excelente' : rate >= .2 ? 'sano' : 'bajo'} (meta ≥ 20 %)`, rate >= .2 ? 'var(--good)' : 'var(--warn)')}
+    ${(() => { const BK = bankInfo(); return BK ? t(`Puedes gastar hasta el ${dateShort(BK.np)}`, money(BK.libre), `tienes ${money(BK.now)} en ${bankAccs(BK.b).length > 1 ? 'tus cuentas' : 'tu cuenta'}`, BK.libre < 0 ? 'var(--bad)' : '', 'hoy') : t('Te sobra al mes (plan)', money(libre), 'sueldo − fijos − variable', '', 'rate'); })()}
+    ${t('Ahorro planeado', pctTxt(Math.max(0, rate)), `de tu sueldo · ${rate >= .3 ? 'excelente' : rate >= .2 ? 'sano' : 'bajo'} (meta ≥ 20 %)`, rate >= .2 ? 'var(--good)' : 'var(--warn)', 'rate')}
   </div>`;
 }
 
@@ -1924,8 +2060,10 @@ function renderPanel() {
   const M = metrics(), P = buildPlan();
   const nav = [['s-hoy', 'Hoy'], ['s-plan', 'Tu plan'], ['s-quin', payDays().length === 2 ? 'Quincena a quincena' : 'Pago a pago'], ['s-mes', 'Tu mes y deudas'], ['s-jp', GN()], ['s-gasto', 'Día a día'], ['s-year', 'Año y retiro']];
   $('#viewPanel').innerHTML = `<nav class="secnav" aria-label="Secciones del panel">${nav.map(([id, n], k) => `<button type="button" data-goto="${id}"><span>${k + 1}</span>${n}</button>`).join('')}</nav>
+    <section class="card hoy-card" aria-label="Hoy">${todayHtml(M)}</section><div style="height:14px"></div>
     ${secH(1, 's-hoy', 'Dónde estás hoy', 'Tu foto financiera: lo que tienes, lo que debes y lo que te sobra cada mes.')}
     ${kpiStrip(M, P)}
+    <div style="height:14px"></div><section class="card">${sumHtml(M)}</section><div style="height:14px"></div>
     <section class="grid-hero"><div class="hero">${heroHtml(M)}</div><aside class="card">${rightHtml(M)}</aside></section>
     ${secH(2, 's-plan', 'Tu plan en 4 pasos', 'Primero protegerte, luego dejar de pagar intereses, después lo comprometido y al final tu meta.')}
     <section class="card">${stepsHtml(M, P)}</section>
@@ -2515,7 +2653,21 @@ async function delMov(id, isUndo) {
   const prev = REAL, item = REAL.find(m => m.id === id); REAL = REAL.filter(m => m.id !== id); EXAMPLE = REAL.length === 0; S.confirmDel = null; render();
   try { await removeDoc(id); toast(isUndo ? 'Listo, se quitó' : item && item.ref ? `${item.note || 'Pago'}: ya no está marcado` : 'Movimiento borrado', !isUndo && item ? () => addMov(item) : null); } catch { REAL = prev; EXAMPLE = REAL.length === 0; render(); toast('No se pudo borrar. Inténtalo otra vez.'); }
 }
+// Cuadre: si el saldo nuevo es menor que lo que la app esperaba, seguramente hay gastos sin anotar.
+// Solo cuando las compras se pagan con débito (si no, no sabemos qué bajó el saldo) y el saldo anterior tiene más de una hora.
+function bankGapCheck(bank) {
+  const B = bankInfo(); S.bankGap = null;
+  if (!B || bank.cc === true || B.b.cc === true || Date.now() - (+B.b.t || 0) < 36e5) return;
+  const gap = Math.round(B.now - bank.a);
+  if (gap >= Math.max(50, B.now * 0.01)) S.bankGap = { a: gap, from: B.b.d };
+}
+function gapHtml() {
+  const G = S.bankGap; if (!G) return '';
+  return `<div class="note-box" role="status">Desde el ${dateShort(G.from)} tu saldo bajó <b>${money(G.a)}</b> más de lo que anotaste. Seguramente son gastos que no registraste (efectivo, compras chicas…).
+    <div class="sur-row" style="margin-top:8px"><button type="button" class="btn small" data-act="gap-add">Registrarlos como gasto</button><button type="button" class="back" data-act="gap-no">No, está bien</button></div></div>`;
+}
 async function saveBank(bank) {
+  bankGapCheck(bank);
   const prev = CFG.bank; CFG.bank = bank; S.bankEd = false; render();
   try { await writeDoc('config', CFG); toast('Saldo actualizado', async () => { CFG.bank = prev; render(); try { await writeDoc('config', CFG); } catch {} }); }
   catch { CFG.bank = prev; render(); toast('No se pudo guardar el saldo.'); }
@@ -2970,7 +3122,7 @@ $('#botBtn').addEventListener('click', botOpen);
 $('#botX').addEventListener('click', botClose);
 document.addEventListener('pointerdown', e => { if (BOT.open && !e.target.closest('#bot') && !e.target.closest('#botBtn') && !e.target.closest('#qa')) botClose(); });
 $('#botForm').addEventListener('submit', e => { e.preventDefault(); const i = $('#botIn'); botAsk(i.value); i.value = ''; });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && BOT.open) botClose(); if (e.key === 'Escape' && !$('#cday').hidden) calDayClose(); if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.cd[data-day]')) { e.preventDefault(); calDayOpen(e.target.dataset.day); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && BOT.open) botClose(); if (e.key === 'Escape' && !$('#cday').hidden) calDayClose(); if (e.key === 'Escape' && !$('#xpl').hidden) xplClose(); if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.cd[data-day]')) { e.preventDefault(); calDayOpen(e.target.dataset.day); } });
 
 /* ---------- cuenta: menú, respaldo, salir ---------- */
 $('#ubtn').addEventListener('click', e => { e.stopPropagation(); const d = $('#udrop'); d.hidden = !d.hidden; $('#ubtn').setAttribute('aria-expanded', String(!d.hidden)); });
@@ -3077,7 +3229,11 @@ document.addEventListener('click', e => {
   else if (act === 'inv-close') invPinClose();
   else if (act === 'inv-refresh') pxFetch(true);
   else if (act === 'inv-del') { const f = $('#invForm'); if (f) { const { k, sym, n } = f.dataset; invSet(invList().filter(x => !(x.k === k && x.sym === sym)), `${n} ya no está en tus inversiones`); } }
-  else if (act === 'bank-edit') { S.bankEd = true; render(); setTimeout(() => { const f = $('.acc-a'); if (f) f.focus(); }, 0); }
+  else if (act === 'bank-edit') { S.bankEd = true; S.bankGap = null; render(); setTimeout(() => { const f = $('.acc-a'); if (f) { f.scrollIntoView({ block: 'center' }); f.focus({ preventScroll: true }); } }, 0); }
+  else if (act === 'explain') xplOpen(a.dataset.k);
+  else if (act === 'xpl-close') xplClose();
+  else if (act === 'gap-add') { const G = S.bankGap; S.bankGap = null; if (G) addMov({ id: uid(), kind: 'mov', type: 'gasto', amount: G.a, date: TODAY, cat: 'otros', note: 'Gastos sin anotar (cuadre de saldo)', created: (+(CFG.bank || {}).t || Date.now()) - 1 }); }
+  else if (act === 'gap-no') { S.bankGap = null; render(); }
   else if (act === 'bank-add') { const box = $('#accRows'); if (box) { box.insertAdjacentHTML('beforeend', accRowHtml({ n: '', a: '' })); const r = box.lastElementChild.querySelector('.acc-n'); if (r) r.focus(); } }
   else if (act === 'bank-del') { const row = a.closest('.acc-r'), box = $('#accRows'); if (row && box) { if (box.children.length > 1) row.remove(); else row.querySelectorAll('input').forEach(i => { i.value = ''; }); } }
   else if (act === 'bank-cancel') { S.bankEd = false; render(); }
@@ -3124,7 +3280,7 @@ document.addEventListener('submit', e => {
   if (e.target.id === 'onbForm') { finishOnboard(); return; }
   if (e.target.id === 'lockForm') { tryUnlock(); return; }
   if (e.target.id === 'pinForm') { const a = $('#pinNew').value.trim(), b = $('#pinNew2').value.trim(), er = $('#pinErr'); if (!/^\d{4,8}$/.test(a)) { er.textContent = 'El PIN debe tener de 4 a 8 números.'; er.hidden = false; return; } if (a !== b) { er.textContent = 'Los PIN no coinciden.'; er.hidden = false; return; } er.hidden = true; setPin(a).then(() => drawCfg()); return; }
-  if (e.target.classList && e.target.classList.contains('bankf')) { const rows = [...e.target.querySelectorAll('.acc-r')].map(r => ({ n: r.querySelector('.acc-n').value.trim().slice(0, 40), v: r.querySelector('.acc-a').value, el: r.querySelector('.acc-a') })).filter(r => r.n || r.v !== ''); const bad = rows.find(r => r.v === '' || !(+r.v >= 0)); if (!rows.length || bad) { (bad ? bad.el : e.target.querySelector('.acc-a')).focus(); toast('Escribe el saldo de hoy de cada cuenta'); return; } const acc = rows.map((r, i) => ({ n: r.n || (rows.length > 1 ? `Cuenta ${i + 1}` : 'Mi cuenta'), a: Math.round(+r.v * 100) / 100 })); saveBank({ a: Math.round(acc.reduce((t, x) => t + x.a, 0) * 100) / 100, acc, d: TODAY, t: Date.now(), inc: $('#bankInc').checked }); return; }
+  if (e.target.classList && e.target.classList.contains('bankf')) { const rows = [...e.target.querySelectorAll('.acc-r')].map(r => ({ n: r.querySelector('.acc-n').value.trim().slice(0, 40), v: r.querySelector('.acc-a').value, el: r.querySelector('.acc-a') })).filter(r => r.n || r.v !== ''); const bad = rows.find(r => r.v === '' || !(+r.v >= 0)); if (!rows.length || bad) { (bad ? bad.el : e.target.querySelector('.acc-a')).focus(); toast('Escribe el saldo de hoy de cada cuenta'); return; } const acc = rows.map((r, i) => ({ n: r.n || (rows.length > 1 ? `Cuenta ${i + 1}` : 'Mi cuenta'), a: Math.round(+r.v * 100) / 100 })); saveBank({ a: Math.round(acc.reduce((t, x) => t + x.a, 0) * 100) / 100, acc, d: TODAY, t: Date.now(), inc: $('#bankInc').checked, cc: $('#bankCc').checked }); return; }
   if (e.target.classList && e.target.classList.contains('abono')) { const f = e.target, amt = +f.querySelector('input').value || 0, d = CFG.debts.find(x => x.id === f.dataset.debt); if (!(amt > 0) || !d) { f.querySelector('input').focus(); toast('Escribe cuánto abonaste'); return; } addMov({ id: uid(), kind: 'mov', type: 'pago', amount: Math.round(amt * 100) / 100, date: TODAY, cat: d.id, note: `Abono a ${d.n}`, created: Date.now() }); return; }
   if (e.target.id === 'qaForm') { const amt = +$('#qaAmt').value || 0, err = $('#qaErr'); if (!(amt > 0)) { err.textContent = 'Escribe un monto mayor que cero.'; err.hidden = false; $('#qaAmt').focus(); return; } const t = S.qaType, cat = $('#qaCat').value; addMov({ id: uid(), kind: 'mov', type: t, amount: Math.round(amt * 100) / 100, date: $('#qaDate').value || TODAY, cat, ref: t === 'ingreso' && CFG.incoming.some(i => i.id === cat) ? cat : null, note: $('#qaNote').value.trim().slice(0, 80), created: Date.now() }); qaClose(); return; }
   if (e.target.id !== 'movForm') return;
