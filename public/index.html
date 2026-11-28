@@ -127,6 +127,8 @@ select,input[type=text],input[type=search],input[type=number],input[type=date]{b
 /* alcohol */
 .alc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr);gap:22px;align-items:center}
 @media (max-width:900px){.alc{grid-template-columns:minmax(0,1fr)}}
+form.bankf label.chk{flex-direction:row;justify-content:flex-start;text-align:left;font-weight:500}.bankf .chk input{width:auto;flex:none;margin:0}
+.acc-r{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:6px;align-items:center}.acc-r input{min-width:0;font-size:16px}.acc-x{border:0;background:none;color:var(--muted);font-size:20px;line-height:1;padding:4px 6px;cursor:pointer}.acc-list{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}.acc-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:3px 10px;font-size:12.5px;max-width:100%}.acc-pill .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.acc-pill b{font-variant-numeric:tabular-nums}
 .bank{padding:12px 14px;border:1px solid var(--line);border-radius:14px;margin:4px 0 6px}.bank-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.kv2{font-family:var(--display);font-weight:800;font-size:20px}.bankf{display:grid;gap:8px;margin:4px 0 10px}.bankf input[type=number]{flex:1;min-width:0;font-size:16px}.chk{display:flex;gap:8px;align-items:center;font-size:14px}
 .alc-big{font-family:var(--display);font-weight:900;font-size:clamp(28px,3.4vw,38px);line-height:1.05;white-space:nowrap}
 .meter{height:10px;background:var(--surface-2);border-radius:6px;overflow:hidden;margin:10px 0 5px}
@@ -864,6 +866,10 @@ function debtRow(d) {
 
 /* Saldo real de la cuenta: lo escribe la persona y la app lo ajusta con lo que registra después
    (ingresos, abonos a tarjetas y pagos fijos o únicos marcados). Las compras con tarjeta de crédito no bajan el saldo. */
+// Varias cuentas: CFG.bank.acc = [{ n, a }]; CFG.bank.a es la suma. Las versiones viejas solo tienen a.
+const bankAccs = b => (b && Array.isArray(b.acc) ? b.acc : b && b.a != null && b.a !== '' ? [{ n: 'Mi cuenta', a: +b.a }] : []);
+let accSeq = 0;
+const accRowHtml = r => { const i = accSeq += 1; return `<div class="acc-r"><label class="sr-only" for="accN${i}">Nombre de la cuenta</label><input id="accN${i}" class="acc-n" type="text" maxlength="40" placeholder="Nombre o apodo" value="${esc(r.n || '')}"><label class="sr-only" for="accA${i}">Saldo de hoy</label><input id="accA${i}" class="acc-a" type="number" inputmode="decimal" min="0" step="any" placeholder="$ Saldo de hoy" value="${r.a != null && r.a !== '' ? esc(String(r.a)) : ''}"><button type="button" class="acc-x" data-act="bank-del" aria-label="Quitar esta cuenta">×</button></div>`; };
 function bankInfo() {
   const b = CFG.bank; if (!b || b.a === '' || b.a == null || !(+b.a >= 0)) return null;
   const refs = new Set([...CFG.fixed.map(f => f.id), ...CFG.upcoming.map(u => u.id)]);
@@ -886,15 +892,18 @@ function bankInfo() {
 function bankHtml() {
   const B = bankInfo();
   if (!B || S.bankEd) { const b = CFG.bank || {};
-    return `<form class="bankf" novalidate><label for="bankAmt" class="ks">¿Cuánto tienes hoy en tu cuenta de banco?</label>
-      <div class="sur-row"><input id="bankAmt" type="number" inputmode="decimal" min="0" step="any" placeholder="$ Saldo de hoy" value="${b.a != null && b.a !== '' ? esc(String(b.a)) : ''}"><button class="btn small" type="submit">Guardar</button>${B ? '<button type="button" class="back" data-act="bank-cancel">Cancelar</button>' : ''}</div>
+    const accs = bankAccs(b);
+    return `<form class="bankf" novalidate><span class="ks">¿Cuánto tienes hoy en tus cuentas de débito?</span>
+      <div id="accRows" style="display:grid;gap:6px">${(accs.length ? accs : [{ n: '', a: '' }]).map(accRowHtml).join('')}</div>
+      <div class="sur-row"><button type="button" class="back" data-act="bank-add">+ Otra cuenta</button><span style="flex:1"></span><button class="btn small" type="submit">Guardar</button>${B ? '<button type="button" class="back" data-act="bank-cancel">Cancelar</button>' : ''}</div>
       <label class="chk"><input type="checkbox" id="bankInc" ${b.inc === false ? '' : 'checked'}> Mi ahorro está en esta misma cuenta</label>
-      <small class="help">Es el número que ves en la app de tu banco. Con él te digo cuánto puedes gastar hasta tu próxima quincena.</small></form>`; }
+      <small class="help">Es el número que ves en la app de tu banco. Ponle a cada cuenta el nombre o apodo que quieras. Con esto te digo cuánto puedes gastar hasta tu próxima quincena.</small></form>`; }
   const col = B.libre < 0 ? 'var(--bad)' : 'var(--fg)';
   const lines = [B.saved ? `tu ahorro ${money(B.saved)}` : '', ...B.res.map(([n, v]) => `${esc(n)} ${money(v)}`)].filter(Boolean);
   return `<div class="bank">
-    <div class="bank-top"><div><div class="ks">En tu cuenta</div><div class="kv2 num">${money(B.now)}</div><small class="ks">al ${dateShort(B.b.d)}${B.inc || B.out ? ` · con lo que registraste después` : ''}</small></div>
+    <div class="bank-top"><div><div class="ks">${bankAccs(B.b).length > 1 ? 'En tus cuentas' : 'En tu cuenta'}</div><div class="kv2 num">${money(B.now)}</div><small class="ks">al ${dateShort(B.b.d)}${B.inc || B.out ? ` · con lo que registraste después` : ''}</small></div>
       <button type="button" class="back" data-act="bank-edit">Actualizar</button></div>
+    ${bankAccs(B.b).length > 1 || (bankAccs(B.b)[0] && bankAccs(B.b)[0].n !== 'Mi cuenta') ? `<div class="acc-list">${bankAccs(B.b).map(a => `<span class="acc-pill"><span class="n">${esc(a.n)}</span><b>${money(a.a)}</b></span>`).join('')}</div>` : ''}
     <div class="ks" style="margin-top:10px">${B.libre < 0 ? `Te faltan para llegar al ${dateShort(B.np)}` : `Puedes gastar hasta el ${dateShort(B.np)}`}</div>
     <div class="alc-big num" style="color:${col}">${money(Math.abs(B.libre))}</div>
     <div class="ks">${B.libre > 0 ? `≈ ${money(B.perDay)} al día por ${B.days} días` : B.libre < 0 ? 'Para cubrir lo apartado tendrías que tomar de tu ahorro o esperar la quincena' : 'Justo, sin margen'}</div>
@@ -1723,7 +1732,7 @@ function kpiStrip(M, P) {
     ${invTile()}
     ${t('Deudas', money(debt), debt ? `≈ ${money(CFG.debts.reduce((s, d) => s + debtLeft(d) * (+d.r || 60) / 1200, 0))}/mes de intereses` : 'sin deudas', debt ? 'var(--bad)' : 'var(--good)')}
     ${ltList().length ? t('Para tu retiro', money(ltTotal()), 'largo plazo, no se usa', 'var(--good)') : t('Por recibir', money(inc), 'sin contar lo que te deben', 'var(--good)')}
-    ${t('Te sobra al mes', money(libre), 'sueldo − fijos − variable')}
+    ${(() => { const BK = bankInfo(); return BK ? t(`Puedes gastar hasta el ${dateShort(BK.np)}`, money(BK.libre), `tienes ${money(BK.now)} en ${bankAccs(BK.b).length > 1 ? 'tus cuentas' : 'tu cuenta'}`) : t('Te sobra al mes (plan)', money(libre), 'sueldo − fijos − variable'); })()}
     ${t('Ahorro planeado', pctTxt(Math.max(0, rate)), `de tu sueldo · ${rate >= .3 ? 'excelente' : rate >= .2 ? 'sano' : 'bajo'} (meta ≥ 20 %)`, rate >= .2 ? 'var(--good)' : 'var(--warn)')}
   </div>`;
 }
@@ -3068,7 +3077,9 @@ document.addEventListener('click', e => {
   else if (act === 'inv-close') invPinClose();
   else if (act === 'inv-refresh') pxFetch(true);
   else if (act === 'inv-del') { const f = $('#invForm'); if (f) { const { k, sym, n } = f.dataset; invSet(invList().filter(x => !(x.k === k && x.sym === sym)), `${n} ya no está en tus inversiones`); } }
-  else if (act === 'bank-edit') { S.bankEd = true; render(); setTimeout(() => $('#bankAmt') && $('#bankAmt').focus(), 0); }
+  else if (act === 'bank-edit') { S.bankEd = true; render(); setTimeout(() => { const f = $('.acc-a'); if (f) f.focus(); }, 0); }
+  else if (act === 'bank-add') { const box = $('#accRows'); if (box) { box.insertAdjacentHTML('beforeend', accRowHtml({ n: '', a: '' })); const r = box.lastElementChild.querySelector('.acc-n'); if (r) r.focus(); } }
+  else if (act === 'bank-del') { const row = a.closest('.acc-r'), box = $('#accRows'); if (row && box) { if (box.children.length > 1) row.remove(); else row.querySelectorAll('input').forEach(i => { i.value = ''; }); } }
   else if (act === 'bank-cancel') { S.bankEd = false; render(); }
   else if (act === 'move-surplus') { const f = fundOf(a.dataset.id), sel = $('#surTo'), to = sel && fundOf(sel.value); if (!f || !to) return; const amt = Math.round(fundExtra(f) * 100) / 100; if (!(amt > 0)) return; addMov({ id: uid(), kind: 'mov', type: 'traspaso', amount: amt, date: TODAY, cat: f.id, to: to.id, note: `Sobrante de ${f.n} a ${to.n}`, created: Date.now() }); }
   else if (act === 'add-fund') { S.view = 'movs'; S.formType = 'ahorro'; S.formCat = a.dataset.id; render(true); setTimeout(() => $('#fAmt') && $('#fAmt').focus(), 0); }
@@ -3113,7 +3124,7 @@ document.addEventListener('submit', e => {
   if (e.target.id === 'onbForm') { finishOnboard(); return; }
   if (e.target.id === 'lockForm') { tryUnlock(); return; }
   if (e.target.id === 'pinForm') { const a = $('#pinNew').value.trim(), b = $('#pinNew2').value.trim(), er = $('#pinErr'); if (!/^\d{4,8}$/.test(a)) { er.textContent = 'El PIN debe tener de 4 a 8 números.'; er.hidden = false; return; } if (a !== b) { er.textContent = 'Los PIN no coinciden.'; er.hidden = false; return; } er.hidden = true; setPin(a).then(() => drawCfg()); return; }
-  if (e.target.classList && e.target.classList.contains('bankf')) { const v = $('#bankAmt').value; if (v === '' || !(+v >= 0)) { $('#bankAmt').focus(); toast('Escribe tu saldo de hoy'); return; } saveBank({ a: Math.round(+v * 100) / 100, d: TODAY, t: Date.now(), inc: $('#bankInc').checked }); return; }
+  if (e.target.classList && e.target.classList.contains('bankf')) { const rows = [...e.target.querySelectorAll('.acc-r')].map(r => ({ n: r.querySelector('.acc-n').value.trim().slice(0, 40), v: r.querySelector('.acc-a').value, el: r.querySelector('.acc-a') })).filter(r => r.n || r.v !== ''); const bad = rows.find(r => r.v === '' || !(+r.v >= 0)); if (!rows.length || bad) { (bad ? bad.el : e.target.querySelector('.acc-a')).focus(); toast('Escribe el saldo de hoy de cada cuenta'); return; } const acc = rows.map((r, i) => ({ n: r.n || (rows.length > 1 ? `Cuenta ${i + 1}` : 'Mi cuenta'), a: Math.round(+r.v * 100) / 100 })); saveBank({ a: Math.round(acc.reduce((t, x) => t + x.a, 0) * 100) / 100, acc, d: TODAY, t: Date.now(), inc: $('#bankInc').checked }); return; }
   if (e.target.classList && e.target.classList.contains('abono')) { const f = e.target, amt = +f.querySelector('input').value || 0, d = CFG.debts.find(x => x.id === f.dataset.debt); if (!(amt > 0) || !d) { f.querySelector('input').focus(); toast('Escribe cuánto abonaste'); return; } addMov({ id: uid(), kind: 'mov', type: 'pago', amount: Math.round(amt * 100) / 100, date: TODAY, cat: d.id, note: `Abono a ${d.n}`, created: Date.now() }); return; }
   if (e.target.id === 'qaForm') { const amt = +$('#qaAmt').value || 0, err = $('#qaErr'); if (!(amt > 0)) { err.textContent = 'Escribe un monto mayor que cero.'; err.hidden = false; $('#qaAmt').focus(); return; } const t = S.qaType, cat = $('#qaCat').value; addMov({ id: uid(), kind: 'mov', type: t, amount: Math.round(amt * 100) / 100, date: $('#qaDate').value || TODAY, cat, ref: t === 'ingreso' && CFG.incoming.some(i => i.id === cat) ? cat : null, note: $('#qaNote').value.trim().slice(0, 80), created: Date.now() }); qaClose(); return; }
   if (e.target.id !== 'movForm') return;
