@@ -145,6 +145,9 @@ form.bankf label.chk{flex-direction:row;justify-content:flex-start;text-align:le
 .sum-grid{display:grid;gap:0 24px}@media (min-width:860px){.sum-grid{grid-template-columns:1fr 1fr}}
 .sum-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.sum-row .n{flex:1;min-width:0}.sum-row small{display:block;color:var(--muted);font-size:12px}.sum-row b{font-family:var(--display);font-variant-numeric:tabular-nums;white-space:nowrap}
 .sum-sub{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 2px}
+.r70{display:grid;gap:16px}@media (min-width:900px){.r70{grid-template-columns:1.1fr 1fr;align-items:start}}
+.r70-q{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}.r70-q div{background:var(--surface-2);border-radius:12px;padding:10px;min-width:0}.r70-q small{display:block;color:var(--muted);font-size:11.5px;font-weight:600}.r70-q b{font-family:var(--display);font-size:clamp(15px,2.2vw,19px);font-variant-numeric:tabular-nums;white-space:nowrap}
+.r70-rec h3{font-size:15px;margin:0 0 2px}.r70-rec .alert:first-of-type{border-top:0}
 .acc-r{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:6px;align-items:center}.acc-r input{min-width:0;font-size:16px}.acc-x{border:0;background:none;color:var(--muted);font-size:20px;line-height:1;padding:4px 6px;cursor:pointer}.acc-list{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}.acc-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:3px 10px;font-size:12.5px;max-width:100%}.acc-pill .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.acc-pill b{font-variant-numeric:tabular-nums}
 .bank{padding:12px 14px;border:1px solid var(--line);border-radius:14px;margin:4px 0 6px}.bank-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.kv2{font-family:var(--display);font-weight:800;font-size:20px}.bankf{display:grid;gap:8px;margin:4px 0 10px}.bankf input[type=number]{flex:1;min-width:0;font-size:16px}.chk{display:flex;gap:8px;align-items:center;font-size:14px}
 .alc-big{font-family:var(--display);font-weight:900;font-size:clamp(28px,3.4vw,38px);line-height:1.05;white-space:nowrap}
@@ -1971,6 +1974,47 @@ function ruleHtml() {
     return `<div class="r5"><div class="r5-h"><b>${n}</b><span class="r5-p">${Math.round(p * 100)} %</span><span class="num r5-v">${money(v[k])} <small>de ${money(tgt)}</small></span></div><div class="bud-bar"><i style="width:${Math.min(100, fr * 100).toFixed(1)}%;background:${over ? 'var(--bad)' : c}"></i></div><small>${h} · ${low ? (fr >= 1 ? '¡meta cumplida!' : `te faltan ${money(tgt - v[k])}`) : over ? `te pasaste ${money(v[k] - tgt)}` : `te quedan ${money(tgt - v[k])}`}</small></div>`; }).join('');
   return `<div class="card-h"><h2>Regla 50/30/20 de este mes</h2><span style="display:flex;gap:6px;align-items:center"><span class="chip">Sueldo ${money(inc)}</span>${editBtn('cats')}</span></div>${inc ? `<div class="r5s">${rows}</div>` : '<p class="help">Pon tu sueldo en Ajustes → Tu plan para ver cómo repartirlo.</p>'}<p class="help" style="margin-top:8px">Una guía clásica: la mitad para lo necesario, 30 % para gustos y 20 % para ahorrar o pagar deudas. Cambia el tipo de cada categoría en Ajustes → Categorías.</p>`;
 }
+// Regla 70/20/10: 70 % para vivir (necesidades y gustos), 20 % para ahorro e inversión, 10 % para deudas
+// (si no hay deudas, ese 10 % va a inversión o a tu colchón). Se mide con el plan del mes: fijos de todo el mes + lo que ya gastaste.
+function r70Data() {
+  const inc = +CFG.income || 0, all = movs().filter(m => m.date.slice(0, 7) === CUR_YM), fixedIds = new Set(CFG.fixed.map(f => f.id));
+  const live = {}; let vivir = 0, aho = 0;
+  const put = (cat, v) => { if (catTipo(cat) === 'aho') aho += v; else { vivir += v; live[cat] = (live[cat] || 0) + v; } };
+  fixedNow().forEach(f => put(f.cat, fixMonthly(f)));
+  all.filter(m => m.type === 'gasto' && !fixedIds.has(m.ref)).forEach(m => put(m.cat, +m.amount || 0));
+  aho += sum(all.filter(m => m.type === 'ahorro' && m.cat !== 'inicial'));
+  const deu = sum(all.filter(m => m.type === 'pago'));
+  return { inc, vivir, aho, deu, live, free: inc - vivir - aho - deu };
+}
+function r70Html() {
+  const D = r70Data(), inc = D.inc, debts = CFG.debts.filter(d => debtLeft(d) > 0).sort((a, b) => (+b.r || 60) - (+a.r || 60));
+  if (!inc) return `<div class="card-h"><h2>Regla 70/20/10</h2>${editBtn('plan')}</div><p class="help">Pon tu sueldo en Ajustes → Tu plan para ver cómo repartirlo.</p>`;
+  const tV = inc * .7, tA = inc * .2, tD = inc * .1;
+  const B = [['Para vivir', .7, D.vivir, tV, 'var(--ai)', 'Fijos, comida, transporte, salidas y gustos', 'max'],
+    ['Ahorro e inversión', .2, D.aho, tA, 'var(--good)', 'Tus fondos, retiro y lo que inviertes', 'min'],
+    [debts.length ? 'Pagar deudas' : 'Inversión extra', .1, debts.length ? D.deu : 0, tD, debts.length ? '#d23f4b' : '#e8590c', debts.length ? 'Abonos a tarjetas y préstamos' : 'Sin deudas: CETES, inversiones o tu colchón', 'min']];
+  const rows = B.map(([n, p, v, tgt, c, sub, kind]) => { const fr = tgt ? v / tgt : 0, over = kind === 'max' && fr > 1;
+    return `<div class="r5"><div class="r5-h"><b>${n}</b><span class="r5-p">${Math.round(p * 100)} %</span><span class="num r5-v">${money(v)} <small>de ${money(tgt)}</small></span></div><div class="bud-bar"><i style="width:${Math.min(100, fr * 100).toFixed(1)}%;background:${over ? 'var(--bad)' : c}"></i></div><small>${sub} · ${pctTxt(v / inc)} de tu sueldo · ${kind === 'max' ? (over ? `te pasas ${money(v - tgt)}` : `te quedan ${money(tgt - v)}`) : fr >= 1 ? '¡cumplido!' : `faltan ${money(tgt - v)}`}</small></div>`; }).join('');
+  const n = payDays().length, per = inc / n, lbl = n === 2 ? 'Cada quincena' : n === 1 ? 'Cada pago' : `Cada uno de tus ${n} pagos`;
+  const quin = `<h3 class="sub" style="margin-top:16px">${lbl} de ${money(per)}, apártalo así</h3><div class="r70-q"><div><small>Vivir 70 %</small><b>${money(per * .7)}</b></div><div><small>Ahorro 20 %</small><b>${money(per * .2)}</b></div><div><small>${debts.length ? 'Deudas' : 'Inversión'} 10 %</small><b>${money(per * .1)}</b></div></div>`;
+  // Recomendaciones con los números de la persona.
+  const rec = [], top = Object.entries(D.live).sort((a, b) => b[1] - a[1]);
+  if (D.vivir > tV) {
+    const gustos = top.filter(([c]) => catTipo(c) === 'des').slice(0, 2);
+    rec.push(['bad', '!', `Para vivir usas ${pctTxt(D.vivir / inc)} de tu sueldo: ${money(D.vivir - tV)} más del 70 %`, gustos.length ? `Lo que más pesa en gustos: ${gustos.map(([c, v]) => `${(CAT[c] || CAT.otros).n} ${money(v)}`).join(' y ')}. Recortar ahí es lo más fácil; ponle un límite en Ajustes → Límites del mes.` : `Tus gastos más grandes: ${top.slice(0, 3).map(([c, v]) => `${(CAT[c] || CAT.otros).n} ${money(v)}`).join(', ')}. Revisa si alguno se puede bajar o cambiar por algo más barato.`]);
+  } else rec.push(['good', '✓', `Para vivir usas ${pctTxt(D.vivir / inc)}: estás dentro del 70 %`, D.vivir < tV * .9 ? `Te sobran ${money(tV - D.vivir)} de ese 70 %. Mándalos a tu ahorro para llegar antes a tu meta.` : 'Vas justo; cuida los gastos chicos de aquí a fin de mes.']);
+  if (D.aho < tA) rec.push(['warn', '!', `Te faltan ${money(tA - D.aho)} para ahorrar el 20 %`, (() => { const end = `${CUR_YM}-${String(lastDay(+CUR_YM.slice(0, 4), +CUR_YM.slice(5) - 1)).padStart(2, '0')}`, k = paydaysUntil(end).length; return `Págate primero: ${k ? `${k === 1 ? 'en tu próximo pago' : `en cada uno de tus ${k} pagos que faltan este mes`} aparta ${money((tA - D.aho) / k)}` : `desde tu próximo pago aparta ${money(tA / Math.max(1, n))}`} antes de gastar. Si lo dejas para el final, casi nunca sobra.`; })()]);
+  else rec.push(['good', '✓', `Ya ahorras ${pctTxt(D.aho / inc)} de tu sueldo`, 'Excelente. Si puedes, sube un poco cada mes: 1 % más casi no se siente.']);
+  if (debts.length) { const d = debts[0], i = debts.reduce((s, x) => s + debtLeft(x) * (+x.r || 60) / 1200, 0);
+    rec.push([D.deu >= tD ? 'good' : 'warn', D.deu >= tD ? '✓' : '$', D.deu >= tD ? `Este mes ya abonaste ${money(D.deu)} a tus deudas` : `Abona ${money(tD - D.deu)} más a ${d.n} este mes`, `Empieza por la de tasa más alta (${d.n}${+d.r ? `, ${d.r} % anual` : ''}). Tus deudas te cobran unos ${money(i)} al mes de intereses: pagarlas rinde más que cualquier inversión.`]); }
+  else rec.push(['good', '✓', 'No tienes deudas', `Usa tu 10 % (${money(tD)} al mes) para invertir, por ejemplo en CETES, o para crecer tu colchón de emergencia.`]);
+  if (D.free > 50 && D.vivir <= tV) rec.push(['info', 'i', `Tienes ${money(D.free)} de tu sueldo sin plan este mes`, 'El dinero sin plan se va en gastos chicos. Asígnalo hoy a tu ahorro o a tus deudas.']);
+  if (D.free < -50) rec.push(['bad', '!', `Este mes repartes ${money(-D.free)} más de lo que ganas`, 'Revisa tus gastos fijos: es donde un cambio ayuda todos los meses (planes de celular, suscripciones, seguros).']);
+  const recH = rec.map(([k, ic, t, d]) => `<div class="alert"><div class="ai ${k}">${ic}</div><div><div class="at">${esc(t)}</div><div class="ad">${esc(d)}</div></div></div>`).join('');
+  return `<div class="card-h"><h2>Regla 70/20/10 de este mes</h2><span class="chip">Sueldo ${money(inc)}</span></div>
+    <div class="r70"><div><div class="r5s">${rows}</div>${quin}</div><div class="r70-rec"><h3>Recomendaciones</h3>${recH}</div></div>
+    <p class="help" style="margin-top:10px">70 % para vivir, 20 % para ahorrar e invertir y 10 % para salir de deudas. Cuenta tus gastos fijos de todo el mes (aunque falte pagarlos) y lo que ya gastaste. Lo que es necesidad, gusto o ahorro se cambia en Ajustes → Categorías.</p>`;
+}
 const udiVal = () => +CFG.udi || 8.93;
 const ltList = () => (Array.isArray(CFG.longterm) ? CFG.longterm : []);
 const ltBal = l => (l.u === 'udi' ? (+l.bal || 0) * udiVal() : (+l.bal || 0)) + (l.ref ? sum(movs().filter(m => m.type === 'gasto' && m.ref === l.ref && m.date > (l.bd || '0000'))) : 0);
@@ -2059,7 +2103,7 @@ async function finishOnboard() {
 function renderPanel() {
   if (S.onboard) { $('#viewPanel').innerHTML = onboardHtml(); return; }
   const M = metrics(), P = buildPlan();
-  const nav = [['s-hoy', 'Hoy'], ['s-plan', 'Tu plan'], ['s-quin', payDays().length === 2 ? 'Quincena a quincena' : 'Pago a pago'], ['s-mes', 'Tu mes y deudas'], ['s-jp', GN()], ['s-gasto', 'Día a día'], ['s-year', 'Año y retiro']];
+  const nav = [['s-hoy', 'Hoy'], ['s-plan', 'Tu plan'], ['s-quin', payDays().length === 2 ? 'Quincena a quincena' : 'Pago a pago'], ['s-mes', 'Tu mes y deudas'], ['s-jp', GN()], ['s-gasto', 'Día a día'], ['s-r70', '70/20/10'], ['s-year', 'Año y retiro']];
   $('#viewPanel').innerHTML = `<nav class="secnav" aria-label="Secciones del panel">${nav.map(([id, n], k) => `<button type="button" data-goto="${id}"><span>${k + 1}</span>${n}</button>`).join('')}</nav>
     <section class="card hoy-card" aria-label="Hoy">${todayHtml(M)}</section><div style="height:14px"></div>
     ${secH(1, 's-hoy', 'Dónde estás hoy', 'Tu foto financiera: lo que tienes, lo que debes y lo que te sobra cada mes.')}
@@ -2077,7 +2121,9 @@ function renderPanel() {
     <section class="card">${goalHtml(M, P)}</section>
     ${secH(6, 's-gasto', 'Tu día a día', 'Cómo repartes tu sueldo, tus límites y en qué se va tu dinero.')}
     <section class="grid-plan"><div class="card">${ruleHtml()}</div><div class="card">${budgetsHtml()}</div></section><div style="height:14px"></div><section class="card">${alcoholHtml(M)}</section><div style="height:14px"></div>${bottomHtml(M)}
-    ${secH(7, 's-year', 'Tu año y tu retiro', 'Mes por mes lo que entró y salió, y cómo va tu ahorro a largo plazo.')}
+    ${secH(7, 's-r70', 'Regla 70/20/10', 'Cómo repartir tu sueldo: 70 % para vivir, 20 % para ahorrar y 10 % para deudas, con recomendaciones para ti.')}
+    <section class="card">${r70Html()}</section>
+    ${secH(8, 's-year', 'Tu año y tu retiro', 'Mes por mes lo que entró y salió, y cómo va tu ahorro a largo plazo.')}
     <section class="card">${retireHtml()}</section><div style="height:14px"></div>
     <section class="card">${yearHtml()}</section>`;
   const slot = $('#dioSlot');
