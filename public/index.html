@@ -976,7 +976,7 @@ function todayHtml(M) {
     main = `<div class="ks">Hoy puedes gastar${qi('hoy', 'lo que puedes gastar hoy')}</div>
       <div class="td-big" style="color:${col}">${B.libre < 0 ? money(0) : money(Math.max(0, B.left))}</div>
       ${B.libre >= 0 ? `<div class="td-bar" aria-hidden="true"><i style="width:${(fr * 100).toFixed(1)}%;background:${over ? 'var(--bad)' : 'var(--ai)'}"></i></div>` : ''}
-      <div class="ks">${B.libre < 0 ? `No te alcanza hasta el ${dateShort(B.np)}: te faltan <b>${money(-B.libre)}</b>. Evita gastos que no sean necesarios.` : over ? `Hoy te pasaste ${money(-B.left)}. Mañana te toca un poco menos.` : B.spent ? `Ya gastaste ${money(B.spent)} de ${money(B.budget)} de hoy.` : `Te tocan ${money(B.budget)} por día.`} Te quedan ${money(Math.max(0, B.libre))} hasta el ${dateShort(B.np)}.</div>`;
+      <div class="ks">${B.libre < 0 ? (B.saved ? `Sin tocar tu ahorro te faltan <b>${money(-B.libre)}</b> para pagar lo pendiente hasta el ${dateShort(B.np)}. Si lo pagas, tu ahorro baja a ${money(Math.max(0, B.now - B.reserve))}.` : `No te alcanza hasta el ${dateShort(B.np)}: te faltan <b>${money(-B.libre)}</b>. Evita gastos que no sean necesarios.`) : over ? `Hoy te pasaste ${money(-B.left)}. Mañana te toca un poco menos.` : B.spent ? `Ya gastaste ${money(B.spent)} de ${money(B.budget)} de hoy.` : `Te tocan ${money(B.budget)} por día.`}${B.libre >= 0 ? ` Te quedan ${money(B.libre)} hasta el ${dateShort(B.np)}.` : ''}</div>`;
   } else {
     main = `<div class="ks">¿Cuánto puedes gastar hoy?</div>
       <p style="margin:6px 0 10px">Escribe cuánto tienes en tus cuentas de débito y te digo cuánto puedes gastar cada día hasta tu próxima quincena.</p>
@@ -1043,7 +1043,7 @@ function bankHtml() {
     ${bankAccs(B.b).length > 1 || (bankAccs(B.b)[0] && bankAccs(B.b)[0].n !== 'Mi cuenta') ? `<div class="acc-list">${bankAccs(B.b).map(a => `<span class="acc-pill"><span class="n">${esc(a.n)}</span><b>${money(a.a)}</b></span>`).join('')}</div>` : ''}
     ${gapHtml()}<div class="ks" style="margin-top:10px">${B.libre < 0 ? `Te faltan para llegar al ${dateShort(B.np)}` : `Puedes gastar hasta el ${dateShort(B.np)}`}${qi('hoy', 'lo que puedes gastar')}</div>
     <div class="alc-big num" style="color:${col}">${money(Math.abs(B.libre))}</div>
-    <div class="ks">${B.libre > 0 ? `≈ ${money(B.perDay)} al día por ${B.days} días` : B.libre < 0 ? 'Para cubrir lo apartado tendrías que tomar de tu ahorro o esperar la quincena' : 'Justo, sin margen'}</div>
+    <div class="ks">${B.libre > 0 ? `≈ ${money(B.perDay)} al día por ${B.days} días` : B.libre < 0 ? (B.saved ? `Te falta pagar ${money(B.reserve)} antes del ${dateShort(B.np)} y fuera de tu ahorro tienes ${money(Math.max(0, B.now - B.saved))}. Si lo pagas, saldrá de tu ahorro: te quedarían ${money(Math.max(0, B.now - B.reserve))} en total. Evita otros gastos hasta la quincena.` : `Te falta pagar ${money(B.reserve)} antes del ${dateShort(B.np)} y tienes ${money(B.now)}. Evita otros gastos hasta la quincena.`) : 'Justo, sin margen'}</div>
     ${lines.length ? `<small class="help">Ya aparté: ${lines.join(' · ')}</small>` : ''}
   </div>`;
 }
